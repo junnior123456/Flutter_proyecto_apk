@@ -1,0 +1,23 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Patita principal -->
+  <ellipse cx="256" cy="350" rx="80" ry="100" fill="#FF6B35" stroke="#E55A2B" stroke-width="4"/>
+  
+  <!-- Dedos de la patita -->
+  <!-- Dedo 1 (izquierda) -->
+  <ellipse cx="180" cy="200" rx="35" ry="50" fill="#FF6B35" stroke="#E55A2B" stroke-width="3"/>
+  
+  <!-- Dedo 2 (centro-izquierda) -->
+  <ellipse cx="230" cy="150" rx="35" ry="55" fill="#FF6B35" stroke="#E55A2B" stroke-width="3"/>
+  
+  <!-- Dedo 3 (centro-derecha) -->
+  <ellipse cx="282" cy="150" rx="35" ry="55" fill="#FF6B35" stroke="#E55A2B" stroke-width="3"/>
+  
+  <!-- Dedo 4 (derecha) -->
+  <ellipse cx="332" cy="200" rx="35" ry="50" fill="#FF6B35" stroke="#E55A2B" stroke-width="3"/>
+  
+  <!-- Sombra suave -->
+  <ellipse cx="256" cy="380" rx="70" ry="20" fill="#000000" opacity="0.1"/>
+  
+  <!-- Brillo en la patita principal -->
+  <ellipse cx="240" cy="320" rx="25" ry="35" fill="#FFFFFF" opacity="0.3"/>
+</svg>
