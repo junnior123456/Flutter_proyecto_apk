@@ -473,6 +473,221 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: Container(
+        color: const Color(0xFFFF9800), // Naranja
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Color(0xFFFF9800),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  const CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.white,
+                    child: Icon(Icons.person, size: 35, color: Color(0xFFFF9800)),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    widget.isAuthenticated ? 'Ryan Karuna' : 'Invitado',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            _buildDrawerItem(
+              icon: Icons.notifications,
+              title: 'Notification',
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Notificaciones')),
+                );
+              },
+            ),
+            _buildDrawerItem(
+              icon: Icons.message,
+              title: 'Message',
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Mensajes')),
+                );
+              },
+            ),
+            _buildDrawerItem(
+              icon: Icons.favorite,
+              title: 'Upload your pet',
+              onTap: () {
+                Navigator.pop(context);
+                setState(() {
+                  _currentIndex = 1; // Ir a la pestaña de Adoptar
+                });
+              },
+            ),
+            _buildDrawerItem(
+              icon: Icons.shopping_bag,
+              title: 'Products',
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Productos - Próximamente')),
+                );
+              },
+              hasSubmenu: true,
+            ),
+            if (_buildDrawerItem(
+              icon: Icons.shopping_bag,
+              title: 'Products',
+              onTap: () {},
+              hasSubmenu: true,
+            ) != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 70),
+                child: Column(
+                  children: [
+                    _buildDrawerSubItem('Shopping cart', () {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Carrito de compras')),
+                      );
+                    }),
+                    _buildDrawerSubItem('Order history', () {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Historial de pedidos')),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            _buildDrawerItem(
+              icon: Icons.volunteer_activism,
+              title: 'Donation',
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Donaciones - Próximamente')),
+                );
+              },
+            ),
+            _buildDrawerItem(
+              icon: Icons.info,
+              title: 'About',
+              onTap: () {
+                Navigator.pop(context);
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Acerca de PawFinder'),
+                    content: const Text(
+                      'PawFinder es una plataforma para ayudar a mascotas en adopción y en riesgo.\n\nVersión 1.0.0',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cerrar'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            _buildDrawerItem(
+              icon: Icons.logout,
+              title: 'Logout',
+              onTap: () {
+                Navigator.pop(context);
+                if (widget.isAuthenticated) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Cerrar Sesión'),
+                      content: const Text('¿Estás seguro de que quieres cerrar sesión?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Cancelar'),
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              AppRoutes.welcome,
+                              (route) => false,
+                            );
+                          },
+                          child: const Text('Cerrar Sesión'),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    AppRoutes.welcome,
+                    (route) => false,
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    bool hasSubmenu = false,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white, size: 24),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      trailing: hasSubmenu
+          ? const Icon(Icons.arrow_drop_down, color: Colors.white)
+          : null,
+      onTap: hasSubmenu ? null : onTap,
+    );
+  }
+
+  Widget _buildDrawerSubItem(String title, VoidCallback onTap) {
+    return ListTile(
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white70,
+          fontSize: 14,
+        ),
+      ),
+      onTap: onTap,
+      dense: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Mostrar loading mientras cargan los datos
@@ -636,7 +851,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         backgroundColor: AppColors.primary,
         elevation: 0,
-        automaticallyImplyLeading: false,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Colors.white),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
         actions: widget.isAuthenticated 
           ? [
               IconButton(
@@ -690,6 +910,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ],
       ),
+      drawer: _buildDrawer(context),
       body: screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
