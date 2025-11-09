@@ -249,12 +249,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {
       _adoptPets = [
         Pet(
-          id: '1',
+          id: 1,
           name: 'Bella',
           imageUrl: 'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
           isRisk: false,
           createdAt: DateTime.now(),
-          userId: 'user1',
+          updatedAt: DateTime.now(),
+          userId: 1,
+          categoryId: 1,
           category: PetCategory.dog,
           description: 'Perrita muy cariñosa y juguetona',
           age: '2 años',
@@ -262,12 +264,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           gender: 'Hembra',
         ),
         Pet(
-          id: '2',
+          id: 2,
           name: 'Max',
           imageUrl: 'https://images.pexels.com/photos/1108098/pexels-photo-1108098.jpeg',
           isRisk: false,
           createdAt: DateTime.now(),
-          userId: 'user1',
+          updatedAt: DateTime.now(),
+          userId: 1,
+          categoryId: 1,
           category: PetCategory.dog,
           description: 'Perro tranquilo y obediente',
           age: '3 años',
@@ -275,12 +279,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           gender: 'Macho',
         ),
         Pet(
-          id: '5',
+          id: 5,
           name: 'Mimi',
           imageUrl: 'https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg',
           isRisk: false,
           createdAt: DateTime.now(),
-          userId: 'user1',
+          updatedAt: DateTime.now(),
+          userId: 1,
+          categoryId: 2,
           category: PetCategory.cat,
           description: 'Gatita muy independiente y cariñosa',
           age: '1 año',
@@ -291,12 +297,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       
       _riskPets = [
         Pet(
-          id: '3',
+          id: 3,
           name: 'Rocky',
           imageUrl: 'https://images.pexels.com/photos/4587997/pexels-photo-4587997.jpeg',
           isRisk: true,
           createdAt: DateTime.now(),
-          userId: 'user1',
+          updatedAt: DateTime.now(),
+          userId: 1,
+          categoryId: 1,
           category: PetCategory.dog,
           description: 'Perro perdido en el centro de la ciudad',
           age: '4 años',
@@ -304,12 +312,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           gender: 'Macho',
         ),
         Pet(
-          id: '4',
+          id: 4,
           name: 'Luna',
           imageUrl: 'https://images.pexels.com/photos/4588000/pexels-photo-4588000.jpeg',
           isRisk: true,
           createdAt: DateTime.now(),
-          userId: 'user1',
+          updatedAt: DateTime.now(),
+          userId: 1,
+          categoryId: 2,
           category: PetCategory.cat,
           description: 'Gata herida encontrada en la calle',
           age: '2 años',
@@ -444,7 +454,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         imageUrl: pet.imageUrl,
         isRisk: false,
         createdAt: pet.createdAt,
+        updatedAt: pet.updatedAt,
         userId: pet.userId,
+        categoryId: pet.categoryId,
         description: pet.description,
         address: pet.address,
         age: pet.age,
@@ -976,20 +988,21 @@ class _ProfileTabState extends State<ProfileTab> {
         children: [
           Stack(
             children: [
-              CircleAvatar(
-                radius: 50,
-                backgroundColor: Colors.orange,
-                backgroundImage: (userImageUrl != null && userImageUrl!.isNotEmpty)
-                    ? NetworkImage(userImageUrl!)
-                    : null,
-                child: (userImageUrl == null || userImageUrl!.isEmpty)
-                    ? const Icon(Icons.person, size: 50, color: Colors.white)
-                    : null,
-                onBackgroundImageError: (exception, stackTrace) {
-                  print('❌ Error cargando imagen: $exception');
-                  print('🔗 URL problemática: $userImageUrl');
-                },
-              ),
+              (userImageUrl != null && userImageUrl!.isNotEmpty)
+                  ? CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.orange,
+                      backgroundImage: NetworkImage(userImageUrl!),
+                      onBackgroundImageError: (exception, stackTrace) {
+                        print('❌ Error cargando imagen: $exception');
+                        print('🔗 URL problemática: $userImageUrl');
+                      },
+                    )
+                  : CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.orange,
+                      child: const Icon(Icons.person, size: 50, color: Colors.white),
+                    ),
               // Indicador de que hay URL pero imagen no visible
               if (userImageUrl != null && userImageUrl!.isNotEmpty)
                 Positioned(

@@ -428,18 +428,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: CircleAvatar(
                   radius: 60,
                   backgroundColor: Colors.grey[300],
-                  backgroundImage: _selectedImage != null
-                      ? FileImage(_selectedImage!)
-                      : (currentImageUrl != null && currentImageUrl.isNotEmpty)
-                          ? NetworkImage(currentImageUrl)
-                          : null,
-                  child: _selectedImage == null && (currentImageUrl == null || currentImageUrl.isEmpty)
-                      ? Icon(
-                          Icons.person,
-                          size: 60,
-                          color: Colors.grey[600],
-                        )
-                      : null,
+                  backgroundImage: _getBackgroundImage(),
+                  child: _getAvatarChild(),
                 ),
               ),
               Positioned(
@@ -869,6 +859,50 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
       onTap: onTap,
     );
+  }
+
+  // Helper methods for CircleAvatar
+  ImageProvider? _getBackgroundImage() {
+    try {
+      if (_selectedImage != null) {
+        return FileImage(_selectedImage!);
+      }
+      
+      final currentImageUrl = _originalProfile?.image;
+      if (currentImageUrl != null && currentImageUrl.isNotEmpty) {
+        return NetworkImage(currentImageUrl);
+      }
+      
+      return null;
+    } catch (e) {
+      Logger.warning('Error loading background image', tag: 'EditProfileScreen', error: e);
+      return null;
+    }
+  }
+
+  Widget? _getAvatarChild() {
+    try {
+      final hasSelectedImage = _selectedImage != null;
+      final currentImageUrl = _originalProfile?.image;
+      final hasNetworkImage = currentImageUrl != null && currentImageUrl.isNotEmpty;
+      
+      if (!hasSelectedImage && !hasNetworkImage) {
+        return Icon(
+          Icons.person,
+          size: 60,
+          color: Colors.grey[600],
+        );
+      }
+      
+      return null;
+    } catch (e) {
+      Logger.warning('Error getting avatar child', tag: 'EditProfileScreen', error: e);
+      return Icon(
+        Icons.person,
+        size: 60,
+        color: Colors.grey[600],
+      );
+    }
   }
 
 }

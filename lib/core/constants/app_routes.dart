@@ -26,4 +26,7 @@ class AppRoutes {
   static const String home = '/home'; // 🟡 Agregado aquí
   static const String apiTest = '/api-test'; // 🧪 Pantalla de prueba de API
   static const String editProfile = '/edit-profile'; // ✏️ Editar perfil
+  static const String petsAdoption = '/pets-adoption'; // 🐾 Mascotas en adopción
+  static const String adminPanel = '/admin-panel'; // 👑 Panel de administración
+  static const String adminAccess = '/admin-access'; // 🔑 Acceso administrativo
 }

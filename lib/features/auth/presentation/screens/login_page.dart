@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import '../../../../core/services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,6 +12,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _authService = AuthService();
   bool _obscurePassword = true;
   bool _isLoading = false;
 
@@ -251,37 +251,8 @@ class _LoginPageState extends State<LoginPage> {
         final email = _emailController.text.trim();
         final password = _passwordController.text;
 
-        // CONEXIÓN DIRECTA - DIFERENTES URLs SEGÚN LA PLATAFORMA
-        final urls = [
-          'http://localhost:3000/api/auth/login',     // Para web (Chrome)
-          'http://192.168.18.97:3000/api/auth/login', // Para Android
-        ];
-
-        Map<String, dynamic>? loginResult;
-        
-        for (String url in urls) {
-          try {
-            final response = await http.post(
-              Uri.parse(url),
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-              },
-              body: jsonEncode({
-                'email': email,
-                'password': password,
-              }),
-            ).timeout(const Duration(seconds: 10));
-
-            if (response.statusCode == 201) {
-              loginResult = jsonDecode(response.body);
-              break;
-            }
-          } catch (e) {
-            // Continuar con la siguiente URL
-            continue;
-          }
-        }
+        // Usar el AuthService real del backend
+        final loginResult = await _authService.login(email, password);
 
         if (mounted) {
           setState(() {

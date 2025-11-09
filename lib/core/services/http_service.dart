@@ -8,7 +8,18 @@ import '../utils/logger.dart';
 class HttpService {
   static final HttpService _instance = HttpService._internal();
   factory HttpService() => _instance;
-  HttpService._internal();
+  HttpService._internal() {
+    _initializeConnection();
+  }
+
+  // Inicialización automática de la conexión
+  void _initializeConnection() {
+    Future.delayed(Duration(milliseconds: 500), () {
+      checkConnection().catchError((e) {
+        Logger.warning('Initial connection check failed', tag: 'HttpService', error: e);
+      });
+    });
+  }
 
   // 🔐 Token de autenticación (se puede guardar en SharedPreferences)
   String? _authToken;
@@ -249,7 +260,7 @@ class HttpService {
     for (String baseUrl in urlsToTest) {
       try {
         Logger.debug('Testing URL: $baseUrl', tag: 'HttpService');
-        final url = Uri.parse('$baseUrl/users');
+        final url = Uri.parse('$baseUrl/health');
         final response = await http.get(
           url,
           headers: _authHeaders,
@@ -285,7 +296,7 @@ class HttpService {
 
     for (String baseUrl in urlsToTest) {
       try {
-        final url = Uri.parse('$baseUrl/users');
+        final url = Uri.parse('$baseUrl/health');
         Logger.debug('Testing direct connection: $url', tag: 'HttpService');
         
         final response = await http.get(

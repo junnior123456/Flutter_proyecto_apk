@@ -34,10 +34,14 @@ class AuthService {
       print('🌐 URL base configurada: ${ApiConfig.baseUrl}');
       print('🔄 URLs alternativas: ${ApiConfig.alternativeUrls}');
       
-      // Primero verificar conectividad
+      // Verificar conectividad (no bloquear si falla)
       print('🔍 Verificando conectividad antes del login...');
-      final isConnected = await _httpService.checkConnection();
-      print('📡 Estado de conectividad: $isConnected');
+      try {
+        final isConnected = await _httpService.checkConnection();
+        print('📡 Estado de conectividad: $isConnected');
+      } catch (e) {
+        print('⚠️ Error en verificación de conectividad, continuando con login: $e');
+      }
       
       final response = await _httpService.post('/auth/login', body: {
         'email': email,

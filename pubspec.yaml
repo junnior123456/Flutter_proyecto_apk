@@ -40,6 +40,9 @@ dependencies:
   # 📧 Email y URL launcher
   url_launcher: ^6.3.0
   mailer: ^6.1.2
+  
+  # 🍞 Toast messages
+  fluttertoast: ^8.2.8
 
   # 🎨 Gestión de temas y colores
   flex_color_scheme: ^8.0.2

@@ -9,8 +9,8 @@ class ApiConfig {
       // En web, conectar directamente a localhost
       return 'http://localhost:3000/api';
     } else if (Platform.isAndroid) {
-      // En Android, usar la IP real del host para Genymotion
-      return 'http://192.168.18.97:3000/api'; // IP WiFi del host
+      // En Android, usar 10.0.2.2 para Android Studio Emulator
+      return 'http://10.0.2.2:3000/api'; // Android Studio Emulator
     } else if (Platform.isIOS) {
       // En iOS Simulator, localhost funciona
       return 'http://localhost:3000/api';
@@ -22,9 +22,10 @@ class ApiConfig {
 
   // 🔄 URLs alternativas para probar en caso de fallo
   static List<String> get alternativeUrls => [
+    'http://10.0.2.2:3000/api',      // Android Studio Emulator
+    'http://192.168.18.97:3000/api', // IP WiFi del host
     'http://192.168.56.1:3000/api',  // Genymotion host bridge
     'http://192.168.56.2:3000/api',  // Genymotion alternativa
-    'http://10.0.2.2:3000/api',      // Android Studio Emulator
     'http://10.0.3.2:3000/api',      // Genymotion NAT
     'http://localhost:3000/api',     // Localhost directo
     'http://127.0.0.1:3000/api',     // IP local

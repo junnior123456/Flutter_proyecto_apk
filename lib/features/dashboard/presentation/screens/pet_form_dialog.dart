@@ -235,16 +235,16 @@ class _PetFormDialogState extends State<PetFormDialog> {
       );
 
       if (createdPet != null) {
-        Logger.petOperation('Pet created successfully', petId: createdPet.id);
+        Logger.petOperation('Pet created successfully', petId: createdPet.id.toString());
         
         if (mounted) {
           // Mostrar mensaje de éxito
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(createdPet.id.startsWith('local_') 
+              content: Text(createdPet.id.toString().startsWith('local_') 
                   ? '⚠️ Mascota guardada localmente - Verifica tu conexión'
                   : '✅ Mascota creada exitosamente'),
-              backgroundColor: createdPet.id.startsWith('local_') 
+              backgroundColor: createdPet.id.toString().startsWith('local_') 
                   ? Colors.orange 
                   : Theme.of(context).primaryColor,
               duration: const Duration(seconds: 2),

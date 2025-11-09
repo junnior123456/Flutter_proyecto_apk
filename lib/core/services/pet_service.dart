@@ -233,7 +233,7 @@ class PetService {
 
         Logger.petOperation(
           'Pet created successfully',
-          petId: createdPet.id,
+          petId: createdPet.id.toString(),
           data: data,
         );
         return createdPet;
@@ -265,9 +265,7 @@ class PetService {
   Pet _petFromJson(Map<String, dynamic> json) {
     try {
       return Pet(
-        id:
-            json['id']?.toString() ??
-            DateTime.now().millisecondsSinceEpoch.toString(),
+        id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
         name: json['name']?.toString() ?? 'Sin nombre',
         description: json['description']?.toString() ?? '',
         imageUrl: json['imageUrl']?.toString() ?? '',
@@ -275,7 +273,11 @@ class PetService {
         createdAt:
             DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
             DateTime.now(),
-        userId: json['userId']?.toString() ?? '',
+        updatedAt:
+            DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
+            DateTime.now(),
+        userId: json['userId'] is int ? json['userId'] : int.tryParse(json['userId']?.toString() ?? '1') ?? 1,
+        categoryId: json['categoryId'] is int ? json['categoryId'] : int.tryParse(json['categoryId']?.toString() ?? '1') ?? 1,
         age: json['age']?.toString() ?? '',
         breed: json['breed']?.toString() ?? '',
         gender: json['gender']?.toString() ?? 'Macho',
@@ -294,13 +296,15 @@ class PetService {
       Logger.error('Error parsing pet JSON', tag: 'PetService', error: e);
       // Retornar pet con datos mínimos válidos
       return Pet(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: int.parse('${DateTime.now().millisecondsSinceEpoch}'.substring(0, 9)),
         name: 'Error al cargar',
         description: 'Error al cargar datos',
         imageUrl: '',
         isRisk: false,
         createdAt: DateTime.now(),
-        userId: '',
+        updatedAt: DateTime.now(),
+        userId: 1,
+        categoryId: 1,
         age: '',
         breed: '',
         gender: 'Macho',
@@ -337,13 +341,15 @@ class PetService {
     Logger.petOperation('Creating local pet as fallback', data: {'name': name});
 
     return Pet(
-      id: 'local_${DateTime.now().millisecondsSinceEpoch}',
+      id: int.parse('${DateTime.now().millisecondsSinceEpoch}'.substring(0, 9)),
       name: name,
       description: description,
       imageUrl: imageUrl ?? '',
       isRisk: isRisk,
       createdAt: DateTime.now(),
-      userId: 'local_user',
+      updatedAt: DateTime.now(),
+      userId: 1,
+      categoryId: 1,
       age: age ?? '',
       breed: breed ?? '',
       gender: gender ?? 'Macho',
@@ -631,7 +637,7 @@ class PetService {
 
         Logger.petOperation(
           'Pet created successfully with Firebase URL',
-          petId: createdPet.id,
+          petId: createdPet.id.toString(),
           data: data,
         );
         return createdPet;

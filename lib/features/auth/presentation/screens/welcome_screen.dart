@@ -169,13 +169,14 @@ class WelcomeScreen extends StatelessWidget {
                         ),
                       ),
                       
-                      // Botón de prueba de API (solo para desarrollo)
+
+                      // Botón de acceso al panel de admin
                       TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, AppRoutes.apiTest);
+                          Navigator.pushNamed(context, AppRoutes.adminAccess);
                         },
                         child: const Text(
-                          '🧪 Probar API Backend',
+                          '👑 Panel de Administración',
                           style: AppStyles.linkWhite,
                         ),
                       ),
