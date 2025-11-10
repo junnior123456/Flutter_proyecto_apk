@@ -58,8 +58,8 @@ class PetModel extends Pet {
       contactEmail: json['contactEmail'] as String? ?? '',
       category: _parsePetCategory(json['category']),
       status: _parsePetStatus(json['status'] as String?),
-      latitude: (json['latitude'] as num?)?.toDouble(),
-      longitude: (json['longitude'] as num?)?.toDouble(),
+      latitude: _parseDouble(json['latitude']),
+      longitude: _parseDouble(json['longitude']),
       medicalHistory: json['medicalHistory'] as String?,
       specialNeeds: json['specialNeeds'] as String?,
       temperament: json['temperament'] as String?,
@@ -128,6 +128,20 @@ class PetModel extends Pet {
           .toList();
     }
     return [];
+  }
+
+  static double? _parseDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      try {
+        return double.parse(value);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
   }
 
   Map<String, dynamic> toJson() {

@@ -1280,23 +1280,36 @@ class _ProfileTabState extends State<ProfileTab> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => MyPublicationsScreen(
-                    adoptPets: widget.adoptPets.where((pet) => 
-                      pet.contactEmail == userEmail
-                    ).toList(),
-                    riskPets: widget.riskPets.where((pet) => 
-                      pet.contactEmail == userEmail
-                    ).toList(),
+                    adoptPets: widget.adoptPets,
+                    riskPets: widget.riskPets,
                     onEditPet: (pet) {
-                      // Aquí iría la lógica para editar la mascota
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Edición de mascota próximamente')),
+                      Navigator.pop(context);
+                      // Mostrar diálogo de edición
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Editar ${pet.name}'),
+                          content: const Text(
+                            'La funcionalidad de edición estará disponible próximamente.\n\n'
+                            'Podrás modificar:\n'
+                            '• Nombre\n'
+                            '• Descripción\n'
+                            '• Edad\n'
+                            '• Raza\n'
+                            '• Foto'
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Entendido'),
+                            ),
+                          ],
+                        ),
                       );
                     },
                     onDeletePet: (pet) {
+                      Navigator.pop(context);
                       widget.onRemovePet(pet);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Publicación eliminada')),
-                      );
                     },
                   ),
                 ),
