@@ -6,6 +6,7 @@ import '../../../../core/constants/app_routes.dart';
 import '../../../../core/services/user_profile_notifier.dart';
 import '../../../../core/services/pet_service.dart';
 import '../../../../core/services/auth_service.dart';
+import '../../../../core/services/adoption_service.dart';
 import '../../../../core/widgets/pet_card.dart';
 import '../../../auth/presentation/dialogs/edit_profile_dialog.dart';
 import '../../../auth/presentation/screens/my_publications_screen.dart';
@@ -13,6 +14,7 @@ import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../../../donations/presentation/screens/donations_screen.dart';
 import '../../../adoption/presentation/screens/my_requests_screen.dart';
 import '../../../adoption/presentation/screens/received_requests_screen.dart';
+import '../../../adoption/presentation/dialogs/send_adoption_request_dialog.dart';
 import 'publish_pet_screen.dart';
 import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
@@ -386,6 +388,149 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  /// 🐕 Manejar solicitud de adopción (igual que en adopt_tab.dart)
+  Future<void> _handleAdoptRequest(BuildContext context, Pet pet) async {
+    if (!widget.isAuthenticated) {
+      // Usuario no autenticado: mostrar diálogo para registrarse
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Registro Requerido'),
+          content: Text(
+            'Para adoptar a ${pet.name}, necesitas registrarte e iniciar sesión primero.'
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.login);
+              },
+              child: const Text('Iniciar Sesión'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.register);
+              },
+              child: const Text('Registrarse'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // Verificar si es su propia mascota
+    final authService = AuthService();
+    final userData = await authService.getCurrentUser();
+    final currentUserId = userData?['id'];
+
+    if (currentUserId != null && pet.userId == currentUserId) {
+      // Es su propia mascota
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.orange),
+                SizedBox(width: 12),
+                Text('No Disponible'),
+              ],
+            ),
+            content: const Text(
+              'No puedes adoptar tu propia mascota. Esta es una publicación que tú creaste.'
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Entendido'),
+              ),
+            ],
+          ),
+        );
+      }
+      return;
+    }
+
+    // Verificar si ya tiene una solicitud pendiente
+    final adoptionService = AdoptionService();
+    final hasExisting = await adoptionService.hasExistingRequest(pet.id);
+
+    if (hasExisting && mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.orange),
+              SizedBox(width: 12),
+              Text('Solicitud Existente'),
+            ],
+          ),
+          content: Text(
+            'Ya tienes una solicitud pendiente para ${pet.name}. Espera la respuesta del dueño.'
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Entendido'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // Usuario autenticado y puede adoptar: mostrar formulario completo
+    if (mounted) {
+      final result = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (context) => SendAdoptionRequestDialog(pet: pet),
+      );
+
+      if (result != null && mounted) {
+        // Enviar solicitud
+        try {
+          await adoptionService.sendAdoptionRequest(
+            petId: pet.id,
+            personalInfo: result['personalInfo'],
+            livingSituation: result['livingSituation'],
+            adoptionReason: result['adoptionReason'],
+            previousExperience: result['previousExperience'],
+            hasYard: result['hasYard'],
+            hasOtherPets: result['hasOtherPets'],
+          );
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('✅ Solicitud enviada para ${pet.name}'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error al enviar solicitud: $e'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      }
+    }
+  }
+
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
       child: Container(
@@ -657,57 +802,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         adoptPets: _adoptPets, 
         riskPets: _riskPets,
         isAuthenticated: widget.isAuthenticated,
-        onRequestAdopt: (pet) {
-          if (!widget.isAuthenticated) {
-            // Mostrar mensaje de que necesita registrarse
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Registro Requerido'),
-                content: const Text(
-                  'Necesitas registrarte e iniciar sesión para solicitar la adopción de una mascota.'
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancelar'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        AppRoutes.welcome,
-                        (route) => false,
-                      );
-                    },
-                    child: const Text('Ir a Registro'),
-                  ),
-                ],
-              ),
-            );
-            return;
-          }
-          
-          // Usuario autenticado: mostrar diálogo de confirmación
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Solicitar adopción'),
-              content: Text('¿Deseas solicitar la adopción de ${pet.name}?'),
-              actions: [
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
-                ElevatedButton(onPressed: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Solicitud enviada para ${pet.name}')));
-                }, child: const Text('Enviar')),
-              ],
-            ),
-          );
-        }, 
+        onRequestAdopt: (pet) => _handleAdoptRequest(context, pet), 
         onMarkSafe: (pet) {
           if (!widget.isAuthenticated) {
             // Mostrar mensaje de que necesita registrarse
