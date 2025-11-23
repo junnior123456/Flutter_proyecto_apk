@@ -186,13 +186,16 @@ class _RiskTabState extends State<RiskTab> {
           }
           
           // Usuario autenticado: mostrar formulario específico de riesgo
-          final result = await showDialog<Pet>(
+          final result = await showDialog<bool>(
             context: context,
             builder: (context) => const RiskPetFormDialog(),
           );
-          if (result != null) {
-            await widget.onAdd(result);
-            // Refrescar la lista después de agregar
+          if (result == true) {
+            // Refrescar la lista desde el backend
+            if (widget.onRefresh != null) {
+              widget.onRefresh!();
+            }
+            // También refrescar el filtro actual
             await _filterByCategory(_selectedCategory);
           }
         },

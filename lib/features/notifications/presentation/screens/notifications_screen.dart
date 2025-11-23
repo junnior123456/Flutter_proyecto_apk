@@ -374,6 +374,18 @@ class _NotificationsViewState extends State<_NotificationsView>
         icon = Icons.check_circle_outline;
         color = Colors.teal;
         break;
+      case app_notification.NotificationType.newPet:
+        icon = Icons.pets;
+        color = Colors.green;
+        break;
+      case app_notification.NotificationType.petInRisk:
+        icon = Icons.warning;
+        color = Colors.red;
+        break;
+      case app_notification.NotificationType.newDonation:
+        icon = Icons.volunteer_activism;
+        color = Colors.pink;
+        break;
       case app_notification.NotificationType.systemMessage:
         icon = Icons.info;
         color = Colors.grey;
@@ -515,6 +527,15 @@ class _NotificationsViewState extends State<_NotificationsView>
     BuildContext context,
     app_notification.Notification notification,
   ) {
+    // Si es una notificación de mascota, mostrar detalles completos
+    if ((notification.type == app_notification.NotificationType.newPet ||
+            notification.type == app_notification.NotificationType.petInRisk) &&
+        notification.pet != null) {
+      _showPetDetails(context, notification);
+      return;
+    }
+
+    // Para otros tipos de notificación, mostrar el diálogo estándar
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -639,7 +660,9 @@ class _NotificationsViewState extends State<_NotificationsView>
                     child: ElevatedButton.icon(
                       onPressed: () {
                         Navigator.pop(context);
-                        _confirmDelete(context, notification);
+                        context.read<NotificationsBloc>().add(
+                              DeleteNotification(notificationId: notification.id),
+                            );
                       },
                       icon: const Icon(Icons.delete),
                       label: const Text('Eliminar'),
@@ -650,6 +673,263 @@ class _NotificationsViewState extends State<_NotificationsView>
                     ),
                   ),
                 ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showPetDetails(
+    BuildContext context,
+    app_notification.Notification notification,
+  ) {
+    final pet = notification.pet!;
+    final owner = notification.fromUser;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.8,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scrollController) => SingleChildScrollView(
+          controller: scrollController,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Indicador de arrastre
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              // Imagen de la mascota
+              if (pet.imageUrl != null)
+                Container(
+                  height: 300,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(pet.imageUrl!),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Nombre y badge
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            pet.name,
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if (pet.isRisk)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              'EN RIESGO',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      pet.category.displayName,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    // Descripción
+                    if (pet.description != null) ...[
+                      const Text(
+                        'Descripción',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        pet.description!,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                    // Información del animal
+                    const Text(
+                      'Información',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    if (pet.breed != null)
+                      _buildInfoRow(Icons.pets, 'Raza', pet.breed!),
+                    if (pet.age != null) ...[
+                      const SizedBox(height: 8),
+                      _buildInfoRow(Icons.cake, 'Edad', pet.age!),
+                    ],
+                    if (pet.gender != null) ...[
+                      const SizedBox(height: 8),
+                      _buildInfoRow(Icons.wc, 'Género', pet.gender!),
+                    ],
+                    if (pet.size != null) ...[
+                      const SizedBox(height: 8),
+                      _buildInfoRow(Icons.straighten, 'Tamaño', pet.size!),
+                    ],
+                    const SizedBox(height: 24),
+                    // Información del publicador
+                    const Text(
+                      'Publicado por',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundColor: Colors.orange,
+                          backgroundImage: owner?.image != null
+                              ? NetworkImage(owner!.image!)
+                              : null,
+                          child: owner?.image == null
+                              ? const Icon(Icons.person,
+                                  size: 30, color: Colors.white)
+                              : null,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                owner?.displayName ?? 'Usuario',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (owner?.email != null)
+                                Text(
+                                  owner!.email!,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (pet.contactPhone != null) ...[
+                      const SizedBox(height: 12),
+                      _buildInfoRow(Icons.phone, 'Teléfono', pet.contactPhone!),
+                    ],
+                    if (pet.address != null) ...[
+                      const SizedBox(height: 8),
+                      _buildInfoRow(Icons.location_on, 'Ubicación', pet.address!),
+                    ],
+                    const SizedBox(height: 32),
+                    // Botones de acción
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              if (!notification.isRead) {
+                                context.read<NotificationsBloc>().add(
+                                      MarkNotificationAsRead(
+                                        notificationId: notification.id,
+                                      ),
+                                    );
+                              }
+                            },
+                            icon: const Icon(Icons.close),
+                            label: const Text('Cerrar'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.grey,
+                              side: BorderSide(color: Colors.grey[400]!),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              if (!notification.isRead) {
+                                context.read<NotificationsBloc>().add(
+                                      MarkNotificationAsRead(
+                                        notificationId: notification.id,
+                                      ),
+                                    );
+                              }
+                              // Aquí puedes agregar navegación a la pantalla de detalles de la mascota
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Ver detalles de ${pet.name}'),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.visibility),
+                            label: const Text('Ver más'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

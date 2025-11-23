@@ -147,24 +147,12 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   ) async {
     emit(NotificationsLoading());
     try {
-      // Intentar cargar desde backend
-      try {
-        final notifications = await _notificationService.getNotifications();
-        final unreadCount = await _notificationService.getUnreadCount();
-        emit(NotificationsLoaded(
-          notifications: notifications,
-          unreadCount: unreadCount,
-        ));
-      } catch (e) {
-        // Si falla, usar notificaciones mock para desarrollo
-        print('⚠️ Backend no disponible, usando notificaciones mock');
-        final mockNotifications = await _notificationService.createMockNotifications();
-        final unreadCount = mockNotifications.where((n) => !n.isRead).length;
-        emit(NotificationsLoaded(
-          notifications: mockNotifications,
-          unreadCount: unreadCount,
-        ));
-      }
+      final notifications = await _notificationService.getNotifications();
+      final unreadCount = await _notificationService.getUnreadCount();
+      emit(NotificationsLoaded(
+        notifications: notifications,
+        unreadCount: unreadCount,
+      ));
     } catch (e) {
       emit(NotificationsError(
         message: 'Error al cargar notificaciones: ${e.toString()}',

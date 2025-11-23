@@ -50,32 +50,56 @@ class NotificationService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         
+        // El backend devuelve: {ok: true, data: {notifications: [...], pagination: {...}}}
+        List<dynamic> notificationsData;
+        
         if (data is List) {
-          final notifications = data
-              .map((json) => NotificationModel.fromJson(json as Map<String, dynamic>))
-              .toList();
-          
-          Logger.info(
-            'Retrieved ${notifications.length} notifications',
-            tag: 'NotificationService',
-          );
-          
-          return notifications;
-        } else if (data is Map && data['data'] != null) {
-          final notificationsData = data['data'] as List;
-          final notifications = notificationsData
-              .map((json) => NotificationModel.fromJson(json as Map<String, dynamic>))
-              .toList();
-          
-          Logger.info(
-            'Retrieved ${notifications.length} notifications',
-            tag: 'NotificationService',
-          );
-          
-          return notifications;
+          // Array directo
+          notificationsData = data;
+        } else if (data is Map) {
+          // Objeto con estructura
+          if (data['ok'] == true && data['data'] != null) {
+            final dataObj = data['data'];
+            if (dataObj is Map && dataObj['notifications'] != null) {
+              // Estructura con paginación: {notifications: [...], pagination: {...}}
+              notificationsData = dataObj['notifications'] as List;
+            } else if (dataObj is List) {
+              // Array directo en 'data'
+              notificationsData = dataObj;
+            } else {
+              Logger.info('No notifications found', tag: 'NotificationService');
+              return [];
+            }
+          } else if (data['data'] != null) {
+            // Estructura sin 'ok': {data: [...]}
+            final dataObj = data['data'];
+            if (dataObj is Map && dataObj['notifications'] != null) {
+              notificationsData = dataObj['notifications'] as List;
+            } else if (dataObj is List) {
+              notificationsData = dataObj;
+            } else {
+              Logger.info('No notifications found', tag: 'NotificationService');
+              return [];
+            }
+          } else {
+            Logger.info('No notifications found', tag: 'NotificationService');
+            return [];
+          }
+        } else {
+          Logger.warning('Unexpected response format', tag: 'NotificationService');
+          return [];
         }
         
-        return [];
+        final notifications = notificationsData
+            .map((json) => NotificationModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+        
+        Logger.info(
+          'Retrieved ${notifications.length} notifications',
+          tag: 'NotificationService',
+        );
+        
+        return notifications;
       }
 
       throw Exception('Error al obtener notificaciones: ${response.statusCode}');
@@ -203,65 +227,4 @@ class NotificationService {
     }
   }
 
-  /// 🔄 Crear notificaciones de prueba (solo para desarrollo)
-  Future<List<Notification>> createMockNotifications() async {
-    Logger.warning('Using mock notifications for development', tag: 'NotificationService');
-    
-    return [
-      Notification(
-        id: 1,
-        userId: 1,
-        type: NotificationType.adoptionRequest,
-        title: 'Nueva solicitud de adopción',
-        message: 'María García quiere adoptar a Max',
-        isRead: false,
-        createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
-        fromUserId: 2,
-        petId: 110,
-      ),
-      Notification(
-        id: 2,
-        userId: 1,
-        type: NotificationType.newComment,
-        title: 'Nuevo comentario',
-        message: 'Juan comentó en tu publicación de Luna',
-        isRead: false,
-        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-        fromUserId: 3,
-        petId: 111,
-      ),
-      Notification(
-        id: 3,
-        userId: 1,
-        type: NotificationType.petStatusChanged,
-        title: 'Mascota en riesgo reportada',
-        message: 'Rocky ha sido reportado como en riesgo',
-        isRead: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 1)),
-        readAt: DateTime.now().subtract(const Duration(hours: 12)),
-        petId: 112,
-      ),
-      Notification(
-        id: 4,
-        userId: 1,
-        type: NotificationType.adoptionAccepted,
-        title: 'Adopción aceptada',
-        message: 'Tu solicitud de adopción para Bella fue aceptada',
-        isRead: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 2)),
-        readAt: DateTime.now().subtract(const Duration(days: 1)),
-        petId: 113,
-      ),
-      Notification(
-        id: 5,
-        userId: 1,
-        type: NotificationType.systemMessage,
-        title: 'Bienvenido a PawFinder',
-        message: 'Gracias por unirte a nuestra comunidad de amantes de las mascotas',
-        isRead: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 7)),
-        readAt: DateTime.now().subtract(const Duration(days: 6)),
-      ),
-    ];
-  }
 }

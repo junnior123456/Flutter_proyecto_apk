@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_service.dart';
 import '../utils/logger.dart';
@@ -14,6 +16,17 @@ class TokenManager {
   // Control de refresh en progreso
   bool _isRefreshing = false;
   List<Function> _refreshCallbacks = [];
+
+  /// 🔑 Obtener token (sin validación)
+  Future<String?> getToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString('auth_token');
+    } catch (e) {
+      Logger.error('Error getting token', tag: 'TokenManager', error: e);
+      return null;
+    }
+  }
 
   /// 🔑 Obtener token válido (con refresh automático si es necesario)
   Future<String?> getValidToken() async {
@@ -71,7 +84,7 @@ class TokenManager {
         final prefs = await SharedPreferences.getInstance();
         final newToken = prefs.getString('auth_token');
         
-        Logger.success('Token refreshed successfully', tag: 'TokenManager');
+        Logger.info('Token refreshed successfully', tag: 'TokenManager');
         
         // Notificar a los callbacks esperando
         _notifyRefreshCallbacks(newToken);
@@ -163,7 +176,3 @@ class TokenManager {
     }
   }
 }
-
-// Imports necesarios
-import 'dart:async';
-import 'dart:convert';

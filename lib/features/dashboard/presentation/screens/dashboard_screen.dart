@@ -11,6 +11,8 @@ import '../../../auth/presentation/dialogs/edit_profile_dialog.dart';
 import '../../../auth/presentation/screens/my_publications_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../../../donations/presentation/screens/donations_screen.dart';
+import '../../../adoption/presentation/screens/my_requests_screen.dart';
+import '../../../adoption/presentation/screens/received_requests_screen.dart';
 import 'publish_pet_screen.dart';
 import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
@@ -72,17 +74,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   /// 🔄 Cargar mascotas desde el backend
   Future<void> _loadPetsFromBackend() async {
+    print('🔄 Iniciando carga de mascotas desde backend...');
     setState(() {
       _isLoading = true;
     });
 
     try {
       // Cargar mascotas para adopción y en riesgo en paralelo
+      print('📡 Solicitando mascotas para adopción...');
       final adoptPetsFuture = _petService.getPetsForAdoption();
+      print('📡 Solicitando mascotas en riesgo...');
       final riskPetsFuture = _petService.getPetsInRisk();
       
+      print('⏳ Esperando respuestas...');
       final adoptPets = await adoptPetsFuture;
+      print('✅ Mascotas para adopción recibidas: ${adoptPets.length}');
       final riskPets = await riskPetsFuture;
+      print('✅ Mascotas en riesgo recibidas: ${riskPets.length}');
 
       setState(() {
         _adoptPets = adoptPets;
@@ -248,9 +256,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
 
       if (createdPet != null) {
-        setState(() {
-          _adoptPets.add(createdPet);
-        });
+        // Recargar la lista completa desde el backend en lugar de agregar localmente
+        await _loadPetsFromBackend();
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -321,9 +328,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
 
       if (createdPet != null) {
-        setState(() {
-          _riskPets.add(createdPet);
-        });
+        // Recargar la lista completa desde el backend en lugar de agregar localmente
+        await _loadPetsFromBackend();
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -339,16 +345,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } catch (e) {
       print('❌ Error agregando mascota en riesgo: $e');
       
-      // Fallback: agregar localmente
-      setState(() {
-        _riskPets.add(pet);
-      });
-      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('⚠️ ${pet.name} reportado localmente - Verifica conexión'),
-            backgroundColor: Colors.orange,
+            content: Text('❌ Error al reportar mascota: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
@@ -481,6 +483,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const DonationsScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildDrawerItem(
+              icon: Icons.assignment,
+              title: 'Mis Solicitudes',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MyRequestsScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildDrawerItem(
+              icon: Icons.inbox,
+              title: 'Solicitudes Recibidas',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ReceivedRequestsScreen(),
                   ),
                 );
               },

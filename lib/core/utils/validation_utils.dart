@@ -56,7 +56,7 @@ class ValidationUtils {
   }
 
   /// 📍 Validar dirección
-  static bool isValidAddress(String address, {int minLength = 5}) {
+  static bool isValidAddress(String address, {int minLength = 3}) {
     final trimmedAddress = address.trim();
     return trimmedAddress.isNotEmpty && trimmedAddress.length >= minLength;
   }
@@ -93,10 +93,8 @@ class ValidationUtils {
       errors['categoryId'] = 'Debe seleccionar una categoría válida';
     }
 
-    // Validaciones opcionales
-    if (age != null && age.isNotEmpty && !isValidPetAge(age)) {
-      errors['age'] = 'Formato de edad inválido (ej: "2 años", "6 meses")';
-    }
+    // Validaciones opcionales - Edad es completamente flexible
+    // No validamos el formato de edad, cualquier texto es válido
 
     if (breed != null && breed.isNotEmpty && !isValidBreed(breed)) {
       errors['breed'] = 'La raza solo puede contener letras y espacios';
@@ -115,7 +113,7 @@ class ValidationUtils {
     }
 
     if (address != null && address.isNotEmpty && !isValidAddress(address)) {
-      errors['address'] = 'La dirección debe tener al menos 5 caracteres';
+      errors['address'] = 'La dirección debe tener al menos 3 caracteres';
     }
 
     return errors;

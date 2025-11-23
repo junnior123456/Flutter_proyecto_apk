@@ -130,6 +130,8 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
     setState(() => _isSubmitting = true);
 
     try {
+      Logger.info('Creating risk pet report', tag: 'RiskPetForm');
+      
       final createdPet = await _petService.createPet(
         name: 'Animal en riesgo - ${_selectedCategory.displayName}',
         description: _descriptionController.text.trim(),
@@ -140,42 +142,104 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
         contactPhone: _contactPhoneController.text.trim(),
         contactEmail: _contactEmailController.text.trim(),
         address: _addressController.text.trim(),
+        // Campos obligatorios para el backend (valores cortos)
+        gender: 'N/A', // Máximo 10 caracteres
+        size: 'Mediano', // Valor por defecto
+        isVaccinated: false,
+        isSterilized: false,
         // Campos adicionales específicos de riesgo
-        breed: _conditionController.text.trim(), // Usamos breed para guardar condición
-        age: _referenceController.text.trim(), // Usamos age para guardar referencia
+        breed: _conditionController.text.trim().isNotEmpty ? _conditionController.text.trim() : 'Desconocido',
+        age: null,
       );
 
       if (createdPet != null && mounted) {
-        Navigator.pop(context, createdPet);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Caso reportado exitosamente. Gracias por ayudar.'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        Logger.info('Risk pet created successfully', tag: 'RiskPetForm');
+        Navigator.pop(context, true); // Devolver true para indicar éxito
+        
+        // Mostrar mensaje de éxito después de cerrar el diálogo
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('✅ Caso reportado exitosamente. Gracias por ayudar.'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+        });
+      } else {
+        throw Exception('No se pudo crear el reporte');
       }
     } catch (e) {
       Logger.error('Error submitting risk pet', tag: 'RiskPetForm', error: e);
+      
       if (mounted) {
+        setState(() => _isSubmitting = false);
+        
         final errorMessage = e.toString();
         
         // Si es error de token, el interceptor ya lo manejó
         // Solo cerrar el formulario silenciosamente
-        if (errorMessage.contains('Token expirado') || errorMessage.contains('401') || errorMessage.contains('UnauthorizedException')) {
+        if (errorMessage.contains('Token expirado') || 
+            errorMessage.contains('401') || 
+            errorMessage.contains('UnauthorizedException')) {
+          Logger.warning('Token expired, closing form', tag: 'RiskPetForm');
           Navigator.pop(context); // Cerrar formulario
           return; // No mostrar más errores
         }
         
-        // Otros errores sí los mostramos
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error al reportar el caso'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 3),
+        // Mostrar diálogo de error más informativo
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.red[700]),
+                const SizedBox(width: 8),
+                const Text('Error al reportar'),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('No se pudo reportar el caso. Por favor verifica:'),
+                const SizedBox(height: 12),
+                const Text('• Tu conexión a internet'),
+                const Text('• Que todos los campos estén completos'),
+                const Text('• Que la imagen no sea muy grande'),
+                const SizedBox(height: 12),
+                Text(
+                  'Error técnico: ${errorMessage.length > 100 ? errorMessage.substring(0, 100) + "..." : errorMessage}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[600],
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cerrar'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                ),
+                onPressed: () {
+                  Navigator.pop(context); // Cerrar diálogo de error
+                  _submit(); // Reintentar
+                },
+                child: const Text('Reintentar'),
+              ),
+            ],
           ),
         );
       }
-    } finally{
+    } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
       }

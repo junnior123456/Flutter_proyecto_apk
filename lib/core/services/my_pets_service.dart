@@ -1,21 +1,28 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/pet.dart';
 import '../../data/models/pet_model.dart';
+import 'token_manager.dart';
 
 class MyPetsService {
   static const String baseUrl = 'http://10.0.2.2:3000/api';
+  final TokenManager _tokenManager = TokenManager();
 
   /// 📋 Obtener las mascotas del usuario autenticado
   Future<List<Pet>> getMyPets() async {
     try {
+      // Verificar si hay token guardado
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
-
-      print('🔑 Token obtenido: ${token != null ? "Sí (${token.substring(0, 20)}...)" : "No"}');
+      final savedToken = prefs.getString('auth_token');
+      print('🔍 Token en SharedPreferences: ${savedToken != null ? "Existe (${savedToken.length} chars)" : "NO EXISTE"}');
+      
+      final token = await _tokenManager.getToken();
+      print('🔑 Token obtenido por TokenManager: ${token != null ? "Sí (${token.substring(0, min(20, token.length))}...)" : "No"}');
 
       if (token == null || token.isEmpty) {
+        print('❌ NO HAY TOKEN - Usuario debe iniciar sesión');
         throw Exception('No hay token de autenticación. Por favor inicia sesión nuevamente.');
       }
 
@@ -63,8 +70,7 @@ class MyPetsService {
     print('🔄 [UPDATE] Iniciando actualización de mascota $petId');
     print('📋 [UPDATE] Datos: $updateData');
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await _tokenManager.getToken();
 
       if (token == null || token.isEmpty) {
         throw Exception('No hay token de autenticación. Por favor inicia sesión nuevamente.');
@@ -111,8 +117,7 @@ class MyPetsService {
   /// 🗑️ Eliminar una mascota
   Future<void> deletePet(int petId) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await _tokenManager.getToken();
 
       if (token == null || token.isEmpty) {
         throw Exception('No hay token de autenticación. Por favor inicia sesión nuevamente.');

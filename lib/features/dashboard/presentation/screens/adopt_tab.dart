@@ -3,10 +3,13 @@ import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
 import '../../../../core/constants/app_routes.dart';
 import '../../../../core/services/pet_service.dart';
+import '../../../../core/services/auth_service.dart';
+import '../../../../core/services/adoption_service.dart';
 import '../../../../core/widgets/pet_card.dart';
 import '../widgets/category_filter.dart';
 import 'improved_pet_form_dialog.dart';
 import 'dashboard_screen.dart';
+import '../../../adoption/presentation/dialogs/send_adoption_request_dialog.dart';
 
 class AdoptTab extends StatefulWidget {
   final List<Pet> adoptPets;
@@ -242,7 +245,7 @@ class _AdoptTabState extends State<AdoptTab> {
   }
 
   /// 🐕 Manejar solicitud de adopción
-  void _handleAdoptRequest(BuildContext context, Pet pet) {
+  Future<void> _handleAdoptRequest(BuildContext context, Pet pet) async {
     if (!widget.isAuthenticated) {
       // Usuario no autenticado: mostrar diálogo para registrarse
       showDialog(
@@ -280,35 +283,108 @@ class _AdoptTabState extends State<AdoptTab> {
       return;
     }
 
-    // Usuario autenticado: mostrar confirmación de adopción
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Solicitar adopción'),
-        content: Text('¿Deseas solicitar la adopción de ${pet.name}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
+    // Verificar si es su propia mascota
+    final authService = AuthService();
+    final userData = await authService.getCurrentUser();
+    final currentUserId = userData?['id'];
+
+    if (currentUserId != null && pet.userId == currentUserId) {
+      // Es su propia mascota
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.orange),
+                SizedBox(width: 12),
+                Text('No Disponible'),
+              ],
             ),
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('✅ Solicitud enviada para ${pet.name}'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-            child: const Text('Enviar Solicitud'),
+            content: const Text(
+              'No puedes adoptar tu propia mascota. Esta es una publicación que tú creaste.'
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Entendido'),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        );
+      }
+      return;
+    }
+
+    // Verificar si ya tiene una solicitud pendiente
+    final adoptionService = AdoptionService();
+    final hasExisting = await adoptionService.hasExistingRequest(pet.id);
+
+    if (hasExisting && mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.orange),
+              SizedBox(width: 12),
+              Text('Solicitud Existente'),
+            ],
+          ),
+          content: Text(
+            'Ya tienes una solicitud pendiente para ${pet.name}. Espera la respuesta del dueño.'
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Entendido'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // Usuario autenticado y puede adoptar: mostrar formulario
+    if (mounted) {
+      final result = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (context) => SendAdoptionRequestDialog(pet: pet),
+      );
+
+      if (result != null && mounted) {
+        // Enviar solicitud
+        try {
+          await adoptionService.sendAdoptionRequest(
+            petId: pet.id,
+            personalInfo: result['personalInfo'],
+            livingSituation: result['livingSituation'],
+            adoptionReason: result['adoptionReason'],
+            previousExperience: result['previousExperience'],
+            hasYard: result['hasYard'],
+            hasOtherPets: result['hasOtherPets'],
+          );
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('✅ Solicitud enviada para ${pet.name}'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error al enviar solicitud: $e'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      }
+    }
   }
 }
 

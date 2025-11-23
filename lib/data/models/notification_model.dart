@@ -60,6 +60,7 @@ class NotificationModel extends Notification {
         return NotificationType.adoptionRequest;
       case 'adoption_accepted':
       case 'adoptionaccepted':
+      case 'adoption_approved':
         return NotificationType.adoptionAccepted;
       case 'adoption_rejected':
       case 'adoptionrejected':
@@ -73,6 +74,15 @@ class NotificationModel extends Notification {
       case 'report_resolved':
       case 'reportresolved':
         return NotificationType.reportResolved;
+      case 'new_pet':
+      case 'newpet':
+        return NotificationType.newPet;
+      case 'pet_in_risk':
+      case 'petinrisk':
+        return NotificationType.petInRisk;
+      case 'new_donation':
+      case 'newdonation':
+        return NotificationType.newDonation;
       case 'system_message':
       case 'systemmessage':
         return NotificationType.systemMessage;
@@ -113,6 +123,12 @@ class NotificationModel extends Notification {
         return 'pet_status_changed';
       case NotificationType.reportResolved:
         return 'report_resolved';
+      case NotificationType.newPet:
+        return 'new_pet';
+      case NotificationType.petInRisk:
+        return 'pet_in_risk';
+      case NotificationType.newDonation:
+        return 'new_donation';
       case NotificationType.systemMessage:
         return 'system_message';
     }

@@ -119,16 +119,19 @@ class AuthService {
   Future<void> _saveAuthData(Map<String, dynamic> data) async {
     final prefs = await SharedPreferences.getInstance();
     
-    // Guardar token
+    // Guardar token SIN "Bearer " (el interceptor lo agregará automáticamente)
     final token = data['token'] as String;
-    await prefs.setString(_tokenKey, token);
+    final cleanToken = token.replaceFirst('Bearer ', '').trim();
+    await prefs.setString(_tokenKey, cleanToken);
+    
+    print('✅ Token guardado (limpio): ${cleanToken.substring(0, 20)}...');
     
     // Guardar datos del usuario
     final userData = jsonEncode(data['user']);
     await prefs.setString(_userKey, userData);
     
-    // Configurar token en HttpService
-    _httpService.setAuthToken(token.replaceFirst('Bearer ', ''));
+    // Configurar token en HttpService (también sin "Bearer ")
+    _httpService.setAuthToken(cleanToken);
   }
 
   // 🔍 Verificar si el usuario está autenticado

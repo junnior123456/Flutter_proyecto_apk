@@ -9,6 +9,9 @@ enum NotificationType {
   newComment,
   petStatusChanged,
   reportResolved,
+  newPet,
+  petInRisk,
+  newDonation,
   systemMessage,
 }
 
@@ -62,6 +65,12 @@ class Notification extends Equatable {
         return 'Estado de mascota actualizado';
       case NotificationType.reportResolved:
         return 'Reporte resuelto';
+      case NotificationType.newPet:
+        return 'Nueva mascota para adopción';
+      case NotificationType.petInRisk:
+        return 'Mascota en riesgo';
+      case NotificationType.newDonation:
+        return 'Nueva donación';
       case NotificationType.systemMessage:
         return 'Mensaje del sistema';
     }
@@ -88,9 +97,12 @@ class Notification extends Equatable {
       case NotificationType.adoptionRequest:
       case NotificationType.adoptionAccepted:
       case NotificationType.adoptionRejected:
+      case NotificationType.petInRisk:
         return 'Alta';
       case NotificationType.newComment:
       case NotificationType.petStatusChanged:
+      case NotificationType.newPet:
+      case NotificationType.newDonation:
         return 'Media';
       case NotificationType.reportResolved:
       case NotificationType.systemMessage:
