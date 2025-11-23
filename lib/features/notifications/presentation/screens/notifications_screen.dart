@@ -31,7 +31,6 @@ class _NotificationsView extends StatefulWidget {
 class _NotificationsViewState extends State<_NotificationsView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _showOnlyUnread = false;
 
   @override
   void initState() {
@@ -52,30 +51,7 @@ class _NotificationsViewState extends State<_NotificationsView>
         title: const Text('Notificaciones'),
         backgroundColor: Colors.orange,
         actions: [
-          // Filtro: Solo no leídas
-          IconButton(
-            icon: Icon(
-              _showOnlyUnread ? Icons.filter_alt : Icons.filter_alt_outlined,
-            ),
-            onPressed: () {
-              setState(() {
-                _showOnlyUnread = !_showOnlyUnread;
-              });
-              context.read<NotificationsBloc>().add(
-                    FilterNotifications(showOnlyUnread: _showOnlyUnread),
-                  );
-            },
-            tooltip: _showOnlyUnread ? 'Mostrar todas' : 'Solo no leídas',
-          ),
-          // Marcar todas como leídas
-          IconButton(
-            icon: const Icon(Icons.done_all),
-            onPressed: () {
-              _showMarkAllAsReadDialog(context);
-            },
-            tooltip: 'Marcar todas como leídas',
-          ),
-          // Refrescar
+          // Solo botón de refrescar
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
@@ -105,15 +81,8 @@ class _NotificationsViewState extends State<_NotificationsView>
             );
             // Recargar después de una operación exitosa
             context.read<NotificationsBloc>().add(LoadNotifications());
-          } else if (state is NotificationsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 3),
-              ),
-            );
           }
+          // Removido el listener de errores para evitar mostrar errores antiguos
         },
         builder: (context, state) {
           if (state is NotificationsLoading) {
@@ -140,32 +109,33 @@ class _NotificationsViewState extends State<_NotificationsView>
               return _buildEmptyView();
             }
 
+            // Filtrar notificaciones por tipo
+            final adoptionNotifications = notifications.where((n) =>
+              n.type == app_notification.NotificationType.adoptionRequest ||
+              n.type == app_notification.NotificationType.adoptionAccepted ||
+              n.type == app_notification.NotificationType.adoptionRejected ||
+              n.type == app_notification.NotificationType.adoptionRequestSent ||
+              n.type == app_notification.NotificationType.newPet ||
+              n.type == app_notification.NotificationType.petPublished
+            ).toList();
+
+            final riskNotifications = notifications.where((n) =>
+              n.type == app_notification.NotificationType.petInRisk ||
+              n.type == app_notification.NotificationType.petRiskPublished ||
+              n.type == app_notification.NotificationType.petStatusChanged ||
+              n.type == app_notification.NotificationType.reportResolved
+            ).toList();
+
+            // TabBarView con filtros
             return TabBarView(
               controller: _tabController,
               children: [
-                // Todas las notificaciones
-                _buildNotificationsList(context, notifications, unreadCount),
-                // Solo adopción
-                _buildNotificationsList(
-                  context,
-                  notifications
-                      .where((n) =>
-                          n.type == app_notification.NotificationType.adoptionRequest ||
-                          n.type == app_notification.NotificationType.adoptionAccepted ||
-                          n.type == app_notification.NotificationType.adoptionRejected)
-                      .toList(),
-                  unreadCount,
-                ),
-                // Solo riesgo
-                _buildNotificationsList(
-                  context,
-                  notifications
-                      .where((n) =>
-                          n.type == app_notification.NotificationType.petStatusChanged ||
-                          n.type == app_notification.NotificationType.reportResolved)
-                      .toList(),
-                  unreadCount,
-                ),
+                // Tab: Todas
+                _buildNotificationsList(context, notifications),
+                // Tab: Adopción
+                _buildNotificationsList(context, adoptionNotifications),
+                // Tab: Riesgo
+                _buildNotificationsList(context, riskNotifications),
               ],
             );
           }
@@ -179,7 +149,6 @@ class _NotificationsViewState extends State<_NotificationsView>
   Widget _buildNotificationsList(
     BuildContext context,
     List<app_notification.Notification> notifications,
-    int unreadCount,
   ) {
     if (notifications.isEmpty) {
       return _buildEmptyView();
@@ -244,23 +213,12 @@ class _NotificationsViewState extends State<_NotificationsView>
       },
       child: Card(
         margin: const EdgeInsets.only(bottom: 12),
-        elevation: notification.isRead ? 1 : 3,
+        elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: notification.isRead
-                ? Colors.transparent
-                : Colors.orange.withOpacity(0.3),
-            width: 2,
-          ),
         ),
         child: InkWell(
           onTap: () {
-            if (!notification.isRead) {
-              context.read<NotificationsBloc>().add(
-                    MarkNotificationAsRead(notificationId: notification.id),
-                  );
-            }
             _showNotificationDetails(context, notification);
           },
           borderRadius: BorderRadius.circular(12),
@@ -277,30 +235,13 @@ class _NotificationsViewState extends State<_NotificationsView>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Título y badge no leído
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              notification.title,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: notification.isRead
-                                    ? FontWeight.normal
-                                    : FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          if (!notification.isRead)
-                            Container(
-                              width: 10,
-                              height: 10,
-                              decoration: const BoxDecoration(
-                                color: Colors.orange,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                        ],
+                      // Título
+                      Text(
+                        notification.title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       // Mensaje
@@ -314,7 +255,7 @@ class _NotificationsViewState extends State<_NotificationsView>
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 8),
-                      // Tiempo y tipo
+                      // Solo tiempo
                       Row(
                         children: [
                           Icon(
@@ -330,8 +271,6 @@ class _NotificationsViewState extends State<_NotificationsView>
                               fontSize: 12,
                             ),
                           ),
-                          const Spacer(),
-                          _buildPriorityBadge(notification),
                         ],
                       ),
                     ],
@@ -362,6 +301,10 @@ class _NotificationsViewState extends State<_NotificationsView>
         icon = Icons.cancel;
         color = Colors.red;
         break;
+      case app_notification.NotificationType.adoptionRequestSent:
+        icon = Icons.send;
+        color = Colors.blue;
+        break;
       case app_notification.NotificationType.newComment:
         icon = Icons.comment;
         color = Colors.purple;
@@ -374,6 +317,10 @@ class _NotificationsViewState extends State<_NotificationsView>
         icon = Icons.check_circle_outline;
         color = Colors.teal;
         break;
+      case app_notification.NotificationType.petPublished:
+        icon = Icons.check_circle;
+        color = Colors.green;
+        break;
       case app_notification.NotificationType.newPet:
         icon = Icons.pets;
         color = Colors.green;
@@ -382,9 +329,17 @@ class _NotificationsViewState extends State<_NotificationsView>
         icon = Icons.warning;
         color = Colors.red;
         break;
+      case app_notification.NotificationType.petRiskPublished:
+        icon = Icons.warning_amber;
+        color = Colors.orange;
+        break;
       case app_notification.NotificationType.newDonation:
         icon = Icons.volunteer_activism;
         color = Colors.pink;
+        break;
+      case app_notification.NotificationType.welcome:
+        icon = Icons.waving_hand;
+        color = Colors.orange;
         break;
       case app_notification.NotificationType.systemMessage:
         icon = Icons.info;
@@ -632,47 +587,17 @@ class _NotificationsViewState extends State<_NotificationsView>
                 ),
               ],
               const SizedBox(height: 32),
-              // Botones de acción
-              Row(
-                children: [
-                  if (!notification.isRead)
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          context.read<NotificationsBloc>().add(
-                                MarkNotificationAsRead(
-                                  notificationId: notification.id,
-                                ),
-                              );
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(Icons.done),
-                        label: const Text('Marcar como leída'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.orange,
-                          side: const BorderSide(color: Colors.orange),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                      ),
-                    ),
-                  if (!notification.isRead) const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        context.read<NotificationsBloc>().add(
-                              DeleteNotification(notificationId: notification.id),
-                            );
-                      },
-                      icon: const Icon(Icons.delete),
-                      label: const Text('Eliminar'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    ),
+              // Botón de cerrar
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                ],
+                  child: const Text('Cerrar'),
+                ),
               ),
             ],
           ),
@@ -874,59 +799,17 @@ class _NotificationsViewState extends State<_NotificationsView>
                       _buildInfoRow(Icons.location_on, 'Ubicación', pet.address!),
                     ],
                     const SizedBox(height: 32),
-                    // Botones de acción
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              if (!notification.isRead) {
-                                context.read<NotificationsBloc>().add(
-                                      MarkNotificationAsRead(
-                                        notificationId: notification.id,
-                                      ),
-                                    );
-                              }
-                            },
-                            icon: const Icon(Icons.close),
-                            label: const Text('Cerrar'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.grey,
-                              side: BorderSide(color: Colors.grey[400]!),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                          ),
+                    // Botón de cerrar
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              if (!notification.isRead) {
-                                context.read<NotificationsBloc>().add(
-                                      MarkNotificationAsRead(
-                                        notificationId: notification.id,
-                                      ),
-                                    );
-                              }
-                              // Aquí puedes agregar navegación a la pantalla de detalles de la mascota
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Ver detalles de ${pet.name}'),
-                                  backgroundColor: Colors.orange,
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.visibility),
-                            label: const Text('Ver más'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                          ),
-                        ),
-                      ],
+                        child: const Text('Cerrar'),
+                      ),
                     ),
                   ],
                 ),
@@ -963,57 +846,5 @@ class _NotificationsViewState extends State<_NotificationsView>
     );
   }
 
-  void _showMarkAllAsReadDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Marcar todas como leídas'),
-        content: const Text(
-          '¿Estás seguro de marcar todas las notificaciones como leídas?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              context
-                  .read<NotificationsBloc>()
-                  .add(MarkAllNotificationsAsRead());
-            },
-            child: const Text('Marcar todas'),
-          ),
-        ],
-      ),
-    );
-  }
 
-  void _confirmDelete(BuildContext context, app_notification.Notification notification) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Eliminar notificación'),
-        content: const Text('¿Estás seguro de eliminar esta notificación?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              context.read<NotificationsBloc>().add(
-                    DeleteNotification(notificationId: notification.id),
-                  );
-            },
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -65,6 +65,9 @@ class NotificationModel extends Notification {
       case 'adoption_rejected':
       case 'adoptionrejected':
         return NotificationType.adoptionRejected;
+      case 'adoption_request_sent':
+      case 'adoptionrequestsent':
+        return NotificationType.adoptionRequestSent;
       case 'new_comment':
       case 'newcomment':
         return NotificationType.newComment;
@@ -74,15 +77,23 @@ class NotificationModel extends Notification {
       case 'report_resolved':
       case 'reportresolved':
         return NotificationType.reportResolved;
+      case 'pet_published':
+      case 'petpublished':
+        return NotificationType.petPublished;
       case 'new_pet':
       case 'newpet':
         return NotificationType.newPet;
       case 'pet_in_risk':
       case 'petinrisk':
         return NotificationType.petInRisk;
+      case 'pet_risk_published':
+      case 'petriskpublished':
+        return NotificationType.petRiskPublished;
       case 'new_donation':
       case 'newdonation':
         return NotificationType.newDonation;
+      case 'welcome':
+        return NotificationType.welcome;
       case 'system_message':
       case 'systemmessage':
         return NotificationType.systemMessage;
@@ -117,18 +128,26 @@ class NotificationModel extends Notification {
         return 'adoption_accepted';
       case NotificationType.adoptionRejected:
         return 'adoption_rejected';
+      case NotificationType.adoptionRequestSent:
+        return 'adoption_request_sent';
       case NotificationType.newComment:
         return 'new_comment';
       case NotificationType.petStatusChanged:
         return 'pet_status_changed';
       case NotificationType.reportResolved:
         return 'report_resolved';
+      case NotificationType.petPublished:
+        return 'pet_published';
       case NotificationType.newPet:
         return 'new_pet';
       case NotificationType.petInRisk:
         return 'pet_in_risk';
+      case NotificationType.petRiskPublished:
+        return 'pet_risk_published';
       case NotificationType.newDonation:
         return 'new_donation';
+      case NotificationType.welcome:
+        return 'welcome';
       case NotificationType.systemMessage:
         return 'system_message';
     }

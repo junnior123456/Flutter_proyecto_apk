@@ -15,16 +15,7 @@ class LoadNotifications extends NotificationsEvent {}
 
 class LoadUnreadNotifications extends NotificationsEvent {}
 
-class MarkNotificationAsRead extends NotificationsEvent {
-  final int notificationId;
 
-  const MarkNotificationAsRead({required this.notificationId});
-
-  @override
-  List<Object?> get props => [notificationId];
-}
-
-class MarkAllNotificationsAsRead extends NotificationsEvent {}
 
 class DeleteNotification extends NotificationsEvent {
   final int notificationId;
@@ -134,8 +125,6 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
         super(NotificationsInitial()) {
     on<LoadNotifications>(_onLoadNotifications);
     on<LoadUnreadNotifications>(_onLoadUnreadNotifications);
-    on<MarkNotificationAsRead>(_onMarkNotificationAsRead);
-    on<MarkAllNotificationsAsRead>(_onMarkAllNotificationsAsRead);
     on<DeleteNotification>(_onDeleteNotification);
     on<RefreshNotifications>(_onRefreshNotifications);
     on<FilterNotifications>(_onFilterNotifications);
@@ -179,50 +168,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     }
   }
 
-  Future<void> _onMarkNotificationAsRead(
-    MarkNotificationAsRead event,
-    Emitter<NotificationsState> emit,
-  ) async {
-    try {
-      await _notificationService.markAsRead(event.notificationId);
-      
-      // Recargar notificaciones
-      final notifications = await _notificationService.getNotifications();
-      final unreadCount = await _notificationService.getUnreadCount();
-      
-      emit(NotificationOperationSuccess(
-        message: 'Notificación marcada como leída',
-        notifications: notifications,
-        unreadCount: unreadCount,
-      ));
-    } catch (e) {
-      emit(NotificationsError(
-        message: 'Error al marcar notificación como leída: ${e.toString()}',
-      ));
-    }
-  }
 
-  Future<void> _onMarkAllNotificationsAsRead(
-    MarkAllNotificationsAsRead event,
-    Emitter<NotificationsState> emit,
-  ) async {
-    try {
-      await _notificationService.markAllAsRead();
-      
-      // Recargar notificaciones
-      final notifications = await _notificationService.getNotifications();
-      
-      emit(NotificationOperationSuccess(
-        message: 'Todas las notificaciones marcadas como leídas',
-        notifications: notifications,
-        unreadCount: 0,
-      ));
-    } catch (e) {
-      emit(NotificationsError(
-        message: 'Error al marcar todas las notificaciones como leídas: ${e.toString()}',
-      ));
-    }
-  }
 
   Future<void> _onDeleteNotification(
     DeleteNotification event,

@@ -125,73 +125,7 @@ class NotificationService {
     }
   }
 
-  /// ✅ Marcar notificación como leída
-  Future<void> markAsRead(int notificationId) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
 
-      if (token == null || token.isEmpty) {
-        throw Exception('No hay token de autenticación');
-      }
-
-      final cleanToken = token.replaceFirst('Bearer ', '').trim();
-      
-      final response = await http.patch(
-        Uri.parse('$baseUrl/notifications/$notificationId/read'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $cleanToken',
-        },
-      );
-
-      Logger.apiResponse('PATCH', '/notifications/$notificationId/read', response.statusCode);
-
-      if (response.statusCode == 200) {
-        Logger.info('Notification marked as read', tag: 'NotificationService');
-        return;
-      }
-
-      throw Exception('Error al marcar notificación como leída: ${response.statusCode}');
-    } catch (e) {
-      Logger.error('Error marking notification as read', tag: 'NotificationService', error: e);
-      rethrow;
-    }
-  }
-
-  /// ✅ Marcar todas las notificaciones como leídas
-  Future<void> markAllAsRead() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
-
-      if (token == null || token.isEmpty) {
-        throw Exception('No hay token de autenticación');
-      }
-
-      final cleanToken = token.replaceFirst('Bearer ', '').trim();
-      
-      final response = await http.patch(
-        Uri.parse('$baseUrl/notifications/read-all'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $cleanToken',
-        },
-      );
-
-      Logger.apiResponse('PATCH', '/notifications/read-all', response.statusCode);
-
-      if (response.statusCode == 200) {
-        Logger.info('All notifications marked as read', tag: 'NotificationService');
-        return;
-      }
-
-      throw Exception('Error al marcar todas las notificaciones como leídas: ${response.statusCode}');
-    } catch (e) {
-      Logger.error('Error marking all notifications as read', tag: 'NotificationService', error: e);
-      rethrow;
-    }
-  }
 
   /// 🗑️ Eliminar notificación
   Future<void> deleteNotification(int notificationId) async {

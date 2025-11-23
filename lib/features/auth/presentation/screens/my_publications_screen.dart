@@ -5,6 +5,9 @@ import '../../../../core/services/my_pets_service.dart';
 import '../../../../core/widgets/cached_pet_image.dart';
 import '../bloc/my_pets_bloc.dart';
 
+// Importar el enum PetStatus
+import '../../../../domain/entities/pet.dart' show PetStatus;
+
 class MyPublicationsScreen extends StatefulWidget {
   final List<Pet> adoptPets;
   final List<Pet> riskPets;
@@ -311,24 +314,7 @@ class _MyPublicationsScreenState extends State<MyPublicationsScreen> {
                             ),
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isRisk ? Colors.red : Colors.green,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            isRisk ? 'En Riesgo' : 'En Adopción',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+                        _buildStatusBadge(pet, isRisk),
                       ],
                     ),
                     
@@ -372,7 +358,9 @@ class _MyPublicationsScreenState extends State<MyPublicationsScreen> {
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: () => _showEditDialog(blocContext, pet),
+                            onPressed: pet.status == PetStatus.adopted 
+                                ? null 
+                                : () => _showEditDialog(blocContext, pet),
                             icon: const Icon(Icons.edit, size: 18),
                             label: const Text('Editar'),
                             style: OutlinedButton.styleFrom(
@@ -385,37 +373,39 @@ class _MyPublicationsScreenState extends State<MyPublicationsScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('Eliminar publicación'),
-                                  content: Text(
-                                    '¿Estás seguro de eliminar la publicación de ${pet.name}?'
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Cancelar'),
-                                    ),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red,
-                                        foregroundColor: Colors.white,
+                            onPressed: pet.status == PetStatus.adopted 
+                                ? null 
+                                : () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('Eliminar publicación'),
+                                        content: Text(
+                                          '¿Estás seguro de eliminar la publicación de ${pet.name}?'
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context),
+                                            child: const Text('Cancelar'),
+                                          ),
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.red,
+                                              foregroundColor: Colors.white,
+                                            ),
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                              blocContext.read<MyPetsBloc>().add(
+                                                DeletePet(petId: pet.id),
+                                              );
+                                              widget.onDeletePet(pet);
+                                            },
+                                            child: const Text('Eliminar'),
+                                          ),
+                                        ],
                                       ),
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        blocContext.read<MyPetsBloc>().add(
-                                          DeletePet(petId: pet.id),
-                                        );
-                                        widget.onDeletePet(pet);
-                                      },
-                                      child: const Text('Eliminar'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+                                    );
+                                  },
                             icon: const Icon(Icons.delete, size: 18),
                             label: const Text('Eliminar'),
                             style: ElevatedButton.styleFrom(
@@ -427,6 +417,34 @@ class _MyPublicationsScreenState extends State<MyPublicationsScreen> {
                         ),
                       ],
                     ),
+                    
+                    // Mensaje informativo para mascotas adoptadas
+                    if (pet.status == PetStatus.adopted) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Esta mascota ya fue adoptada y no puede ser editada ni eliminada',
+                                style: TextStyle(
+                                  color: Colors.blue[700],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -437,3 +455,43 @@ class _MyPublicationsScreenState extends State<MyPublicationsScreen> {
     );
   }
 }
+
+  /// Widget para mostrar el badge de estado
+  Widget _buildStatusBadge(Pet pet, bool isRisk) {
+    String text;
+    Color color;
+
+    // Determinar el texto y color según el estado (usando el enum)
+    if (pet.status == PetStatus.adopted) {
+      text = 'Adoptado';
+      color = Colors.blue;
+    } else if (pet.status == PetStatus.pending) {
+      text = 'Pendiente';
+      color = Colors.orange;
+    } else if (isRisk) {
+      text = 'En Riesgo';
+      color = Colors.red;
+    } else {
+      text = 'En Adopción';
+      color = Colors.green;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 6,
+      ),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }

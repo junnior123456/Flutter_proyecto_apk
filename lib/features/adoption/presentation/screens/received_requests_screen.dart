@@ -85,6 +85,63 @@ class _ReceivedRequestsScreenState extends State<ReceivedRequestsScreen> {
     }
   }
 
+  Future<void> _handleComplete(Map<String, dynamic> request) async {
+    // Mostrar diálogo de confirmación
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.blue),
+            SizedBox(width: 12),
+            Text('Completar Adopción'),
+          ],
+        ),
+        content: Text(
+          '¿Confirmas que has entregado a ${request['pet']?['name'] ?? 'la mascota'} a ${request['adopter']?['name'] ?? 'el adoptante'}?\n\nEl adoptante deberá confirmar la recepción para finalizar el proceso.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+            ),
+            child: const Text('Confirmar Entrega'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await _adoptionService.completeAdoption(request['id']);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Entrega confirmada. Esperando confirmación del adoptante.'),
+              backgroundColor: Colors.blue,
+            ),
+          );
+          _loadRequests();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error al completar adopción: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   Future<void> _handleReject(Map<String, dynamic> request) async {
     final reason = await showDialog<String>(
       context: context,
@@ -325,8 +382,9 @@ class _ReceivedRequestsScreenState extends State<ReceivedRequestsScreen> {
                 ),
               ),
 
-              // Botones de acción (solo si está pendiente)
+              // Botones de acción
               if (status == 'pending')
+                // Botones para solicitudes pendientes
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -375,6 +433,36 @@ class _ReceivedRequestsScreenState extends State<ReceivedRequestsScreen> {
                         ),
                       ),
                     ],
+                  ),
+                )
+              else if (status == 'approved')
+                // Botón para completar adopción (solicitudes aprobadas)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    border: Border(
+                      top: BorderSide(color: Colors.blue[200]!),
+                    ),
+                  ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _handleComplete(request);
+                      },
+                      icon: const Icon(Icons.check_circle, size: 20),
+                      label: const Text('Completar Adopción'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
             ],

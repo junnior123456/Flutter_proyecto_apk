@@ -3,15 +3,28 @@ import 'user.dart';
 import 'pet.dart';
 
 enum NotificationType {
+  // Notificaciones de adopción
   adoptionRequest,
   adoptionAccepted,
   adoptionRejected,
+  adoptionRequestSent, // Nueva: confirmación al enviar solicitud
+  
+  // Notificaciones de comentarios
   newComment,
+  
+  // Notificaciones de mascotas
   petStatusChanged,
   reportResolved,
-  newPet,
-  petInRisk,
+  petPublished, // Nueva: confirmación al publicar
+  newPet, // Comunitaria: nueva mascota disponible
+  petInRisk, // Comunitaria: mascota en riesgo
+  petRiskPublished, // Nueva: confirmación al publicar en riesgo
+  
+  // Notificaciones de donaciones
   newDonation,
+  
+  // Notificaciones del sistema
+  welcome, // Nueva: bienvenida al registrarse
   systemMessage,
 }
 
@@ -59,18 +72,26 @@ class Notification extends Equatable {
         return 'Adopción aceptada';
       case NotificationType.adoptionRejected:
         return 'Adopción rechazada';
+      case NotificationType.adoptionRequestSent:
+        return 'Solicitud enviada';
       case NotificationType.newComment:
         return 'Nuevo comentario';
       case NotificationType.petStatusChanged:
         return 'Estado de mascota actualizado';
       case NotificationType.reportResolved:
         return 'Reporte resuelto';
+      case NotificationType.petPublished:
+        return 'Mascota publicada';
       case NotificationType.newPet:
         return 'Nueva mascota para adopción';
       case NotificationType.petInRisk:
         return 'Mascota en riesgo';
+      case NotificationType.petRiskPublished:
+        return 'Reporte publicado';
       case NotificationType.newDonation:
         return 'Nueva donación';
+      case NotificationType.welcome:
+        return 'Bienvenida';
       case NotificationType.systemMessage:
         return 'Mensaje del sistema';
     }
@@ -99,12 +120,16 @@ class Notification extends Equatable {
       case NotificationType.adoptionRejected:
       case NotificationType.petInRisk:
         return 'Alta';
+      case NotificationType.adoptionRequestSent:
       case NotificationType.newComment:
       case NotificationType.petStatusChanged:
+      case NotificationType.petPublished:
+      case NotificationType.petRiskPublished:
       case NotificationType.newPet:
       case NotificationType.newDonation:
         return 'Media';
       case NotificationType.reportResolved:
+      case NotificationType.welcome:
       case NotificationType.systemMessage:
         return 'Baja';
     }
