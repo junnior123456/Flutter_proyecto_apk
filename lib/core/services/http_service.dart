@@ -3,14 +3,19 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import '../utils/logger.dart';
+import 'http_interceptor.dart';
 
 /// Servicio HTTP para comunicación con el backend NestJS
+/// Ahora con manejo profesional de tokens vía HttpInterceptor
 class HttpService {
   static final HttpService _instance = HttpService._internal();
   factory HttpService() => _instance;
   HttpService._internal() {
     _initializeConnection();
   }
+  
+  // Interceptor para manejo automático de 401
+  final HttpInterceptor _interceptor = HttpInterceptor();
 
   // Inicialización automática de la conexión
   void _initializeConnection() {
@@ -41,57 +46,28 @@ class HttpService {
     return headers;
   }
 
-  // 🔍 GET Request
+  // 🔍 GET Request (con manejo automático de 401)
   Future<http.Response> get(String endpoint) async {
-    final stopwatch = Stopwatch()..start();
-    final baseUrl = _workingBaseUrl ?? ApiConfig.baseUrl;
-    
     try {
-      final url = Uri.parse(baseUrl + endpoint);
-      Logger.apiRequest('GET', endpoint, headers: _authHeaders);
-      
-      final response = await http.get(
-        url,
-        headers: _authHeaders,
-      ).timeout(ApiConfig.connectTimeout);
-      
-      stopwatch.stop();
-      Logger.apiResponse('GET', endpoint, response.statusCode, 
-          body: response.body, duration: stopwatch.elapsed);
-      
-      return response;
+      return await _interceptor.request('GET', endpoint);
     } catch (e) {
-      stopwatch.stop();
-      Logger.error('GET request failed', tag: 'HttpService', error: e, stackTrace: StackTrace.current);
+      if (e is UnauthorizedException) {
+        // Token expirado, lanzar excepción específica
+        throw Exception('Token expirado. Por favor, inicia sesión nuevamente.');
+      }
       rethrow;
     }
   }
 
-  // 📤 POST Request
+  // 📤 POST Request (con manejo automático de 401)
   Future<http.Response> post(String endpoint, {Map<String, dynamic>? body}) async {
-    final stopwatch = Stopwatch()..start();
-    final baseUrl = _workingBaseUrl ?? ApiConfig.baseUrl;
-    
     try {
-      final url = Uri.parse(baseUrl + endpoint);
-      final bodyJson = body != null ? jsonEncode(body) : null;
-      
-      Logger.apiRequest('POST', endpoint, body: body, headers: _authHeaders);
-      
-      final response = await http.post(
-        url,
-        headers: _authHeaders,
-        body: bodyJson,
-      ).timeout(ApiConfig.connectTimeout);
-      
-      stopwatch.stop();
-      Logger.apiResponse('POST', endpoint, response.statusCode, 
-          body: response.body, duration: stopwatch.elapsed);
-      
-      return response;
+      return await _interceptor.request('POST', endpoint, body: body);
     } catch (e) {
-      stopwatch.stop();
-      Logger.error('POST request failed', tag: 'HttpService', error: e, stackTrace: StackTrace.current);
+      if (e is UnauthorizedException) {
+        // Token expirado, lanzar excepción específica
+        throw Exception('Token expirado. Por favor, inicia sesión nuevamente.');
+      }
       rethrow;
     }
   }

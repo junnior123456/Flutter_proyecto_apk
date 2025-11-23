@@ -13,15 +13,15 @@ class ValidationUtils {
     return emailRegex.hasMatch(email.trim());
   }
 
-  /// 📱 Validar formato de teléfono (9 dígitos para Perú)
+  /// 📱 Validar formato de teléfono (flexible para Perú)
   static bool isValidPhone(String phone) {
     if (phone.trim().isEmpty) return false;
     
     // Remover espacios y caracteres especiales, solo mantener dígitos
     final cleanPhone = phone.replaceAll(RegExp(r'[^\d]'), '');
     
-    // Debe tener exactamente 9 dígitos y solo números
-    return cleanPhone.length == 9 && RegExp(r'^[0-9]+$').hasMatch(cleanPhone);
+    // Debe tener entre 7 y 11 dígitos (más flexible)
+    return cleanPhone.length >= 7 && cleanPhone.length <= 11 && RegExp(r'^[0-9]+$').hasMatch(cleanPhone);
   }
 
   /// 👤 Validar nombre (no vacío, longitud mínima)
@@ -31,7 +31,7 @@ class ValidationUtils {
   }
 
   /// 📝 Validar descripción (no vacía, longitud mínima)
-  static bool isValidDescription(String description, {int minLength = 10}) {
+  static bool isValidDescription(String description, {int minLength = 5}) {
     final trimmedDescription = description.trim();
     return trimmedDescription.isNotEmpty && trimmedDescription.length >= minLength;
   }
@@ -56,7 +56,7 @@ class ValidationUtils {
   }
 
   /// 📍 Validar dirección
-  static bool isValidAddress(String address, {int minLength = 10}) {
+  static bool isValidAddress(String address, {int minLength = 5}) {
     final trimmedAddress = address.trim();
     return trimmedAddress.isNotEmpty && trimmedAddress.length >= minLength;
   }
@@ -86,7 +86,7 @@ class ValidationUtils {
     }
 
     if (!isValidDescription(description)) {
-      errors['description'] = 'La descripción debe tener al menos 10 caracteres';
+      errors['description'] = 'La descripción debe tener al menos 5 caracteres';
     }
 
     if (!isValidCategoryId(categoryId)) {
@@ -107,7 +107,7 @@ class ValidationUtils {
     }
 
     if (contactPhone != null && contactPhone.isNotEmpty && !isValidPhone(contactPhone)) {
-      errors['contactPhone'] = 'El teléfono debe tener exactamente 9 dígitos';
+      errors['contactPhone'] = 'El teléfono debe tener entre 7 y 11 dígitos';
     }
 
     if (contactEmail != null && contactEmail.isNotEmpty && !isValidEmail(contactEmail)) {
@@ -115,7 +115,7 @@ class ValidationUtils {
     }
 
     if (address != null && address.isNotEmpty && !isValidAddress(address)) {
-      errors['address'] = 'La dirección debe tener al menos 10 caracteres';
+      errors['address'] = 'La dirección debe tener al menos 5 caracteres';
     }
 
     return errors;
@@ -138,7 +138,7 @@ class ValidationUtils {
     }
 
     if (phone != null && phone.isNotEmpty && !isValidPhone(phone)) {
-      errors['phone'] = 'El teléfono debe tener exactamente 9 dígitos';
+      errors['phone'] = 'El teléfono debe tener entre 7 y 11 dígitos';
     }
 
     return errors;

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../domain/entities/pet.dart';
 import '../../../../core/services/my_pets_service.dart';
+import '../../../../core/widgets/cached_pet_image.dart';
+import '../bloc/my_pets_bloc.dart';
 
 class MyPublicationsScreen extends StatefulWidget {
   final List<Pet> adoptPets;
@@ -22,133 +25,149 @@ class MyPublicationsScreen extends StatefulWidget {
 
 class _MyPublicationsScreenState extends State<MyPublicationsScreen> {
   final MyPetsService _myPetsService = MyPetsService();
-  List<Pet> _myPets = [];
-  bool _isLoading = true;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadMyPets();
-  }
-
-  Future<void> _loadMyPets() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    try {
-      final pets = await _myPetsService.getMyPets();
-      setState(() {
-        _myPets = pets;
-        _isLoading = false;
-      });
-      print('✅ Cargadas ${pets.length} mascotas del usuario');
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
-      print('❌ Error cargando mis mascotas: $e');
-    }
-  }
-
-  Future<void> _handleDelete(Pet pet) async {
-    try {
-      await _myPetsService.deletePet(pet.id);
-      
-      setState(() {
-        _myPets.removeWhere((p) => p.id == pet.id);
-      });
-      
-      widget.onDeletePet(pet);
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${pet.name} eliminado correctamente'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al eliminar: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Mis Publicaciones'),
-          backgroundColor: Colors.orange,
-        ),
-        body: const Center(
-          child: CircularProgressIndicator(color: Colors.orange),
-        ),
-      );
-    }
-
-    if (_error != null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Mis Publicaciones'),
-          backgroundColor: Colors.orange,
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text('Error: $_error'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _loadMyPets,
-                child: const Text('Reintentar'),
+    return BlocProvider(
+      create: (context) => MyPetsBloc(myPetsService: _myPetsService)
+        ..add(LoadMyPets()),
+      child: BlocConsumer<MyPetsBloc, MyPetsState>(
+        listener: (context, state) {
+          if (state is MyPetsOperationSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
               ),
-            ],
-          ),
-        ),
-      );
-    }
+            );
+          } else if (state is MyPetsError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is MyPetsLoading) {
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('Mis Publicaciones'),
+                backgroundColor: Colors.orange,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: () {
+                      context.read<MyPetsBloc>().add(RefreshMyPets());
+                    },
+                  ),
+                ],
+              ),
+              body: const Center(
+                child: CircularProgressIndicator(color: Colors.orange),
+              ),
+            );
+          }
 
-    final adoptPets = _myPets.where((pet) => !pet.isRisk).toList();
-    final riskPets = _myPets.where((pet) => pet.isRisk).toList();
+          List<Pet> pets = [];
+          if (state is MyPetsLoaded) {
+            pets = state.pets;
+          } else if (state is MyPetsOperationSuccess) {
+            pets = state.pets;
+          }
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Mis Publicaciones'),
-          backgroundColor: Colors.orange,
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'En Adopción'),
-              Tab(text: 'En Riesgo'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            _buildPetList(adoptPets, false),
-            _buildPetList(riskPets, true),
-          ],
-        ),
+          final adoptPets = pets.where((pet) => !pet.isRisk).toList();
+          final riskPets = pets.where((pet) => pet.isRisk).toList();
+
+          return DefaultTabController(
+            length: 2,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text('Mis Publicaciones'),
+                backgroundColor: Colors.orange,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: () {
+                      context.read<MyPetsBloc>().add(RefreshMyPets());
+                    },
+                    tooltip: 'Actualizar',
+                  ),
+                ],
+                bottom: TabBar(
+                  tabs: [
+                    Tab(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('En Adopción'),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '${adoptPets.length}',
+                              style: const TextStyle(
+                                color: Colors.orange,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Tab(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('En Riesgo'),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '${riskPets.length}',
+                              style: const TextStyle(
+                                color: Colors.orange,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              body: TabBarView(
+                children: [
+                  _buildPetList(context, adoptPets, false),
+                  _buildPetList(context, riskPets, true),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  void _showEditDialog(Pet pet) {
+  void _showEditDialog(BuildContext blocContext, Pet pet) {
     final nameController = TextEditingController(text: pet.name);
     final descriptionController = TextEditingController(text: pet.description);
     final ageController = TextEditingController(text: pet.age);
@@ -206,40 +225,19 @@ class _MyPublicationsScreenState extends State<MyPublicationsScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
             ),
-            onPressed: () async {
+            onPressed: () {
               Navigator.pop(context);
               
-              try {
-                final updateData = {
-                  'name': nameController.text,
-                  'description': descriptionController.text,
-                  'age': ageController.text,
-                  'breed': breedController.text,
-                };
+              final updateData = {
+                'name': nameController.text,
+                'description': descriptionController.text,
+                'age': ageController.text,
+                'breed': breedController.text,
+              };
 
-                await _myPetsService.updatePet(pet.id, updateData);
-                
-                // Recargar la lista
-                await _loadMyPets();
-                
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Mascota actualizada correctamente'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error al actualizar: $e'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
+              blocContext.read<MyPetsBloc>().add(
+                UpdatePet(petId: pet.id, updateData: updateData),
+              );
             },
             child: const Text('Guardar'),
           ),
@@ -248,7 +246,7 @@ class _MyPublicationsScreenState extends State<MyPublicationsScreen> {
     );
   }
 
-  Widget _buildPetList(List<Pet> pets, bool isRisk) {
+  Widget _buildPetList(BuildContext blocContext, List<Pet> pets, bool isRisk) {
     if (pets.isEmpty) {
       return Center(
         child: Column(
@@ -286,22 +284,13 @@ class _MyPublicationsScreenState extends State<MyPublicationsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Imagen de la mascota
-              ClipRRect(
+              // Imagen de la mascota con caché
+              CachedPetImage(
+                imageUrl: pet.imageUrl,
+                width: double.infinity,
+                height: 200,
+                fit: BoxFit.cover,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: Image.network(
-                  pet.imageUrl,
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      height: 200,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.pets, size: 64, color: Colors.grey),
-                    );
-                  },
-                ),
               ),
               
               Padding(
@@ -383,16 +372,13 @@ class _MyPublicationsScreenState extends State<MyPublicationsScreen> {
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: () => _showEditDialog(pet),
+                            onPressed: () => _showEditDialog(blocContext, pet),
                             icon: const Icon(Icons.edit, size: 18),
                             label: const Text('Editar'),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.orange,
                               side: const BorderSide(color: Colors.orange),
                               padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
                             ),
                           ),
                         ),
@@ -418,7 +404,10 @@ class _MyPublicationsScreenState extends State<MyPublicationsScreen> {
                                       ),
                                       onPressed: () {
                                         Navigator.pop(context);
-                                        _handleDelete(pet);
+                                        blocContext.read<MyPetsBloc>().add(
+                                          DeletePet(petId: pet.id),
+                                        );
+                                        widget.onDeletePet(pet);
                                       },
                                       child: const Text('Eliminar'),
                                     ),
@@ -432,9 +421,6 @@ class _MyPublicationsScreenState extends State<MyPublicationsScreen> {
                               backgroundColor: Colors.red,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
                             ),
                           ),
                         ),

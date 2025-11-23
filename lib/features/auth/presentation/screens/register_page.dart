@@ -392,6 +392,28 @@ class _RegisterPageState extends State<RegisterPage> {
       try {
         final authService = AuthService();
         
+        // 🔍 1. Validar si el correo ya existe
+        final emailExists = await authService.checkEmailExists(
+          _emailController.text.trim(),
+        );
+
+        if (emailExists) {
+          if (mounted) {
+            setState(() => _isLoading = false);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  '❌ Este correo ya está registrado. Intenta iniciar sesión.',
+                ),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 4),
+              ),
+            );
+          }
+          return; // No continuar con el registro
+        }
+
+        // ✅ 2. Si el correo NO existe, proceder con el registro
         final result = await authService.register(
           name: _nameController.text.trim(),
           lastname: _lastnameController.text.trim(),

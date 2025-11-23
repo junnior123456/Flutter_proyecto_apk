@@ -1,5 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'mascota_bloc.dart';
+import 'pets/pets_bloc.dart';
+import 'adoption/adoption_bloc.dart';
+import 'comments/comments_bloc.dart';
+import 'notifications/notifications_bloc.dart';
 import '../usecases/get_mascotas.dart';
 import '../usecases/add_mascota.dart';
 import '../usecases/reportar_mascota.dart';
@@ -17,12 +21,30 @@ List<BlocProvider> get mascotaBlocProviders {
   final reportarMascota = ReportarMascota(repository);
 
   return [
+    // Legacy MascotaBloc (keep for backward compatibility)
     BlocProvider<MascotaBloc>(
       create: (context) => MascotaBloc(
         getMascotas: getMascotas,
         addMascota: addMascota,
         reportarMascota: reportarMascota,
       ),
+    ),
+    
+    // New BLoCs for Clean Architecture
+    BlocProvider<PetsBloc>(
+      create: (context) => PetsBloc(),
+    ),
+    
+    BlocProvider<AdoptionBloc>(
+      create: (context) => AdoptionBloc(),
+    ),
+    
+    BlocProvider<CommentsBloc>(
+      create: (context) => CommentsBloc(),
+    ),
+    
+    BlocProvider<NotificationsBloc>(
+      create: (context) => NotificationsBloc(),
     ),
   ];
 }

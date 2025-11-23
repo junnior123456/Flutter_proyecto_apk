@@ -5,175 +5,17 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_routes.dart';
 import '../../../../core/services/user_profile_notifier.dart';
 import '../../../../core/services/pet_service.dart';
+import '../../../../core/services/auth_service.dart';
+import '../../../../core/widgets/pet_card.dart';
 import '../../../auth/presentation/dialogs/edit_profile_dialog.dart';
 import '../../../auth/presentation/screens/my_publications_screen.dart';
+import '../../../notifications/presentation/screens/notifications_screen.dart';
+import '../../../donations/presentation/screens/donations_screen.dart';
+import 'publish_pet_screen.dart';
 import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
 import 'adopt_tab.dart';
 import 'risk_tab.dart';
-
-// Widget reutilizable para mostrar una mascota
-class PetCard extends StatelessWidget {
-  final Pet pet;
-  final String buttonText;
-  final VoidCallback onPressed;
-  const PetCard({super.key, required this.pet, required this.buttonText, required this.onPressed});
-
-  void _showPetDetails(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: 400,
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      pet.name,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-                Flexible(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            pet.imageUrl,
-                            height: 200,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text('Descripción:', style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text(pet.description.isEmpty ? 'Sin descripción' : pet.description),
-                        const SizedBox(height: 8),
-                        Text('Edad: ${pet.age}'),
-                        Text('Raza: ${pet.breed}'),
-                        Text('Género: ${pet.gender}'),
-                        Text('Tamaño: ${pet.size}'),
-                        Text('Vacunado: ${pet.isVaccinated ? "Sí" : "No"}'),
-                        Text('Esterilizado: ${pet.isSterilized ? "Sí" : "No"}'),
-                        const SizedBox(height: 16),
-                        Text('Datos de contacto:', style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text('Nombre: ${pet.contactName}'),
-                        Text('Teléfono: ${pet.contactPhone}'),
-                        Text('Email: ${pet.contactEmail}'),
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cerrar'),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          onPressed();
-                        },
-                        child: Text(buttonText),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 160,
-      height: 280,
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.07),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 160,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
-                child: Image.network(
-                  pet.imageUrl,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    pet.name,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF448AFF),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                    ),
-                    onPressed: () => _showPetDetails(context),
-                    child: Text(buttonText, textAlign: TextAlign.center),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class DashboardScreen extends StatefulWidget {
   final bool isAuthenticated;
@@ -196,12 +38,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Pet> _adoptPets = [];
   List<Pet> _riskPets = [];
   bool _isLoading = true;
+  
+  // Datos del usuario
+  String? _userName;
+  String? _userEmail;
+  String? _userImage;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialTab;
+    _loadUserProfile();
     _loadPetsFromBackend();
+  }
+  
+  /// 👤 Cargar perfil del usuario
+  Future<void> _loadUserProfile() async {
+    try {
+      final authService = AuthService();
+      final userData = await authService.getCurrentUser();
+      
+      if (userData != null && mounted) {
+        setState(() {
+          _userName = '${userData['name'] ?? ''} ${userData['lastname'] ?? ''}'.trim();
+          _userEmail = userData['email'] ?? '';
+          _userImage = userData['image'];
+        });
+      }
+    } catch (e) {
+      print('❌ Error cargando perfil: $e');
+    }
   }
 
   /// 🔄 Cargar mascotas desde el backend
@@ -230,7 +96,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } catch (e) {
       print('❌ Error cargando mascotas del backend: $e');
       
-      // Fallback a datos locales si falla el backend
+      // Si es error de token, redirigir a login
+      final errorMessage = e.toString();
+      if (errorMessage.contains('Token expirado') || errorMessage.contains('401')) {
+        if (mounted) {
+          // Mostrar mensaje y redirigir
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tu sesión ha expirado. Por favor, inicia sesión de nuevo.'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 2),
+            ),
+          );
+          
+          // Esperar un momento y redirigir
+          await Future.delayed(const Duration(seconds: 2));
+          
+          if (mounted) {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              AppRoutes.welcome,
+              (route) => false,
+            );
+          }
+        }
+        return;
+      }
+      
+      // Fallback a datos locales si falla el backend por otra razón
       _loadFallbackData();
       
       if (mounted) {
@@ -373,16 +266,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } catch (e) {
       print('❌ Error agregando mascota para adopción: $e');
       
-      // Fallback: agregar localmente
-      setState(() {
-        _adoptPets.add(pet);
-      });
+      String errorMessage;
+      Color backgroundColor;
+      
+      if (e.toString().contains('Token expirado')) {
+        errorMessage = '🔐 Sesión expirada. Por favor, inicia sesión nuevamente.';
+        backgroundColor = Colors.red;
+      } else if (e.toString().contains('401')) {
+        errorMessage = '🔐 Error de autenticación. Verifica tu sesión.';
+        backgroundColor = Colors.red;
+      } else if (e.toString().contains('Error al crear mascota en backend')) {
+        errorMessage = '❌ Error del servidor. Inténtalo más tarde.';
+        backgroundColor = Colors.red;
+      } else {
+        errorMessage = '❌ Error: ${e.toString()}';
+        backgroundColor = Colors.red;
+      }
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('⚠️ ${pet.name} agregado localmente - Verifica conexión'),
-            backgroundColor: Colors.orange,
+            content: Text(errorMessage),
+            backgroundColor: backgroundColor,
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Reintentar',
+              textColor: Colors.white,
+              onPressed: () => _addAdoptPet(pet),
+            ),
           ),
         );
       }
@@ -488,102 +399,95 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  const CircleAvatar(
+                  // Foto de perfil
+                  CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.white,
-                    child: Icon(Icons.person, size: 35, color: Color(0xFFFF9800)),
+                    backgroundImage: _userImage != null && _userImage!.isNotEmpty
+                        ? NetworkImage(_userImage!)
+                        : null,
+                    child: _userImage == null || _userImage!.isEmpty
+                        ? const Icon(Icons.person, size: 35, color: Color(0xFFFF9800))
+                        : null,
                   ),
                   const SizedBox(height: 10),
+                  // Nombre del usuario
                   Text(
-                    widget.isAuthenticated ? 'Ryan Karuna' : 'Invitado',
+                    widget.isAuthenticated 
+                        ? (_userName ?? 'Usuario') 
+                        : 'Invitado',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  // Email del usuario
+                  if (_userEmail != null && _userEmail!.isNotEmpty)
+                    Text(
+                      _userEmail!,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                 ],
               ),
             ),
             _buildDrawerItem(
               icon: Icons.notifications,
-              title: 'Notification',
+              title: 'Notificaciones',
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Notificaciones')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NotificationsScreen(),
+                  ),
                 );
               },
             ),
             _buildDrawerItem(
               icon: Icons.message,
-              title: 'Message',
+              title: 'Mensajes',
               onTap: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Mensajes')),
+                  const SnackBar(content: Text('Mensajes - Próximamente')),
                 );
               },
             ),
             _buildDrawerItem(
               icon: Icons.favorite,
-              title: 'Upload your pet',
+              title: 'Publicar mascota',
               onTap: () {
                 Navigator.pop(context);
-                setState(() {
-                  _currentIndex = 1; // Ir a la pestaña de Adoptar
-                });
-              },
-            ),
-            _buildDrawerItem(
-              icon: Icons.shopping_bag,
-              title: 'Products',
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Productos - Próximamente')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PublishPetScreen(),
+                  ),
                 );
               },
-              hasSubmenu: true,
             ),
-            if (_buildDrawerItem(
-              icon: Icons.shopping_bag,
-              title: 'Products',
-              onTap: () {},
-              hasSubmenu: true,
-            ) != null)
-              Padding(
-                padding: const EdgeInsets.only(left: 70),
-                child: Column(
-                  children: [
-                    _buildDrawerSubItem('Shopping cart', () {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Carrito de compras')),
-                      );
-                    }),
-                    _buildDrawerSubItem('Order history', () {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Historial de pedidos')),
-                      );
-                    }),
-                  ],
-                ),
-              ),
             _buildDrawerItem(
               icon: Icons.volunteer_activism,
-              title: 'Donation',
+              title: 'Donaciones',
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Donaciones - Próximamente')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DonationsScreen(),
+                  ),
                 );
               },
             ),
             _buildDrawerItem(
               icon: Icons.info,
-              title: 'About',
+              title: 'Acerca de',
               onTap: () {
                 Navigator.pop(context);
                 showDialog(
@@ -605,7 +509,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             _buildDrawerItem(
               icon: Icons.logout,
-              title: 'Logout',
+              title: 'Cerrar sesión',
               onTap: () {
                 Navigator.pop(context);
                 if (widget.isAuthenticated) {
@@ -622,6 +526,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
                           ),
                           onPressed: () {
                             Navigator.pop(context);
@@ -875,6 +780,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
                           ),
                           onPressed: () {
                             Navigator.pop(context); // Cierra el diálogo
@@ -993,6 +899,8 @@ class HomeTab extends StatelessWidget {
               children: adoptPets.map((pet) => PetCard(
                 pet: pet,
                 buttonText: 'Adoptar',
+                buttonColor: Colors.blue,
+                buttonIcon: Icons.favorite,
                 onPressed: () {
                   if (onRequestAdopt != null) {
                     onRequestAdopt!(pet);
@@ -1025,6 +933,8 @@ class HomeTab extends StatelessWidget {
               children: riskPets.map((pet) => PetCard(
                 pet: pet,
                 buttonText: 'Fuera de peligro',
+                buttonColor: Colors.red,
+                buttonIcon: Icons.check_circle,
                 onPressed: () {
                   if (onMarkSafe != null) {
                     onMarkSafe!(pet);

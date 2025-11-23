@@ -238,6 +238,8 @@ class PetService {
         );
         return createdPet;
       } else {
+        // El interceptor ya maneja 401 automáticamente
+        // Solo manejar otros errores
         // Si falla la creación del backend, limpiar imagen de Firebase
         if (imageUrl != null) {
           Logger.warning(

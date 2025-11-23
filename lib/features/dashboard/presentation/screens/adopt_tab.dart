@@ -3,8 +3,9 @@ import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
 import '../../../../core/constants/app_routes.dart';
 import '../../../../core/services/pet_service.dart';
+import '../../../../core/widgets/pet_card.dart';
 import '../widgets/category_filter.dart';
-import 'pet_form_dialog.dart';
+import 'improved_pet_form_dialog.dart';
 import 'dashboard_screen.dart';
 
 class AdoptTab extends StatefulWidget {
@@ -134,11 +135,16 @@ class _AdoptTabState extends State<AdoptTab> {
                           },
                           child: GridView.count(
                             crossAxisCount: 2,
-                            childAspectRatio: 0.75,
+                            childAspectRatio: 0.8,
+                            mainAxisSpacing: 8,
+                            crossAxisSpacing: 8,
+                            padding: const EdgeInsets.all(8),
                             children: _filteredPets.map((pet) => PetCard(
                               pet: pet,
                               buttonText: 'Adoptar',
                               onPressed: () => _handleAdoptRequest(context, pet),
+                              buttonColor: Colors.blue,
+                              buttonIcon: Icons.favorite,
                             )).toList(),
                           ),
                         ),
@@ -184,10 +190,10 @@ class _AdoptTabState extends State<AdoptTab> {
             return;
           }
           
-          // Usuario autenticado: mostrar formulario
+          // Usuario autenticado: mostrar formulario mejorado
           final result = await showDialog<Pet>(
             context: context,
-            builder: (context) => PetFormDialog(tipo: 'adopción'),
+            builder: (context) => const ImprovedPetFormDialog(tipo: 'adopción'),
           );
           if (result != null) {
             await widget.onAdd(result);
@@ -305,3 +311,6 @@ class _AdoptTabState extends State<AdoptTab> {
     );
   }
 }
+
+
+

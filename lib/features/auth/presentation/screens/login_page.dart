@@ -301,57 +301,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _forgotPassword() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        final TextEditingController emailController = TextEditingController();
-        return AlertDialog(
-          title: const Text('Recuperar Contraseña'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.',
-                style: TextStyle(fontSize: 14),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Correo electrónico',
-                  hintText: 'ejemplo@correo.com',
-                  prefixIcon: Icon(Icons.email),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (emailController.text.isNotEmpty) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Se ha enviado un enlace de recuperación a ${emailController.text}',
-                      ),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
-              },
-              child: const Text('Enviar'),
-            ),
-          ],
-        );
-      },
-    );
+    // Navegar a la pantalla de recuperación de contraseña
+    Navigator.pushNamed(context, '/forgot-password');
   }
 
   @override

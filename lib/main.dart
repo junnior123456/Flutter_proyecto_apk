@@ -22,6 +22,8 @@ import 'features/profile/presentation/screens/edit_profile_screen.dart';
 import 'features/auth/presentation/screens/welcome_screen.dart';
 import 'features/auth/presentation/screens/login_page.dart';
 import 'features/auth/presentation/screens/register_page.dart';
+import 'features/auth/presentation/screens/forgot_password_screen.dart';
+import 'features/auth/presentation/screens/reset_password_screen.dart';
 import 'features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'presentation/screens/mascotas_list_screen.dart';
 import 'presentation/screens/reportar_mascota_screen.dart';
@@ -111,7 +113,7 @@ class _MyAppState extends State<MyApp> {
         // Navigation Configuration
         initialRoute: AppRoutes.welcome,
         onGenerateRoute: _onGenerateRoute,
-        
+
         // Error handling for unknown routes
         onUnknownRoute: (settings) {
           return MaterialPageRoute(builder: (context) => const WelcomeScreen());
@@ -139,17 +141,17 @@ class _MyAppState extends State<MyApp> {
   Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
     // Extraer argumentos si existen
     final args = settings.arguments as Map<String, dynamic>?;
-    
+
     switch (settings.name) {
       case AppRoutes.welcome:
         return MaterialPageRoute(builder: (context) => const WelcomeScreen());
-      
+
       case AppRoutes.login:
         return MaterialPageRoute(builder: (context) => const LoginPage());
-      
+
       case AppRoutes.register:
         return MaterialPageRoute(builder: (context) => const RegisterPage());
-      
+
       case AppRoutes.dashboard:
         final isAuthenticated = args?['isAuthenticated'] as bool? ?? false;
         final initialTab = args?['initialTab'] as int? ?? 0;
@@ -159,24 +161,42 @@ class _MyAppState extends State<MyApp> {
             initialTab: initialTab,
           ),
         );
-      
+
       case AppRoutes.pets:
-        return MaterialPageRoute(builder: (context) => const MascotasListScreen());
-      
+        return MaterialPageRoute(
+          builder: (context) => const MascotasListScreen(),
+        );
+
       case AppRoutes.reportPet:
-        return MaterialPageRoute(builder: (context) => const ReportarMascotaScreen());
-      
+        return MaterialPageRoute(
+          builder: (context) => const ReportarMascotaScreen(),
+        );
+
       case AppRoutes.home:
         return MaterialPageRoute(builder: (context) => const HomeScreen());
-      
+
       case AppRoutes.apiTest:
         return MaterialPageRoute(builder: (context) => const ApiTestScreen());
-      
+
       case AppRoutes.editProfile:
-        return MaterialPageRoute(builder: (context) => const EditProfileScreen());
-      
+        return MaterialPageRoute(
+          builder: (context) => const EditProfileScreen(),
+        );
+
+      case AppRoutes.forgotPassword:
+        return MaterialPageRoute(
+          builder: (context) => const ForgotPasswordScreen(),
+        );
+
+      case AppRoutes.resetPassword:
+        final token = settings.arguments as String?;
+        return MaterialPageRoute(
+          builder: (context) => ResetPasswordScreen(initialToken: token),
+        );
+
       default:
         return null;
     }
   }
 }
+

@@ -3,9 +3,9 @@ import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
 import '../../../../core/constants/app_routes.dart';
 import '../../../../core/services/pet_service.dart';
+import '../../../../core/widgets/pet_card.dart';
 import '../widgets/category_filter.dart';
-import 'pet_form_dialog.dart';
-import 'dashboard_screen.dart';
+import 'risk_pet_form_dialog.dart';
 
 class RiskTab extends StatefulWidget {
   final List<Pet> riskPets;
@@ -68,10 +68,7 @@ class _RiskTabState extends State<RiskTab> {
         _filteredBackendPets = pets;
         _isLoadingFiltered = false;
       });
-      
-      print('✅ Filtrado mascotas en riesgo por ${category.displayName}: ${pets.length} mascotas');
     } catch (e) {
-      print('❌ Error filtrando mascotas en riesgo por categoría: $e');
       setState(() {
         _filteredBackendPets = [];
         _isLoadingFiltered = false;
@@ -141,6 +138,8 @@ class _RiskTabState extends State<RiskTab> {
                               pet: pet,
                               buttonText: 'Fuera de peligro',
                               onPressed: () => _handleMarkSafe(context, pet),
+                              buttonColor: Colors.red,
+                              buttonIcon: Icons.check_circle,
                             )).toList(),
                           ),
                         ),
@@ -186,10 +185,10 @@ class _RiskTabState extends State<RiskTab> {
             return;
           }
           
-          // Usuario autenticado: mostrar formulario
+          // Usuario autenticado: mostrar formulario específico de riesgo
           final result = await showDialog<Pet>(
             context: context,
-            builder: (context) => PetFormDialog(tipo: 'riesgo'),
+            builder: (context) => const RiskPetFormDialog(),
           );
           if (result != null) {
             await widget.onAdd(result);
