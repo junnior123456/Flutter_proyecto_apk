@@ -24,6 +24,7 @@ import 'features/auth/presentation/screens/login_page.dart';
 import 'features/auth/presentation/screens/register_page.dart';
 import 'features/auth/presentation/screens/forgot_password_screen.dart';
 import 'features/auth/presentation/screens/reset_password_screen.dart';
+import 'features/auth/presentation/screens/terms_and_conditions_screen.dart';
 import 'features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'presentation/screens/mascotas_list_screen.dart';
 import 'presentation/screens/reportar_mascota_screen.dart';
@@ -192,6 +193,11 @@ class _MyAppState extends State<MyApp> {
         final token = settings.arguments as String?;
         return MaterialPageRoute(
           builder: (context) => ResetPasswordScreen(initialToken: token),
+        );
+
+      case AppRoutes.terms:
+        return MaterialPageRoute(
+          builder: (context) => const TermsAndConditionsScreen(),
         );
 
       default:

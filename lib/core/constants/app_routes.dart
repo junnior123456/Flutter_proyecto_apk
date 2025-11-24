@@ -5,6 +5,7 @@ class AppRoutes {
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';
   static const String resetPassword = '/reset-password';
+  static const String terms = '/terms';
 
   // Main app routes
   static const String dashboard = '/dashboard';

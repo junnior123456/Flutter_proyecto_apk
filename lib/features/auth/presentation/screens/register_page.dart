@@ -300,16 +300,35 @@ class _RegisterPageState extends State<RegisterPage> {
                                 activeColor: const Color(0xFFFF9800),
                               ),
                               Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _acceptTerms = !_acceptTerms;
-                                    });
-                                  },
-                                  child: const Text(
-                                    'Acepto los términos y condiciones',
-                                    style: TextStyle(fontSize: 14),
-                                  ),
+                                child: Wrap(
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _acceptTerms = !_acceptTerms;
+                                        });
+                                      },
+                                      child: const Text(
+                                        'Acepto los ',
+                                        style: TextStyle(fontSize: 14),
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.pushNamed(context, '/terms');
+                                      },
+                                      child: const Text(
+                                        'términos y condiciones',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Color(0xFFFF9800),
+                                          fontWeight: FontWeight.bold,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],

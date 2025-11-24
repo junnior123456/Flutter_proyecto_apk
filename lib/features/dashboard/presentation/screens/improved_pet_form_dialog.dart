@@ -126,10 +126,40 @@ class _ImprovedPetFormDialogState extends State<ImprovedPetFormDialog> {
   /// ✅ Validar y enviar formulario
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    
+    // Prevenir doble envío
+    if (_isSubmitting) {
+      print('⚠️ Ya se está enviando el formulario, ignorando clic adicional');
+      return;
+    }
 
     setState(() => _isSubmitting = true);
 
     try {
+      // Mostrar indicador de progreso
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                SizedBox(width: 16),
+                Text('Subiendo imagen y publicando...'),
+              ],
+            ),
+            duration: Duration(seconds: 30),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+
       // Usar la primera imagen si existe, sino null
       final createdPet = await _petService.createPet(
         name: _nameController.text.trim(),
@@ -150,17 +180,24 @@ class _ImprovedPetFormDialogState extends State<ImprovedPetFormDialog> {
       );
 
       if (createdPet != null && mounted) {
+        // Ocultar indicador de progreso
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        
         Navigator.pop(context, createdPet);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('✅ ${createdPet.name} publicado exitosamente'),
             backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
           ),
         );
       }
     } catch (e) {
       Logger.error('Error submitting pet', tag: 'PetForm', error: e);
       if (mounted) {
+        // Ocultar indicador de progreso
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        
         final errorMessage = e.toString();
         
         // Si es error de token, el interceptor ya lo manejó
@@ -170,12 +207,24 @@ class _ImprovedPetFormDialogState extends State<ImprovedPetFormDialog> {
           return; // No mostrar más errores
         }
         
+        // Detectar error de duplicado
+        if (errorMessage.contains('Ya existe una mascota') || errorMessage.contains('CONFLICT') || errorMessage.contains('409')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('⚠️ Ya publicaste una mascota con este nombre recientemente. Espera unos minutos.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 4),
+            ),
+          );
+          return;
+        }
+        
         // Otros errores sí los mostramos
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al publicar mascota'),
+          const SnackBar(
+            content: Text('❌ Error al publicar mascota. Intenta de nuevo.'),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+            duration: Duration(seconds: 3),
           ),
         );
       }

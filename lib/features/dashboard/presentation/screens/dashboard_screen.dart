@@ -15,11 +15,13 @@ import '../../../donations/presentation/screens/donations_screen.dart';
 import '../../../adoption/presentation/screens/my_requests_screen.dart';
 import '../../../adoption/presentation/screens/received_requests_screen.dart';
 import '../../../adoption/presentation/dialogs/send_adoption_request_dialog.dart';
+import '../../../adoption/presentation/dialogs/send_risk_adoption_request_dialog.dart';
 import 'publish_pet_screen.dart';
 import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
 import 'adopt_tab.dart';
 import 'risk_tab.dart';
+import '../../../pet_details/presentation/screens/pet_detail_screen.dart'; // ✅ Clean Architecture
 
 class DashboardScreen extends StatefulWidget {
   final bool isAuthenticated;
@@ -359,33 +361,154 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  void _markSafe(Pet pet) {
-    setState(() {
-      // remove from risk list and add to adopt list as a safe pet
-      _riskPets.removeWhere((p) => p.name == pet.name && p.imageUrl == pet.imageUrl);
-      final safePet = Pet(
-        id: pet.id,
-        name: pet.name,
-        imageUrl: pet.imageUrl,
-        isRisk: false,
-        createdAt: pet.createdAt,
-        updatedAt: pet.updatedAt,
-        userId: pet.userId,
-        categoryId: pet.categoryId,
-        description: pet.description,
-        address: pet.address,
-        age: pet.age,
-        breed: pet.breed,
-        gender: pet.gender,
-        size: pet.size,
-        isVaccinated: pet.isVaccinated,
-        isSterilized: pet.isSterilized,
-        contactName: pet.contactName,
-        contactPhone: pet.contactPhone,
-        contactEmail: pet.contactEmail,
+  /// 💙 Manejar ayuda por adopción de animal en riesgo
+  Future<void> _markSafe(Pet pet) async {
+    // Usar la misma lógica que en risk_tab.dart
+    if (!widget.isAuthenticated) {
+      // Usuario no autenticado: mostrar diálogo para registrarse
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Registro Requerido'),
+          content: Text(
+            'Para ayudar a ${pet.name}, necesitas registrarse e iniciar sesión primero.'
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.login);
+              },
+              child: const Text('Iniciar Sesión'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/register');
+              },
+              child: const Text('Registrarse'),
+            ),
+          ],
+        ),
       );
-      _adoptPets.add(safePet);
-    });
+      return;
+    }
+
+    // Verificar si es su propia mascota
+    final authService = AuthService();
+    final userData = await authService.getCurrentUser();
+    final currentUserId = userData?['id'];
+
+    if (currentUserId != null && pet.userId == currentUserId) {
+      // Es su propia mascota
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.orange),
+                SizedBox(width: 12),
+                Text('No Disponible'),
+              ],
+            ),
+            content: const Text(
+              'No puedes ayudar a tu propia mascota. Esta es una publicación que tú creaste.'
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Entendido'),
+              ),
+            ],
+          ),
+        );
+      }
+      return;
+    }
+
+    // Verificar si ya tiene una solicitud pendiente
+    final adoptionService = AdoptionService();
+    final hasExisting = await adoptionService.hasExistingRequest(pet.id);
+
+    if (hasExisting && mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.orange),
+              SizedBox(width: 12),
+              Text('Solicitud Existente'),
+            ],
+          ),
+          content: Text(
+            'Ya tienes una solicitud pendiente para ayudar a ${pet.name}. Espera la respuesta del publicador.'
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Entendido'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // Usuario autenticado y puede ayudar: mostrar formulario especializado para riesgo
+    if (mounted) {
+      final result = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (context) => SendRiskAdoptionRequestDialog(pet: pet),
+      );
+
+      if (result != null && mounted) {
+        // Enviar solicitud con campos adicionales de rescate
+        try {
+          await adoptionService.sendAdoptionRequest(
+            petId: pet.id,
+            personalInfo: result['personalInfo'],
+            livingSituation: result['livingSituation'],
+            adoptionReason: result['adoptionReason'],
+            previousExperience: result['previousExperience'],
+            hasYard: result['hasYard'],
+            hasOtherPets: result['hasOtherPets'],
+            // Campos adicionales específicos para animales en riesgo
+            rescuePlan: result['rescuePlan'],
+            medicalCare: result['medicalCare'],
+            canProvideMedicalCare: result['canProvideMedicalCare'],
+            hasTransportation: result['hasTransportation'],
+          );
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('✅ Solicitud de rescate enviada para ${pet.name}'),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error al enviar solicitud: $e'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      }
+    }
   }
 
   /// 🐕 Manejar solicitud de adopción (igual que en adopt_tab.dart)
@@ -550,10 +673,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.white,
-                    backgroundImage: _userImage != null && _userImage!.isNotEmpty
-                        ? NetworkImage(_userImage!)
+                    backgroundImage: (_userImage != null && _userImage!.isNotEmpty)
+                        ? CachedNetworkImageProvider(_userImage!)
                         : null,
-                    child: _userImage == null || _userImage!.isEmpty
+                    child: (_userImage == null || _userImage!.isEmpty)
                         ? const Icon(Icons.person, size: 35, color: Color(0xFFFF9800))
                         : null,
                   ),
@@ -593,16 +716,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   MaterialPageRoute(
                     builder: (context) => const NotificationsScreen(),
                   ),
-                );
-              },
-            ),
-            _buildDrawerItem(
-              icon: Icons.message,
-              title: 'Mensajes',
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Mensajes - Próximamente')),
                 );
               },
             ),
@@ -694,6 +807,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.grey[700],
+                          ),
                           child: const Text('Cancelar'),
                         ),
                         ElevatedButton(
@@ -840,7 +956,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           
           // Usuario autenticado: ejecutar acción
           _markSafe(pet);
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${pet.name} marcado como fuera de peligro')));
         },
       ),
       AdoptTab(
@@ -898,6 +1013,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.grey[700],
+                          ),
                           child: const Text('Cancelar'),
                         ),
                         ElevatedButton(
@@ -1041,6 +1159,7 @@ class HomeTab extends StatelessWidget {
                     );
                   }
                 },
+                onImageTap: () => _navigateToAdoptPetDetails(context, pet, onRequestAdopt), // ✅ Clean Architecture
               )).toList(),
             ),
           ),
@@ -1055,20 +1174,57 @@ class HomeTab extends StatelessWidget {
             child: Row(
               children: riskPets.map((pet) => PetCard(
                 pet: pet,
-                buttonText: 'Fuera de peligro',
-                buttonColor: Colors.red,
-                buttonIcon: Icons.check_circle,
+                buttonText: 'Ayudar Adoptando', // ✅ NUEVO TEXTO
+                buttonColor: Colors.orange, // ✅ Color más cálido
+                buttonIcon: Icons.favorite_border, // ✅ Icono de corazón
                 onPressed: () {
                   if (onMarkSafe != null) {
                     onMarkSafe!(pet);
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Marcado como fuera de peligro')));
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ayudando a esta mascota')));
                   }
                 },
+                onImageTap: () => _navigateToRiskPetDetails(context, pet, onMarkSafe), // ✅ Clean Architecture
               )).toList(),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// 📱 Navegar a detalles de mascota para adopción - Clean Architecture
+  static void _navigateToAdoptPetDetails(BuildContext context, Pet pet, void Function(Pet)? onRequestAdopt) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PetDetailScreen(
+          pet: pet,
+          onAdoptPressed: onRequestAdopt != null ? () {
+            Navigator.pop(context); // Cerrar detalles
+            onRequestAdopt(pet); // Ejecutar adopción
+          } : null,
+          actionButtonText: 'Adoptar',
+          actionButtonColor: Colors.blue,
+        ),
+      ),
+    );
+  }
+
+  /// 📱 Navegar a detalles de mascota en riesgo - Clean Architecture
+  static void _navigateToRiskPetDetails(BuildContext context, Pet pet, void Function(Pet)? onMarkSafe) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PetDetailScreen(
+          pet: pet,
+          onAdoptPressed: onMarkSafe != null ? () {
+            Navigator.pop(context); // Cerrar detalles
+            onMarkSafe(pet); // Ejecutar marcar como segura
+          } : null,
+          actionButtonText: 'Ayudar Adoptando', // ✅ NUEVO TEXTO
+          actionButtonColor: Colors.orange, // ✅ Color más cálido
+        ),
       ),
     );
   }
@@ -1379,11 +1535,15 @@ class _ProfileTabState extends State<ProfileTab> {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.grey[700],
+                      ),
                       child: const Text('Cancelar'),
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
                       ),
                       onPressed: () {
                         Navigator.pop(context); // Cierra el diálogo

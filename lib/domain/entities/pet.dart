@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'pet_category.dart';
 import 'user.dart';
+import 'risk_type.dart'; // ✅ NUEVO
 
 enum PetStatus {
   available,
@@ -38,6 +39,7 @@ class Pet extends Equatable {
   final String? temperament;
   final bool isActive;
   final List<String> images;
+  final List<RiskType> riskTypes; // ✅ NUEVO: Tipos de riesgo
   
   // Relaciones opcionales
   final User? user;
@@ -71,6 +73,7 @@ class Pet extends Equatable {
     this.temperament,
     this.isActive = true,
     this.images = const [],
+    this.riskTypes = const [], // ✅ NUEVO
     this.user,
   });
 
@@ -146,6 +149,7 @@ class Pet extends Equatable {
     String? temperament,
     bool? isActive,
     List<String>? images,
+    List<RiskType>? riskTypes, // ✅ NUEVO
     User? user,
   }) {
     return Pet(
@@ -177,6 +181,7 @@ class Pet extends Equatable {
       temperament: temperament ?? this.temperament,
       isActive: isActive ?? this.isActive,
       images: images ?? this.images,
+      riskTypes: riskTypes ?? this.riskTypes, // ✅ NUEVO
       user: user ?? this.user,
     );
   }
@@ -211,6 +216,7 @@ class Pet extends Equatable {
         temperament,
         isActive,
         images,
+        riskTypes, // ✅ NUEVO
         user,
       ];
 

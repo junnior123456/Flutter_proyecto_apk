@@ -1,5 +1,6 @@
 import '../../domain/entities/pet.dart';
 import '../../domain/entities/pet_category.dart';
+import '../../domain/entities/risk_type.dart'; // ✅ NUEVO
 import 'user_model.dart';
 
 class PetModel extends Pet {
@@ -32,6 +33,7 @@ class PetModel extends Pet {
     super.temperament,
     super.isActive,
     super.images,
+    super.riskTypes, // ✅ NUEVO
     super.user,
   });
 
@@ -65,8 +67,28 @@ class PetModel extends Pet {
       temperament: json['temperament'] as String?,
       isActive: json['isActive'] as bool? ?? true,
       images: _parseImages(json['images']),
+      riskTypes: _parseRiskTypes(json['riskTypes']), // ✅ NUEVO
       user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
     );
+  }
+
+  /// Parsear tipos de riesgo desde JSON
+  static List<RiskType> _parseRiskTypes(dynamic riskTypesData) {
+    if (riskTypesData == null) return [];
+    
+    if (riskTypesData is List) {
+      return riskTypesData
+          .map((item) {
+            if (item is String) {
+              return RiskTypeExtension.fromBackendString(item);
+            }
+            return null;
+          })
+          .whereType<RiskType>()
+          .toList();
+    }
+    
+    return [];
   }
 
   static PetCategory _parsePetCategory(dynamic categoryData) {
@@ -173,6 +195,7 @@ class PetModel extends Pet {
       'temperament': temperament,
       'isActive': isActive,
       'images': images,
+      'riskTypes': riskTypes.map((type) => type.toBackendString()).toList(), // ✅ NUEVO
     };
   }
 
@@ -206,6 +229,7 @@ class PetModel extends Pet {
       temperament: pet.temperament,
       isActive: pet.isActive,
       images: pet.images,
+      riskTypes: pet.riskTypes, // ✅ NUEVO
       user: pet.user,
     );
   }
@@ -240,6 +264,7 @@ class PetModel extends Pet {
       temperament: temperament,
       isActive: isActive,
       images: images,
+      riskTypes: riskTypes, // ✅ NUEVO
       user: user,
     );
   }

@@ -17,6 +17,11 @@ class AdoptionService {
     String? workSchedule,
     bool? hasYard,
     bool? hasOtherPets,
+    // ✅ Campos adicionales para animales en riesgo
+    String? rescuePlan,
+    String? medicalCare,
+    bool? canProvideMedicalCare,
+    bool? hasTransportation,
   }) async {
     try {
       final token = await _tokenManager.getToken();
@@ -40,6 +45,11 @@ class AdoptionService {
           if (workSchedule != null) 'workSchedule': workSchedule,
           if (hasYard != null) 'hasYard': hasYard,
           if (hasOtherPets != null) 'hasOtherPets': hasOtherPets,
+          // ✅ Campos adicionales para animales en riesgo
+          if (rescuePlan != null) 'rescuePlan': rescuePlan,
+          if (medicalCare != null) 'medicalCare': medicalCare,
+          if (canProvideMedicalCare != null) 'canProvideMedicalCare': canProvideMedicalCare,
+          if (hasTransportation != null) 'hasTransportation': hasTransportation,
         }),
       );
 

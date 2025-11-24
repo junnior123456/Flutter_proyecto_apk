@@ -143,6 +143,7 @@ class PetService {
     String? contactPhone,
     String? contactEmail,
     String? address,
+    List<String>? riskTypes, // ✅ NUEVO: Tipos de riesgo como strings
   }) async {
     try {
       // Obtener token (se creará automáticamente en desarrollo si no existe)
@@ -223,6 +224,7 @@ class PetService {
         contactPhone: contactPhone,
         contactEmail: contactEmail,
         address: address,
+        riskTypes: riskTypes, // ✅ NUEVO
       );
 
       final response = await _httpService.post('/pets', body: petData);
@@ -528,6 +530,7 @@ class PetService {
     String? contactPhone,
     String? contactEmail,
     String? address,
+    List<String>? riskTypes, // ✅ NUEVO
   }) {
     return {
       'name': ValidationUtils.cleanText(name),
@@ -550,6 +553,7 @@ class PetService {
         'contactEmail': ValidationUtils.normalizeEmail(contactEmail),
       if (address != null && address.isNotEmpty)
         'address': ValidationUtils.cleanText(address),
+      if (riskTypes != null && riskTypes.isNotEmpty) 'riskTypes': riskTypes, // ✅ NUEVO
     };
   }
 

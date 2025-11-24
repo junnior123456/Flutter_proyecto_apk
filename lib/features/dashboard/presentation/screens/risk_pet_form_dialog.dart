@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../../domain/entities/pet_category.dart';
+import '../../../../domain/entities/risk_type.dart'; // ✅ NUEVO
 import '../../../../core/services/image_service.dart';
 import '../../../../core/services/pet_service.dart';
 import '../../../../core/services/auth_service.dart';
@@ -34,6 +35,7 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
   PetCategory _selectedCategory = PetCategory.dog;
   File? _selectedImage;
   bool _isSubmitting = false;
+  List<RiskType> _selectedRiskTypes = []; // ✅ NUEVO: Tipos de riesgo seleccionados
   
   // ✅ Requisitos de responsabilidad (TODOS OBLIGATORIOS)
   bool _acceptRealCase = false;
@@ -116,6 +118,17 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
       return;
     }
 
+    // Validar tipos de riesgo
+    if (_selectedRiskTypes.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Debes seleccionar al menos un tipo de riesgo'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     // Validar requisitos
     if (!_validateRequirements()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -127,10 +140,40 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
       return;
     }
 
+    // Prevenir doble envío
+    if (_isSubmitting) {
+      print('⚠️ Ya se está enviando el reporte, ignorando clic adicional');
+      return;
+    }
+
     setState(() => _isSubmitting = true);
 
     try {
       Logger.info('Creating risk pet report', tag: 'RiskPetForm');
+      
+      // Mostrar indicador de progreso
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                SizedBox(width: 16),
+                Text('Subiendo imagen y reportando...'),
+              ],
+            ),
+            duration: Duration(seconds: 30),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       
       final createdPet = await _petService.createPet(
         name: 'Animal en riesgo - ${_selectedCategory.displayName}',
@@ -150,10 +193,15 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
         // Campos adicionales específicos de riesgo
         breed: _conditionController.text.trim().isNotEmpty ? _conditionController.text.trim() : 'Desconocido',
         age: null,
+        riskTypes: _selectedRiskTypes.map((type) => type.toBackendString()).toList(), // ✅ NUEVO
       );
 
       if (createdPet != null && mounted) {
         Logger.info('Risk pet created successfully', tag: 'RiskPetForm');
+        
+        // Ocultar indicador de progreso
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        
         Navigator.pop(context, true); // Devolver true para indicar éxito
         
         // Mostrar mensaje de éxito después de cerrar el diálogo
@@ -175,6 +223,9 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
       Logger.error('Error submitting risk pet', tag: 'RiskPetForm', error: e);
       
       if (mounted) {
+        // Ocultar indicador de progreso
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        
         setState(() => _isSubmitting = false);
         
         final errorMessage = e.toString();
@@ -187,6 +238,18 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
           Logger.warning('Token expired, closing form', tag: 'RiskPetForm');
           Navigator.pop(context); // Cerrar formulario
           return; // No mostrar más errores
+        }
+        
+        // Detectar error de duplicado
+        if (errorMessage.contains('Ya existe una mascota') || errorMessage.contains('CONFLICT') || errorMessage.contains('409')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('⚠️ Ya reportaste un caso similar recientemente. Espera unos minutos.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 4),
+            ),
+          );
+          return;
         }
         
         // Mostrar diálogo de error más informativo
@@ -367,7 +430,12 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
                         },
                       ),
                       
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
+                      
+                      // ✅ NUEVO: Tipos de riesgo
+                      _buildRiskTypesSection(),
+                      
+                      const SizedBox(height: 16),
                       
                       // Descripción del caso
                       TextFormField(
@@ -737,6 +805,211 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
           ),
         ),
       ],
+    );
+  }
+
+  /// 🚨 Widget para selector de tipos de riesgo
+  Widget _buildRiskTypesSection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[300]!, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red[700],
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(Icons.report_problem, color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tipos de Riesgo',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[900],
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    Text(
+                      'Selecciona todas las condiciones que apliquen',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          
+          // Mostrar tipos de riesgo por categoría
+          ...RiskTypeGroups.all.entries.map((entry) {
+            final categoryName = entry.key;
+            final types = entry.value;
+            
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    categoryName.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.grey[700],
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...types.map((type) {
+                  final isSelected = _selectedRiskTypes.contains(type);
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.red[50] : Colors.white,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: isSelected ? Colors.red[400]! : Colors.grey[300]!,
+                        width: isSelected ? 2 : 1,
+                      ),
+                    ),
+                    child: CheckboxListTile(
+                      value: isSelected,
+                      onChanged: (selected) {
+                        setState(() {
+                          if (selected == true) {
+                            _selectedRiskTypes.add(type);
+                          } else {
+                            _selectedRiskTypes.remove(type);
+                          }
+                        });
+                      },
+                      controlAffinity: ListTileControlAffinity.leading,
+                      activeColor: Colors.red[700],
+                      dense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      title: Text(
+                        type.label,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                          color: isSelected ? Colors.red[900] : Colors.grey[800],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+                const SizedBox(height: 16),
+              ],
+            );
+          }).toList(),
+          
+          // Mostrar resumen de seleccionados
+          if (_selectedRiskTypes.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: Colors.blue[200]!),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.blue[700], size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Riesgos seleccionados: ${_selectedRiskTypes.length}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue[900],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: _selectedRiskTypes.map((type) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Colors.blue[300]!),
+                        ),
+                        child: Text(
+                          type.label,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue[900],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          
+          // Validación
+          if (_selectedRiskTypes.isEmpty) ...[
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.orange[50],
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: Colors.orange[300]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber, color: Colors.orange[800], size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Debe seleccionar al menos un tipo de riesgo',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.orange[900],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 

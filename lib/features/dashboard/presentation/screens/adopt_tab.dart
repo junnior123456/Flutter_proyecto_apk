@@ -10,6 +10,7 @@ import '../widgets/category_filter.dart';
 import 'improved_pet_form_dialog.dart';
 import 'dashboard_screen.dart';
 import '../../../adoption/presentation/dialogs/send_adoption_request_dialog.dart';
+import '../../../pet_details/presentation/screens/pet_detail_screen.dart'; // ✅ Clean Architecture
 
 class AdoptTab extends StatefulWidget {
   final List<Pet> adoptPets;
@@ -146,6 +147,7 @@ class _AdoptTabState extends State<AdoptTab> {
                               pet: pet,
                               buttonText: 'Adoptar',
                               onPressed: () => _handleAdoptRequest(context, pet),
+                              onImageTap: () => _navigateToPetDetails(context, pet), // ✅ Clean Architecture
                               buttonColor: Colors.blue,
                               buttonIcon: Icons.favorite,
                             )).toList(),
@@ -240,6 +242,24 @@ class _AdoptTabState extends State<AdoptTab> {
             textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+
+  /// 📱 Navegar a detalles de mascota - Clean Architecture
+  void _navigateToPetDetails(BuildContext context, Pet pet) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PetDetailScreen(
+          pet: pet,
+          onAdoptPressed: () {
+            Navigator.pop(context); // Cerrar detalles
+            _handleAdoptRequest(context, pet); // Ejecutar adopción
+          },
+          actionButtonText: 'Adoptar',
+          actionButtonColor: Colors.blue,
+        ),
       ),
     );
   }

@@ -320,24 +320,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: const Color(0xFFFF9800), // Naranja claro igual que el resto de la app
         foregroundColor: Colors.white,
         elevation: 2,
         actions: [
           Container(
-            margin: const EdgeInsets.only(right: 8),
-            child: TextButton(
+            margin: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
+            child: ElevatedButton(
               onPressed: (_isLoading || !_hasUnsavedChanges) ? null : _saveProfile,
-              style: TextButton.styleFrom(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _hasUnsavedChanges ? const Color(0xFF4CAF50) : Colors.grey[300],
                 foregroundColor: Colors.white,
-                backgroundColor: _isLoading 
-                    ? Colors.white.withOpacity(0.3)
-                    : _hasUnsavedChanges
-                        ? Colors.white.withOpacity(0.9)
-                        : Colors.white.withOpacity(0.3),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                disabledBackgroundColor: Colors.grey[300],
+                disabledForegroundColor: Colors.grey[500],
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                elevation: 2,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(25),
                 ),
               ),
               child: _isLoading
@@ -349,29 +348,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : Text(
-                      'Guardar',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: _hasUnsavedChanges ? Colors.white : Colors.white.withOpacity(0.6),
-                      ),
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.check_circle,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 6),
+                        const Text(
+                          'Guardar',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
             ),
           ),
         ],
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Theme.of(context).primaryColor.withOpacity(0.1),
-              Colors.white,
-            ],
-          ),
-        ),
-        child: SingleChildScrollView(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Form(
             key: _formKey,
@@ -398,7 +399,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
           ),
         ),
-      ),
     );
   }
 
@@ -482,30 +482,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white,
-              Theme.of(context).primaryColor.withOpacity(0.05),
-            ],
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.person_outline,
-                    color: Theme.of(context).primaryColor,
-                    size: 24,
-                  ),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.person_outline,
+                  color: Theme.of(context).primaryColor,
+                  size: 24,
+                ),
                   const SizedBox(width: 8),
                   Text(
                     'Información Personal',
@@ -600,7 +589,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ],
           ),
         ),
-      ),
     );
   }
 
@@ -610,80 +598,29 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white,
-              Theme.of(context).primaryColor.withOpacity(0.05),
-            ],
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.palette_outlined,
-                    color: Theme.of(context).primaryColor,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Personalización',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              
-              // Selector de color
-              Text(
-                'Color de tema',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.palette_outlined,
                   color: Theme.of(context).primaryColor,
+                  size: 24,
                 ),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _themeService.getColorNames().entries.map((entry) {
-                  final isSelected = _selectedColor == entry.key;
-                  return ChoiceChip(
-                    label: Text(
-                      entry.value,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Theme.of(context).primaryColor,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                    selected: isSelected,
-                    selectedColor: Theme.of(context).primaryColor,
-                    backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                    checkmarkColor: Colors.white,
-                    onSelected: (selected) {
-                      if (selected) {
-                        setState(() {
-                          _selectedColor = entry.key;
-                          _hasUnsavedChanges = true;
-                        });
-                      }
-                    },
-                  );
-                }).toList(),
-              ),
-              
+                const SizedBox(width: 8),
+                Text(
+                  'Personalización',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
               const SizedBox(height: 20),
               
               // Modo oscuro
@@ -721,7 +658,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ],
           ),
         ),
-      ),
     );
   }
 
@@ -731,25 +667,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white,
-              Theme.of(context).primaryColor.withOpacity(0.05),
-            ],
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
                   Icon(
                     Icons.security_outlined,
                     color: Theme.of(context).primaryColor,
@@ -815,7 +740,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ],
           ),
         ),
-      ),
     );
   }
 

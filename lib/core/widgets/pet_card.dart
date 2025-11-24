@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/pet.dart';
 
+/// 🎴 Widget de tarjeta de mascota - Clean Architecture
+/// No tiene dependencias de features, solo usa callbacks
 class PetCard extends StatelessWidget {
   final Pet pet;
   final String buttonText;
   final VoidCallback onPressed;
+  final VoidCallback? onImageTap; // ✅ Callback para navegación
   final Color? buttonColor;
   final IconData? buttonIcon;
 
@@ -13,6 +16,7 @@ class PetCard extends StatelessWidget {
     required this.pet,
     required this.buttonText,
     required this.onPressed,
+    this.onImageTap, // ✅ Opcional
     this.buttonColor,
     this.buttonIcon,
   });
@@ -33,24 +37,27 @@ class PetCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Imagen con altura fija
-            SizedBox(
-              height: 140,
-              child: pet.imageUrl.isNotEmpty
-                  ? Image.network(
-                      pet.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.pets, size: 40, color: Colors.grey),
-                        );
-                      },
-                    )
-                  : Container(
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.pets, size: 40, color: Colors.grey),
-                    ),
+            // Imagen con altura fija - Clickeable si hay callback
+            GestureDetector(
+              onTap: onImageTap, // ✅ Usa el callback si existe
+              child: SizedBox(
+                height: 140,
+                child: pet.imageUrl.isNotEmpty
+                    ? Image.network(
+                        pet.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.pets, size: 40, color: Colors.grey),
+                          );
+                        },
+                      )
+                    : Container(
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.pets, size: 40, color: Colors.grey),
+                      ),
+              ),
             ),
             
             // Info

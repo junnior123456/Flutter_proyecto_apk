@@ -3,9 +3,14 @@ import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
 import '../../../../core/constants/app_routes.dart';
 import '../../../../core/services/pet_service.dart';
+import '../../../../core/services/auth_service.dart'; // ✅ NUEVO
+import '../../../../core/services/adoption_service.dart'; // ✅ NUEVO
 import '../../../../core/widgets/pet_card.dart';
 import '../widgets/category_filter.dart';
 import 'risk_pet_form_dialog.dart';
+import '../../../pet_details/presentation/screens/pet_detail_screen.dart';
+import '../../../adoption/presentation/dialogs/send_adoption_request_dialog.dart'; // ✅ NUEVO
+import '../../../adoption/presentation/dialogs/send_risk_adoption_request_dialog.dart'; // ✅ Diálogo especializado para riesgo
 
 class RiskTab extends StatefulWidget {
   final List<Pet> riskPets;
@@ -136,10 +141,11 @@ class _RiskTabState extends State<RiskTab> {
                             childAspectRatio: 0.75,
                             children: _filteredPets.map((pet) => PetCard(
                               pet: pet,
-                              buttonText: 'Fuera de peligro',
+                              buttonText: 'Ayudar Adoptando', // ✅ NUEVO TEXTO
                               onPressed: () => _handleMarkSafe(context, pet),
-                              buttonColor: Colors.red,
-                              buttonIcon: Icons.check_circle,
+                              onImageTap: () => _navigateToPetDetails(context, pet), // ✅ Clean Architecture
+                              buttonColor: Colors.orange, // ✅ Color más cálido
+                              buttonIcon: Icons.favorite_border, // ✅ Icono de corazón
                             )).toList(),
                           ),
                         ),
@@ -239,8 +245,26 @@ class _RiskTabState extends State<RiskTab> {
     );
   }
 
-  /// 🚨 Manejar marcar mascota como fuera de peligro
-  void _handleMarkSafe(BuildContext context, Pet pet) {
+  /// 📱 Navegar a detalles de mascota - Clean Architecture
+  void _navigateToPetDetails(BuildContext context, Pet pet) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PetDetailScreen(
+          pet: pet,
+          onAdoptPressed: () {
+            Navigator.pop(context); // Cerrar detalles
+            _handleMarkSafe(context, pet); // Ejecutar marcar como segura
+          },
+          actionButtonText: 'Ayudar Adoptando', // ✅ NUEVO TEXTO
+          actionButtonColor: Colors.orange, // ✅ Color más cálido
+        ),
+      ),
+    );
+  }
+
+  /// 💙 Manejar ayuda por adopción (NUEVA LÓGICA)
+  Future<void> _handleMarkSafe(BuildContext context, Pet pet) async {
     if (!widget.isAuthenticated) {
       // Usuario no autenticado: mostrar diálogo para registrarse
       showDialog(
@@ -248,7 +272,7 @@ class _RiskTabState extends State<RiskTab> {
         builder: (context) => AlertDialog(
           title: const Text('Registro Requerido'),
           content: Text(
-            'Para marcar a ${pet.name} como fuera de peligro, necesitas registrarte e iniciar sesión primero.'
+            'Para ayudar a ${pet.name}, necesitas registrarte e iniciar sesión primero.'
           ),
           actions: [
             TextButton(
@@ -278,37 +302,113 @@ class _RiskTabState extends State<RiskTab> {
       return;
     }
 
-    // Usuario autenticado: mostrar confirmación
-    if (widget.onMarkSafe != null) {
+    // Verificar si es su propia mascota
+    final authService = AuthService();
+    final userData = await authService.getCurrentUser();
+    final currentUserId = userData?['id'];
+
+    if (currentUserId != null && pet.userId == currentUserId) {
+      // Es su propia mascota
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.orange),
+                SizedBox(width: 12),
+                Text('No Disponible'),
+              ],
+            ),
+            content: const Text(
+              'No puedes ayudar a tu propia mascota. Esta es una publicación que tú creaste.'
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Entendido'),
+              ),
+            ],
+          ),
+        );
+      }
+      return;
+    }
+
+    // Verificar si ya tiene una solicitud pendiente
+    final adoptionService = AdoptionService();
+    final hasExisting = await adoptionService.hasExistingRequest(pet.id);
+
+    if (hasExisting && mounted) {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Marcar fuera de peligro'),
-          content: Text('¿Confirmas que ${pet.name} ya está fuera de peligro?'),
+          title: const Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.orange),
+              SizedBox(width: 12),
+              Text('Solicitud Existente'),
+            ],
+          ),
+          content: Text(
+            'Ya tienes una solicitud pendiente para ayudar a ${pet.name}. Espera la respuesta del publicador.'
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-                widget.onMarkSafe!(pet);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('✅ ${pet.name} marcado como fuera de peligro'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              },
-              child: const Text('Confirmar'),
+              child: const Text('Entendido'),
             ),
           ],
         ),
       );
+      return;
+    }
+
+    // Usuario autenticado y puede ayudar: mostrar formulario especializado para riesgo
+    if (mounted) {
+      final result = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (context) => SendRiskAdoptionRequestDialog(pet: pet), // ✅ Diálogo especializado
+      );
+
+      if (result != null && mounted) {
+        // Enviar solicitud con campos adicionales de rescate
+        try {
+          await adoptionService.sendAdoptionRequest(
+            petId: pet.id,
+            personalInfo: result['personalInfo'],
+            livingSituation: result['livingSituation'],
+            adoptionReason: result['adoptionReason'],
+            previousExperience: result['previousExperience'],
+            hasYard: result['hasYard'],
+            hasOtherPets: result['hasOtherPets'],
+            // Campos adicionales específicos para animales en riesgo
+            rescuePlan: result['rescuePlan'],
+            medicalCare: result['medicalCare'],
+            canProvideMedicalCare: result['canProvideMedicalCare'],
+            hasTransportation: result['hasTransportation'],
+          );
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('✅ Solicitud de rescate enviada para ${pet.name}'),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error al enviar solicitud: $e'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      }
     }
   }
 }
