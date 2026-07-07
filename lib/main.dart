@@ -12,6 +12,7 @@ import 'core/services/theme_notifier.dart';
 import 'core/constants/app_strings.dart';
 import 'core/constants/app_routes.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/floating_pet_helper.dart';
 
 // Screen imports
 import 'presentation/screens/home_screen.dart';
@@ -26,6 +27,8 @@ import 'features/auth/presentation/screens/forgot_password_screen.dart';
 import 'features/auth/presentation/screens/reset_password_screen.dart';
 import 'features/auth/presentation/screens/terms_and_conditions_screen.dart';
 import 'features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'features/first_aid/presentation/screens/first_aid_screen.dart';
+import 'features/first_aid/presentation/screens/pet_chat_screen.dart';
 import 'presentation/screens/mascotas_list_screen.dart';
 import 'presentation/screens/reportar_mascota_screen.dart';
 
@@ -78,6 +81,9 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final ThemeNotifier _themeNotifier = ThemeNotifier();
 
+  // Clave global del navegador: la usa el perrito flotante para navegar.
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   void initState() {
     super.initState();
@@ -104,6 +110,10 @@ class _MyAppState extends State<MyApp> {
         title: AppStrings.appName,
         debugShowCheckedModeBanner: false,
 
+        // Navigator key + observador de rutas (para el perrito flotante)
+        navigatorKey: _navigatorKey,
+        navigatorObservers: [AppRouteTracker()],
+
         // Theme Configuration
         theme: _themeNotifier.lightTheme ?? AppTheme.lightTheme,
         darkTheme: _themeNotifier.darkTheme ?? AppTheme.darkTheme,
@@ -120,10 +130,10 @@ class _MyAppState extends State<MyApp> {
           return MaterialPageRoute(builder: (context) => const WelcomeScreen());
         },
 
-        // Global error handling
+        // Global builder: limita el escalado de texto y añade el perrito
+        // flotante 🐶 por encima de TODAS las pantallas.
         builder: (context, child) {
           return MediaQuery(
-            // Prevent text scaling beyond reasonable limits
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.linear(
                 (MediaQuery.of(context).textScaler.scale(1.0) * 1.0).clamp(
@@ -132,7 +142,16 @@ class _MyAppState extends State<MyApp> {
                 ),
               ),
             ),
-            child: child ?? const SizedBox.shrink(),
+            child: Stack(
+              alignment: Alignment.topLeft,
+              children: [
+                child ?? const SizedBox.shrink(),
+                FloatingPetHelper(
+                  navigatorKey: _navigatorKey,
+                  helpRoute: AppRoutes.assistant,
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -145,18 +164,28 @@ class _MyAppState extends State<MyApp> {
 
     switch (settings.name) {
       case AppRoutes.welcome:
-        return MaterialPageRoute(builder: (context) => const WelcomeScreen());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => const WelcomeScreen(),
+        );
 
       case AppRoutes.login:
-        return MaterialPageRoute(builder: (context) => const LoginPage());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => const LoginPage(),
+        );
 
       case AppRoutes.register:
-        return MaterialPageRoute(builder: (context) => const RegisterPage());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => const RegisterPage(),
+        );
 
       case AppRoutes.dashboard:
         final isAuthenticated = args?['isAuthenticated'] as bool? ?? false;
         final initialTab = args?['initialTab'] as int? ?? 0;
         return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DashboardScreen(
             isAuthenticated: isAuthenticated,
             initialTab: initialTab,
@@ -165,39 +194,63 @@ class _MyAppState extends State<MyApp> {
 
       case AppRoutes.pets:
         return MaterialPageRoute(
+          settings: settings,
           builder: (context) => const MascotasListScreen(),
         );
 
       case AppRoutes.reportPet:
         return MaterialPageRoute(
+          settings: settings,
           builder: (context) => const ReportarMascotaScreen(),
         );
 
       case AppRoutes.home:
-        return MaterialPageRoute(builder: (context) => const HomeScreen());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => const HomeScreen(),
+        );
 
       case AppRoutes.apiTest:
-        return MaterialPageRoute(builder: (context) => const ApiTestScreen());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => const ApiTestScreen(),
+        );
 
       case AppRoutes.editProfile:
         return MaterialPageRoute(
+          settings: settings,
           builder: (context) => const EditProfileScreen(),
         );
 
       case AppRoutes.forgotPassword:
         return MaterialPageRoute(
+          settings: settings,
           builder: (context) => const ForgotPasswordScreen(),
         );
 
       case AppRoutes.resetPassword:
         final token = settings.arguments as String?;
         return MaterialPageRoute(
+          settings: settings,
           builder: (context) => ResetPasswordScreen(initialToken: token),
         );
 
       case AppRoutes.terms:
         return MaterialPageRoute(
+          settings: settings,
           builder: (context) => const TermsAndConditionsScreen(),
+        );
+
+      case AppRoutes.firstAid:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => const FirstAidScreen(),
+        );
+
+      case AppRoutes.assistant:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => const PetChatScreen(),
         );
 
       default:
@@ -205,4 +258,3 @@ class _MyAppState extends State<MyApp> {
     }
   }
 }
-
