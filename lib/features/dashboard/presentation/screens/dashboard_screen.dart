@@ -16,12 +16,14 @@ import '../../../adoption/presentation/screens/my_requests_screen.dart';
 import '../../../adoption/presentation/screens/received_requests_screen.dart';
 import '../../../adoption/presentation/dialogs/send_adoption_request_dialog.dart';
 import '../../../adoption/presentation/dialogs/send_risk_adoption_request_dialog.dart';
+import '../../../ai/presentation/screens/ai_chat_screen.dart'; // 🤖 Pantalla de IA PawBot
+import '../../../ai/presentation/screens/dog_recommendation_screen.dart'; // 🔍 Recomendación de perros
 import 'publish_pet_screen.dart';
 import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
 import 'adopt_tab.dart';
 import 'risk_tab.dart';
-import '../../../pet_details/presentation/screens/pet_detail_screen.dart'; // ✅ Clean Architecture
+import '../../../pet_details/presentation/screens/pet_detail_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final bool isAuthenticated;
@@ -1059,6 +1061,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       drawer: _buildDrawer(context),
       body: screens[_currentIndex],
+      // Botón flotante de IA PawBot
+      floatingActionButton: widget.isAuthenticated
+          ? FloatingActionButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AiChatScreen()),
+              ),
+              backgroundColor: const Color(0xFF6C63FF),
+              tooltip: 'PawBot - Asistente IA',
+              child: const Text('🐕', style: TextStyle(fontSize: 22)),
+            )
+          : null,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../core/constants/backend.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -28,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
 
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3000/api/api/pets'),
+        Uri.parse('${BackendConfig.baseUrl}/api/api/pets'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -67,10 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: loadPets,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: loadPets),
         ],
       ),
       body: _buildBody(),
@@ -79,9 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildBody() {
     if (isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (error != null) {
@@ -89,16 +85,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red[300],
-            ),
+            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
             const SizedBox(height: 16),
-            Text(
-              'Error',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            Text('Error', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -109,10 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: loadPets,
-              child: const Text('Retry'),
-            ),
+            ElevatedButton(onPressed: loadPets, child: const Text('Retry')),
           ],
         ),
       );
@@ -123,16 +109,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.pets,
-              size: 64,
-              color: Colors.grey,
-            ),
+            Icon(Icons.pets, size: 64, color: Colors.grey),
             SizedBox(height: 16),
-            Text(
-              'No pets found',
-              style: TextStyle(fontSize: 18),
-            ),
+            Text('No pets found', style: TextStyle(fontSize: 18)),
           ],
         ),
       );
@@ -160,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final isRisk = pet['isRisk'] ?? false;
     final imageUrl = pet['imageUrl'];
     final images = pet['images'] as List<dynamic>? ?? [];
-    
+
     // Use primary image from images array or fallback to imageUrl
     String? displayImageUrl;
     if (images.isNotEmpty) {
@@ -176,16 +155,16 @@ class _HomeScreenState extends State<HomeScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Image
           if (displayImageUrl != null && displayImageUrl.isNotEmpty)
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
               child: Image.network(
                 displayImageUrl,
                 height: 200,
@@ -195,11 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   return Container(
                     height: 200,
                     color: Colors.grey[300],
-                    child: const Icon(
-                      Icons.pets,
-                      size: 64,
-                      color: Colors.grey,
-                    ),
+                    child: const Icon(Icons.pets, size: 64, color: Colors.grey),
                   );
                 },
                 loadingBuilder: (context, child, loadingProgress) {
@@ -207,9 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   return Container(
                     height: 200,
                     color: Colors.grey[200],
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    child: const Center(child: CircularProgressIndicator()),
                   );
                 },
               ),
@@ -219,17 +192,15 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 200,
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.pets,
-                  size: 64,
-                  color: Colors.grey,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
                 ),
               ),
+              child: const Center(
+                child: Icon(Icons.pets, size: 64, color: Colors.grey),
+              ),
             ),
-          
+
           // Content
           Padding(
             padding: const EdgeInsets.all(16),
@@ -288,9 +259,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Pet details
                 if (breed.isNotEmpty || age.isNotEmpty || gender.isNotEmpty)
                   Row(
@@ -309,7 +280,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                       if (gender.isNotEmpty) ...[
                         Icon(
-                          gender.toLowerCase() == 'macho' ? Icons.male : Icons.female,
+                          gender.toLowerCase() == 'macho'
+                              ? Icons.male
+                              : Icons.female,
                           size: 16,
                           color: Colors.grey[600],
                         ),
@@ -318,22 +291,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ],
                   ),
-                
+
                 if (description.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
                     description,
-                    style: TextStyle(
-                      color: Colors.grey[700],
-                      height: 1.4,
-                    ),
+                    style: TextStyle(color: Colors.grey[700], height: 1.4),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Action buttons
                 Row(
                   children: [
@@ -365,7 +335,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         icon: const Icon(Icons.favorite),
                         label: const Text('Adoptar'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: isRisk ? Colors.orange : Colors.green,
+                          backgroundColor: isRisk
+                              ? Colors.orange
+                              : Colors.green,
                           foregroundColor: Colors.white,
                         ),
                       ),

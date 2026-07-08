@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../core/constants/backend.dart';
 
 class PetsAdoptionScreen extends StatefulWidget {
   const PetsAdoptionScreen({Key? key}) : super(key: key);
@@ -28,7 +29,7 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
       });
 
       final response = await http.get(
-        Uri.parse('http://192.168.18.97:3000/api/api/pets'),
+        Uri.parse('${BackendConfig.baseUrl}/api/api/pets'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -67,10 +68,7 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
         backgroundColor: const Color(0xFFFF9800),
         foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: loadPets,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: loadPets),
           IconButton(
             icon: const Icon(Icons.admin_panel_settings),
             onPressed: () {
@@ -86,9 +84,7 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
   Widget _buildBody() {
     if (isLoading) {
       return const Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFFFF9800),
-        ),
+        child: CircularProgressIndicator(color: Color(0xFFFF9800)),
       );
     }
 
@@ -97,11 +93,7 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red[300],
-            ),
+            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
             const SizedBox(height: 16),
             Text(
               'Error de Conexión',
@@ -135,16 +127,9 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.pets,
-              size: 64,
-              color: Colors.grey,
-            ),
+            Icon(Icons.pets, size: 64, color: Colors.grey),
             SizedBox(height: 16),
-            Text(
-              'No hay mascotas disponibles',
-              style: TextStyle(fontSize: 18),
-            ),
+            Text('No hay mascotas disponibles', style: TextStyle(fontSize: 18)),
           ],
         ),
       );
@@ -176,7 +161,7 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
     final contactName = pet['contactName'] ?? '';
     final contactPhone = pet['contactPhone'] ?? '';
     final images = pet['images'] as List<dynamic>? ?? [];
-    
+
     // Use primary image from images array or fallback to imageUrl
     String? displayImageUrl;
     if (images.isNotEmpty) {
@@ -190,24 +175,22 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Image
           if (displayImageUrl != null && displayImageUrl.isNotEmpty)
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
               child: Image.network(
                 displayImageUrl,
                 height: 200,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                headers: const {
-                  'User-Agent': 'PawFinder/1.0',
-                },
+                headers: const {'User-Agent': 'PawFinder/1.0'},
                 errorBuilder: (context, error, stackTrace) {
                   print('Error loading image: $displayImageUrl - $error');
                   return Container(
@@ -216,11 +199,7 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
-                          Icons.pets,
-                          size: 64,
-                          color: Colors.grey,
-                        ),
+                        const Icon(Icons.pets, size: 64, color: Colors.grey),
                         const SizedBox(height: 8),
                         Text(
                           name,
@@ -252,17 +231,15 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
               height: 200,
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.pets,
-                  size: 64,
-                  color: Colors.grey,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
                 ),
               ),
+              child: const Center(
+                child: Icon(Icons.pets, size: 64, color: Colors.grey),
+              ),
             ),
-          
+
           // Content
           Padding(
             padding: const EdgeInsets.all(16),
@@ -301,9 +278,9 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Pet details
                 if (breed.isNotEmpty || age.isNotEmpty || gender.isNotEmpty)
                   Wrap(
@@ -316,7 +293,10 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
                           children: [
                             Icon(Icons.pets, size: 16, color: Colors.grey[600]),
                             const SizedBox(width: 4),
-                            Text(breed, style: TextStyle(color: Colors.grey[600])),
+                            Text(
+                              breed,
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
                           ],
                         ),
                       if (age.isNotEmpty)
@@ -325,7 +305,10 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
                           children: [
                             Icon(Icons.cake, size: 16, color: Colors.grey[600]),
                             const SizedBox(width: 4),
-                            Text(age, style: TextStyle(color: Colors.grey[600])),
+                            Text(
+                              age,
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
                           ],
                         ),
                       if (gender.isNotEmpty)
@@ -333,17 +316,22 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              gender.toLowerCase() == 'macho' ? Icons.male : Icons.female,
+                              gender.toLowerCase() == 'macho'
+                                  ? Icons.male
+                                  : Icons.female,
                               size: 16,
                               color: Colors.grey[600],
                             ),
                             const SizedBox(width: 4),
-                            Text(gender, style: TextStyle(color: Colors.grey[600])),
+                            Text(
+                              gender,
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
                           ],
                         ),
                     ],
                   ),
-                
+
                 // Health status
                 if (isVaccinated || isSterilized)
                   Padding(
@@ -353,7 +341,10 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
                       children: [
                         if (isVaccinated)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.green[100],
                               borderRadius: BorderRadius.circular(8),
@@ -368,7 +359,10 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
                           ),
                         if (isSterilized)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.blue[100],
                               borderRadius: BorderRadius.circular(8),
@@ -384,20 +378,17 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
                       ],
                     ),
                   ),
-                
+
                 if (description.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
                     description,
-                    style: TextStyle(
-                      color: Colors.grey[700],
-                      height: 1.4,
-                    ),
+                    style: TextStyle(color: Colors.grey[700], height: 1.4),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-                
+
                 // Contact info
                 if (contactName.isNotEmpty || contactPhone.isNotEmpty) ...[
                   const SizedBox(height: 8),
@@ -407,8 +398,13 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          contactName.isNotEmpty ? contactName : 'Contacto disponible',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          contactName.isNotEmpty
+                              ? contactName
+                              : 'Contacto disponible',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                       if (contactPhone.isNotEmpty) ...[
@@ -416,15 +412,18 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
                         const SizedBox(width: 4),
                         Text(
                           contactPhone,
-                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ],
                   ),
                 ],
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Action buttons
                 Row(
                   children: [
@@ -450,7 +449,9 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
                         icon: const Icon(Icons.favorite),
                         label: Text(isRisk ? 'Ayudar' : 'Adoptar'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: isRisk ? Colors.red : const Color(0xFFFF9800),
+                          backgroundColor: isRisk
+                              ? Colors.red
+                              : const Color(0xFFFF9800),
                           foregroundColor: Colors.white,
                         ),
                       ),
@@ -481,14 +482,22 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
               Text('Raza: ${pet['breed'] ?? 'No especificada'}'),
               Text('Edad: ${pet['age'] ?? 'No especificada'}'),
               Text('Género: ${pet['gender'] ?? 'No especificado'}'),
-              if (pet['medicalHistory'] != null && pet['medicalHistory'].isNotEmpty) ...[
+              if (pet['medicalHistory'] != null &&
+                  pet['medicalHistory'].isNotEmpty) ...[
                 const SizedBox(height: 8),
-                const Text('Historial Médico:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Historial Médico:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 Text(pet['medicalHistory']),
               ],
-              if (pet['specialNeeds'] != null && pet['specialNeeds'].isNotEmpty) ...[
+              if (pet['specialNeeds'] != null &&
+                  pet['specialNeeds'].isNotEmpty) ...[
                 const SizedBox(height: 8),
-                const Text('Necesidades Especiales:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Necesidades Especiales:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 Text(pet['specialNeeds']),
               ],
             ],
@@ -511,7 +520,9 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('${pet['isRisk'] == true ? 'Ayudar a' : 'Adoptar a'} ${pet['name']}'),
+        title: Text(
+          '${pet['isRisk'] == true ? 'Ayudar a' : 'Adoptar a'} ${pet['name']}',
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -543,7 +554,7 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              if (personalInfoController.text.isNotEmpty && 
+              if (personalInfoController.text.isNotEmpty &&
                   motivationController.text.isNotEmpty) {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
