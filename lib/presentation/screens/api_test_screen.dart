@@ -119,9 +119,9 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
       print('🧪 Iniciando prueba de login directo');
       
       final urls = [
-        'http://192.168.18.97:3000/api/auth/login',
-        'http://192.168.56.1:3000/api/auth/login',
-        'http://10.0.2.2:3000/api/auth/login',
+        'http://167.99.4.161/api/auth/login',
+        'http://167.99.4.161/api/auth/login',
+        'http://167.99.4.161/api/auth/login',
       ];
       
       for (String url in urls) {

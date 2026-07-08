@@ -66,7 +66,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> loadUsers() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.18.97:3000/api/users'),
+        Uri.parse('http://167.99.4.161/api/users'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -84,7 +84,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> loadPets() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.18.97:3000/api/api/pets'),
+        Uri.parse('http://167.99.4.161/api/pets'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -132,7 +132,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> deleteUser(int userId) async {
     try {
       final response = await http.delete(
-        Uri.parse('http://192.168.18.97:3000/api/users/$userId'),
+        Uri.parse('http://167.99.4.161/api/users/$userId'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -158,7 +158,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> deletePet(int petId) async {
     try {
       final response = await http.delete(
-        Uri.parse('http://192.168.18.97:3000/api/api/pets/$petId'),
+        Uri.parse('http://167.99.4.161/api/pets/$petId'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -616,7 +616,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> _createUser(Map<String, dynamic> userData) async {
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.18.97:3000/api/users'),
+        Uri.parse('http://167.99.4.161/api/users'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(userData),
       );
@@ -643,7 +643,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> _createPet(Map<String, dynamic> petData) async {
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.18.97:3000/api/api/pets'),
+        Uri.parse('http://167.99.4.161/api/pets'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(petData),
       );

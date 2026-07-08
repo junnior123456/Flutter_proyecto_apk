@@ -18,7 +18,7 @@ class HttpService {
 
   /// 🌐 URL fija de tu backend en Railway
   static const String _railwayBaseUrl =
-      'https://banckend2025apk-production.up.railway.app';
+      'http://167.99.4.161';
 
   // URL que funciona (se actualiza automáticamente al detectar conexión)
   String? _workingBaseUrl;

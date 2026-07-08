@@ -5,13 +5,13 @@ void main() async {
   print('🧪 === PRUEBA SIMPLE DE CONECTIVIDAD ===');
   
   final urls = [
-    'http://192.168.18.97:3000/api/users',
-    'http://192.168.56.1:3000/api/users',
-    'http://192.168.56.2:3000/api/users',
-    'http://10.0.2.2:3000/api/users',
-    'http://10.0.3.2:3000/api/users',
-    'http://localhost:3000/api/users',
-    'http://127.0.0.1:3000/api/users',
+    'http://167.99.4.161/api/users',
+    'http://167.99.4.161/api/users',
+    'http://167.99.4.161/api/users',
+    'http://167.99.4.161/api/users',
+    'http://167.99.4.161/api/users',
+    'http://167.99.4.161/api/users',
+    'http://167.99.4.161/api/users',
   ];
   
   for (String url in urls) {

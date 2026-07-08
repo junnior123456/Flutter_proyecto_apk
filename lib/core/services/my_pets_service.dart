@@ -7,7 +7,7 @@ import '../../data/models/pet_model.dart';
 import 'token_manager.dart';
 
 class MyPetsService {
-  static const String baseUrl = 'http://10.0.2.2:3000/api';
+  static const String baseUrl = 'http://167.99.4.161/api';
   final TokenManager _tokenManager = TokenManager();
 
   /// 📋 Obtener las mascotas del usuario autenticado

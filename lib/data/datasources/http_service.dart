@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class HttpService {
-  static const String baseUrl = 'http://10.0.2.2:3000/api/api'; // Para emulador Android
+  static const String baseUrl = 'http://167.99.4.161/api'; // Para emulador Android
   static const Duration timeoutDuration = Duration(seconds: 30);
   
   String? _authToken;

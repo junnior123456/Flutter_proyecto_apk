@@ -5,11 +5,11 @@ import 'dart:io';
 class ApiConfig {
   // 🌐 URL de producción en Railway
   static const String productionUrl =
-      'https://banckend2025apk-production.up.railway.app/api';
+      'http://167.99.4.161/api';
 
   // 🔧 URL de desarrollo local
-  static const String developmentUrl = 'http://192.168.18.97:3000/api';
-  static const String emulatorUrl = 'http://10.0.2.2:3000/api';
+  static const String developmentUrl = 'http://167.99.4.161/api';
+  static const String emulatorUrl = 'http://167.99.4.161/api';
 
   // 🎯 Cambiar entre producción y desarrollo
   // Durante desarrollo local en el emulador poner en `false` para usar las URLs locales
@@ -22,7 +22,7 @@ class ApiConfig {
     }
 
     if (kIsWeb) {
-      return 'http://localhost:3000/api';
+      return 'http://167.99.4.161/api';
     }
     
     // Solo usar Platform en plataformas no-web
@@ -30,7 +30,7 @@ class ApiConfig {
       if (Platform.isAndroid) {
         return emulatorUrl;
       } else if (Platform.isIOS) {
-        return 'http://localhost:3000/api';
+        return 'http://167.99.4.161/api';
       }
     } catch (_) {}
     
@@ -39,13 +39,13 @@ class ApiConfig {
 
   // 🔄 URLs alternativas para probar en caso de fallo
   static List<String> get alternativeUrls => [
-    'http://10.0.2.2:3000/api', // Android Studio Emulator
-    'http://192.168.18.97:3000/api', // IP WiFi del host
-    'http://192.168.56.1:3000/api', // Genymotion host bridge
-    'http://192.168.56.2:3000/api', // Genymotion alternativa
-    'http://10.0.3.2:3000/api', // Genymotion NAT
-    'http://localhost:3000/api', // Localhost directo
-    'http://127.0.0.1:3000/api', // IP local
+    'http://167.99.4.161/api', // Android Studio Emulator
+    'http://167.99.4.161/api', // IP WiFi del host
+    'http://167.99.4.161/api', // Genymotion host bridge
+    'http://167.99.4.161/api', // Genymotion alternativa
+    'http://167.99.4.161/api', // Genymotion NAT
+    'http://167.99.4.161/api', // Localhost directo
+    'http://167.99.4.161/api', // IP local
   ];
 
   // 📱 Endpoints principales

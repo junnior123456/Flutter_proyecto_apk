@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
 
       final response = await http.get(
-        Uri.parse('${BackendConfig.baseUrl}/api/api/pets'),
+        Uri.parse('${BackendConfig.baseUrl}/api/pets'),
         headers: {'Content-Type': 'application/json'},
       );
 
