@@ -53,9 +53,13 @@ void main() async {
   await AuthService().initialize();
 
   // Set preferred orientations
+  // Se habilitan también las orientaciones horizontales para que la app
+  // rote correctamente en tablets (antes estaba bloqueada solo en vertical).
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
   ]);
 
   // Set system UI overlay style

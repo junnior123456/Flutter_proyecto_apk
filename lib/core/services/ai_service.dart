@@ -1,6 +1,7 @@
 /// Servicio de IA para PawFinder
-/// Conecta con el backend que usa Google Gemini
-/// Funcionalidades: recomendación de perros, cuidado, veterinarias en Tarapoto
+/// Conecta con el backend (proveedor: GitHub Models, compatible OpenAI)
+/// Funcionalidades: recomendación, cuidado, veterinarias, chat,
+/// análisis de foto (visión) y match de mascotas por foto (visión).
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
@@ -101,5 +102,51 @@ class AiService {
       return data['response'] ?? 'No se pudo obtener respuesta';
     }
     throw Exception('Error en chat: ${response.statusCode}');
+  }
+
+  /// 🔍 Analiza/clasifica un perro a partir de su foto (visión).
+  /// [imageUrl] puede ser una URL pública o un data URL base64
+  /// (data:image/jpeg;base64,...). Devuelve el mapa con
+  /// raza, color, tamano, edad_aproximada, senas_particulares, confianza.
+  Future<Map<String, dynamic>> analyzePhoto(String imageUrl) async {
+    final headers = await _getHeaders();
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/ai/analyze-photo'),
+      headers: headers,
+      body: jsonEncode({'imageUrl': imageUrl}),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      return Map<String, dynamic>.from(data['analysis'] ?? {});
+    }
+    throw Exception('Error al analizar foto: ${response.statusCode}');
+  }
+
+  /// 🐕 Compara la foto de un perro perdido/encontrado contra candidatos (visión).
+  /// [lostImageUrl] URL o data URL base64 de la foto de referencia.
+  /// [candidates] lista de { 'id': int, 'imageUrl': String } a comparar.
+  /// Devuelve la lista de resultados { candidateId, score, reason }
+  /// ordenada de mayor a menor similitud.
+  Future<List<Map<String, dynamic>>> matchPets(
+    String lostImageUrl,
+    List<Map<String, dynamic>> candidates,
+  ) async {
+    final headers = await _getHeaders();
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/ai/match-pets'),
+      headers: headers,
+      body: jsonEncode({
+        'lostImageUrl': lostImageUrl,
+        'candidates': candidates,
+      }),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      final matches = (data['matches'] as List?) ?? [];
+      return matches.map((m) => Map<String, dynamic>.from(m)).toList();
+    }
+    throw Exception('Error en match de mascotas: ${response.statusCode}');
   }
 }

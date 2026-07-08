@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/risk_type.dart'; // ✅ NUEVO
 import '../../../../core/widgets/cached_pet_image.dart';
+import 'pet_health_hub_screen.dart';
 
 /// 📱 Pantalla de detalles de mascota - Clean Architecture
 class PetDetailScreen extends StatelessWidget {
@@ -66,9 +68,34 @@ class PetDetailScreen extends StatelessWidget {
                 children: [
                   // Badge de estado
                   _buildStatusBadge(),
-                  
+
                   const SizedBox(height: 16),
-                  
+
+                  // 🩺 Expediente digital de salud (Módulo 3)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PetHealthHubScreen(
+                            petId: pet.id,
+                            petName: pet.name,
+                          ),
+                        ),
+                      ),
+                      icon: const Icon(Icons.medical_services_outlined),
+                      label: const Text('Expediente de salud'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6C63FF),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
                   // ✅ NUEVO: Tipos de riesgo (solo si es mascota en riesgo)
                   if (pet.isRisk && pet.riskTypes.isNotEmpty) ...[
                     _buildRiskTypesSection(),
@@ -132,6 +159,25 @@ class PetDetailScreen extends StatelessWidget {
                           _buildInfoRow('Teléfono', pet.contactPhone),
                         if (pet.contactEmail.isNotEmpty)
                           _buildInfoRow('Email', pet.contactEmail),
+                        if (pet.contactPhone.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () =>
+                                    _openWhatsApp(pet.contactPhone, pet.name),
+                                icon: const Icon(Icons.chat),
+                                label: const Text('Contactar por WhatsApp'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF25D366),
+                                  foregroundColor: Colors.white,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -480,5 +526,21 @@ class PetDetailScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Abre WhatsApp con un mensaje prellenado hacia el teléfono de contacto.
+  /// Normaliza el número (solo dígitos) y antepone 51 (Perú) si es celular de 9.
+  Future<void> _openWhatsApp(String rawPhone, String petName) async {
+    var digits = rawPhone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length == 9) digits = '51$digits';
+    final msg = Uri.encodeComponent(
+      'Hola 🐶, vi a $petName en PawFinder y me interesa. ¿Sigue disponible?',
+    );
+    final uri = Uri.parse('https://wa.me/$digits?text=$msg');
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      // Si no se puede abrir WhatsApp, no interrumpe la app.
+    }
   }
 }

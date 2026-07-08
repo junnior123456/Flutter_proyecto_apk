@@ -16,8 +16,9 @@ import '../../../adoption/presentation/screens/my_requests_screen.dart';
 import '../../../adoption/presentation/screens/received_requests_screen.dart';
 import '../../../adoption/presentation/dialogs/send_adoption_request_dialog.dart';
 import '../../../adoption/presentation/dialogs/send_risk_adoption_request_dialog.dart';
-import '../../../ai/presentation/screens/ai_chat_screen.dart'; // 🤖 Pantalla de IA PawBot
 import '../../../ai/presentation/screens/dog_recommendation_screen.dart'; // 🔍 Recomendación de perros
+import '../../../ai/presentation/screens/analyze_photo_screen.dart'; // 🔍 Identificar raza por foto (IA)
+import '../../../ai/presentation/screens/pet_match_screen.dart'; // 🐕 Buscar coincidencias (IA)
 import 'publish_pet_screen.dart';
 import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
@@ -709,6 +710,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             _buildDrawerItem(
+              icon: Icons.image_search,
+              title: 'Identificar raza (IA)',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AnalyzePhotoScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildDrawerItem(
+              icon: Icons.find_in_page,
+              title: 'Buscar coincidencias (IA)',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PetMatchScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildDrawerItem(
               icon: Icons.notifications,
               title: 'Notificaciones',
               onTap: () {
@@ -1061,18 +1088,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       drawer: _buildDrawer(context),
       body: screens[_currentIndex],
-      // Botón flotante de IA PawBot
-      floatingActionButton: widget.isAuthenticated
-          ? FloatingActionButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AiChatScreen()),
-              ),
-              backgroundColor: const Color(0xFF6C63FF),
-              tooltip: 'PawBot - Asistente IA',
-              child: const Text('🐕', style: TextStyle(fontSize: 22)),
-            )
-          : null,
+      // (El acceso a la IA está en la burbuja flotante global 🐶 PawBot;
+      //  se quitó el FAB para no duplicar la burbuja.)
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {

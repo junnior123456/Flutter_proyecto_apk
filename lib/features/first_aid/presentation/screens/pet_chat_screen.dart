@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/services/ai_service.dart';
 import 'first_aid_screen.dart';
 import 'symptom_checker_screen.dart';
 
@@ -29,14 +31,17 @@ class _PetChatScreenState extends State<PetChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scroll = ScrollController();
   final ImagePicker _picker = ImagePicker();
+  final AiService _aiService = AiService();
+  bool _isTyping = false; // PawBot está pensando (llamada a la IA en curso)
 
   @override
   void initState() {
     super.initState();
     _messages.add(_Msg(
-      '¡Hola! 🐶 Soy tu asistente para perritos. Cuéntame qué le pasa a tu '
-      'perro (por ejemplo: "vomita", "no come", "tiene una herida") y te doy '
-      'consejos. Funciona sin internet.',
+      '¡Hola! 🐶 Soy PawBot, tu asistente para perritos con IA. Cuéntame qué le '
+      'pasa a tu perro (por ejemplo: "vomita", "no come", "tiene una herida") o '
+      'envíame una foto y te ayudo. Si te quedas sin señal, igual te doy '
+      'consejos básicos.',
       isBot: true,
     ));
   }
@@ -48,14 +53,29 @@ class _PetChatScreenState extends State<PetChatScreen> {
     super.dispose();
   }
 
-  void _send(String raw) {
+  Future<void> _send(String raw) async {
     final text = raw.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _isTyping) return;
     setState(() {
       _messages.add(_Msg(text, isBot: false));
-      _messages.add(_Msg(_botReply(text), isBot: true));
+      _isTyping = true;
     });
     _controller.clear();
+    _scrollToEnd();
+
+    // Primero intenta la IA real (backend); si no hay conexión, usa el
+    // motor offline por palabras clave como respaldo.
+    String reply;
+    try {
+      reply = await _aiService.generalChat(text);
+    } catch (_) {
+      reply = _botReply(text);
+    }
+    if (!mounted) return;
+    setState(() {
+      _isTyping = false;
+      _messages.add(_Msg(reply, isBot: true));
+    });
     _scrollToEnd();
   }
 
@@ -113,12 +133,30 @@ class _PetChatScreenState extends State<PetChatScreen> {
       if (!mounted) return;
       setState(() {
         _messages.add(_Msg('📷 Foto de mi perrito', isBot: false, image: bytes));
-        _messages.add(_Msg(_photoReply(), isBot: true));
+        _isTyping = true;
+      });
+      _scrollToEnd();
+
+      // Analiza la foto con la IA real; si falla, cae al mensaje offline.
+      String reply;
+      try {
+        final mime = file.mimeType ?? 'image/jpeg';
+        final dataUrl = 'data:$mime;base64,${base64Encode(bytes)}';
+        final analysis = await _aiService.analyzePhoto(dataUrl);
+        reply = _formatAnalysis(analysis);
+      } catch (_) {
+        reply = _photoReply();
+      }
+      if (!mounted) return;
+      setState(() {
+        _isTyping = false;
+        _messages.add(_Msg(reply, isBot: true));
       });
       _scrollToEnd();
     } catch (e) {
       if (!mounted) return;
       setState(() {
+        _isTyping = false;
         _messages.add(_Msg(
           'No pude acceder a la cámara o galería. Revisa los permisos del '
           'dispositivo e inténtalo de nuevo.',
@@ -129,13 +167,28 @@ class _PetChatScreenState extends State<PetChatScreen> {
     }
   }
 
+  /// Formatea el resultado del análisis de foto de la IA.
+  String _formatAnalysis(Map<String, dynamic> a) {
+    final raza = (a['raza'] ?? '—').toString();
+    final color = (a['color'] ?? '—').toString();
+    final tam = (a['tamano'] ?? '—').toString();
+    final senas = (a['senas_particulares'] ?? '').toString();
+    final edad = (a['edad_aproximada'] ?? '').toString();
+    final conf = (a['confianza'] ?? '').toString();
+    final buf = StringBuffer('🔍 Analicé la foto de tu perrito:\n');
+    buf.write('🐩 Raza: $raza\n🎨 Color: $color\n📏 Tamaño: $tam');
+    if (edad.isNotEmpty) buf.write('\n🎂 Edad aprox.: $edad');
+    if (senas.isNotEmpty) buf.write('\n✨ Señas: $senas');
+    if (conf.isNotEmpty) buf.write('\n📊 Confianza: $conf%');
+    buf.write('\n\nCuéntame si le notas algún síntoma y te doy consejos. 🐾');
+    return buf.toString();
+  }
+
   String _photoReply() {
     return 'Recibí la foto de tu perrito 🐶📷.\n\n'
-        'Por ahora, sin conexión, no puedo analizar la imagen automáticamente. '
-        'Mientras tanto, cuéntame qué le notas (por ejemplo dónde está la '
-        'herida o qué síntoma ves) o usa el "🔍 Detector de síntomas".\n\n'
-        '🔒 Tu foto queda lista para que, cuando se active el asistente con IA, '
-        'se analice y te dé una orientación.';
+        'Ahora mismo no pude conectarme para analizarla. '
+        'Cuéntame qué le notas (por ejemplo dónde está la '
+        'herida o qué síntoma ves) o usa el "🔍 Detector de síntomas".';
   }
 
   @override
@@ -180,8 +233,13 @@ class _PetChatScreenState extends State<PetChatScreen> {
                 child: ListView.builder(
                   controller: _scroll,
                   padding: const EdgeInsets.all(12),
-                  itemCount: _messages.length,
-                  itemBuilder: (context, i) => _bubble(_messages[i]),
+                  itemCount: _messages.length + (_isTyping ? 1 : 0),
+                  itemBuilder: (context, i) {
+                    if (i >= _messages.length) {
+                      return _bubble(_Msg('🐶 Pensando...', isBot: true));
+                    }
+                    return _bubble(_messages[i]);
+                  },
                 ),
               ),
 

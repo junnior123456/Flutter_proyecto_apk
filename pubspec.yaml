@@ -40,6 +40,9 @@ dependencies:
   # 📧 Email y URL launcher
   url_launcher: ^6.3.0
   mailer: ^6.1.2
+
+  # 🔳 Código QR del expediente (Módulo 3)
+  qr_flutter: ^4.1.0
   
   # 🍞 Toast messages
   fluttertoast: ^8.2.8
