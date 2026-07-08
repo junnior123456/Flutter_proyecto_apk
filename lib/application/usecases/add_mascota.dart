@@ -6,6 +6,6 @@ class AddMascota {
   AddMascota(this.repository);
 
   Future<void> call(Mascota mascota) async {
-    return await repository.addMascota(mascota);
+    await repository.addMascota(mascota);
   }
 }

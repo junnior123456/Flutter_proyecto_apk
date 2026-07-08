@@ -5,10 +5,10 @@ class ReportarMascota {
   ReportarMascota(this.repository);
 
   Future<void> call(String id, String categoria) async {
-    return await repository.reportarMascotaEnRiesgo(id, categoria);
+    await repository.reportarMascotaEnRiesgo(id, categoria);
   }
 
   Future<void> marcarFueraDeRiesgo(String id) async {
-    return await repository.marcarMascotaFueraDeRiesgo(id);
+    await repository.marcarMascotaFueraDeRiesgo(id);
   }
 }

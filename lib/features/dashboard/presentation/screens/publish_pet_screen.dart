@@ -28,117 +28,135 @@ class PublishPetScreen extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Título y descripción
-                const SizedBox(height: 20),
-                const Icon(
-                  Icons.pets,
-                  size: 80,
-                  color: Colors.orange,
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  '¿Qué deseas publicar?',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Selecciona el tipo de publicación que deseas realizar',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 48),
-                
-                // Opción 1: Mascota en Adopción
-                _buildOptionCard(
-                  context: context,
-                  icon: Icons.favorite,
-                  iconColor: Colors.blue,
-                  title: 'Mascota en Adopción',
-                  description: 'Publica una mascota que busca un hogar amoroso',
-                  gradient: LinearGradient(
-                    colors: [Colors.blue.shade400, Colors.blue.shade600],
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    showDialog(
-                      context: context,
-                      builder: (context) => const ImprovedPetFormDialog(
-                        tipo: 'adopción',
+          // Responsive + sin overflow: en pantallas altas el Spacer empuja la
+          // info al fondo; en pantallas cortas el contenido se desplaza.
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Título y descripción
+                          const SizedBox(height: 20),
+                          const Icon(
+                            Icons.pets,
+                            size: 80,
+                            color: Colors.orange,
+                          ),
+                          const SizedBox(height: 24),
+                          const Text(
+                            '¿Qué deseas publicar?',
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Selecciona el tipo de publicación que deseas realizar',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 48),
+
+                          // Opción 1: Mascota en Adopción
+                          _buildOptionCard(
+                            context: context,
+                            icon: Icons.favorite,
+                            iconColor: Colors.blue,
+                            title: 'Mascota en Adopción',
+                            description:
+                                'Publica una mascota que busca un hogar amoroso',
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.blue.shade400,
+                                Colors.blue.shade600
+                              ],
+                            ),
+                            onTap: () {
+                              Navigator.pop(context);
+                              showDialog(
+                                context: context,
+                                builder: (context) => const ImprovedPetFormDialog(
+                                  tipo: 'adopción',
+                                ),
+                              );
+                            },
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Opción 2: Mascota en Riesgo
+                          _buildOptionCard(
+                            context: context,
+                            icon: Icons.warning_amber_rounded,
+                            iconColor: Colors.red,
+                            title: 'Mascota en Riesgo',
+                            description:
+                                'Reporta una mascota que necesita ayuda urgente',
+                            gradient: LinearGradient(
+                              colors: [Colors.red.shade400, Colors.red.shade600],
+                            ),
+                            onTap: () {
+                              Navigator.pop(context);
+                              showDialog(
+                                context: context,
+                                builder: (context) => const RiskPetFormDialog(),
+                              );
+                            },
+                          ),
+
+                          const Spacer(),
+
+                          // Información adicional
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.orange.shade200,
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  color: Colors.orange.shade700,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Todas las publicaciones son revisadas para garantizar la seguridad de las mascotas',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
                       ),
-                    );
-                  },
-                ),
-                
-                const SizedBox(height: 20),
-                
-                // Opción 2: Mascota en Riesgo
-                _buildOptionCard(
-                  context: context,
-                  icon: Icons.warning_amber_rounded,
-                  iconColor: Colors.red,
-                  title: 'Mascota en Riesgo',
-                  description: 'Reporta una mascota que necesita ayuda urgente',
-                  gradient: LinearGradient(
-                    colors: [Colors.red.shade400, Colors.red.shade600],
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    showDialog(
-                      context: context,
-                      builder: (context) => const RiskPetFormDialog(),
-                    );
-                  },
-                ),
-                
-                const Spacer(),
-                
-                // Información adicional
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.orange.shade200,
-                      width: 1,
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: Colors.orange.shade700,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Todas las publicaciones son revisadas para garantizar la seguridad de las mascotas',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
-                const SizedBox(height: 20),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),

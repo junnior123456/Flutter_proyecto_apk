@@ -32,4 +32,6 @@ class AppRoutes {
   static const String petsAdoption = '/pets-adoption'; // 🐾 Mascotas en adopción
   static const String adminPanel = '/admin-panel'; // 👑 Panel de administración
   static const String adminAccess = '/admin-access'; // 🔑 Acceso administrativo
+  static const String firstAid = '/primeros-auxilios'; // 🐶 Primeros auxilios y cuidados
+  static const String assistant = '/asistente'; // 🐶 Asistente/bot para perritos
 }
