@@ -1,6 +1,4 @@
 import '../../domain/entities/notification.dart';
-import '../../domain/entities/user.dart';
-import '../../domain/entities/pet.dart';
 import 'user_model.dart';
 import 'pet_model.dart';
 

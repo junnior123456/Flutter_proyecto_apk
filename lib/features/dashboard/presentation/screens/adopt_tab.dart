@@ -9,7 +9,6 @@ import '../../../../core/services/adoption_service.dart';
 import '../../../../core/widgets/pet_card.dart';
 import '../widgets/category_filter.dart';
 import 'improved_pet_form_dialog.dart';
-import 'dashboard_screen.dart';
 import '../../../adoption/presentation/dialogs/send_adoption_request_dialog.dart';
 import '../../../pet_details/presentation/screens/pet_detail_screen.dart'; // ✅ Clean Architecture
 

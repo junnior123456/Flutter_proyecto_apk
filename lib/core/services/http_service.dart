@@ -46,6 +46,9 @@ class HttpService {
           tag: 'HttpService',
           error: e,
         );
+        // checkConnection() devuelve Future<bool>: el handler DEBE devolver bool.
+        // Sin este return, un fallo de conexión lanzaba un TypeError.
+        return false;
       });
     });
   }

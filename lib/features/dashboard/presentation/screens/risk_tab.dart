@@ -10,7 +10,6 @@ import '../../../../core/widgets/pet_card.dart';
 import '../widgets/category_filter.dart';
 import 'risk_pet_form_dialog.dart';
 import '../../../pet_details/presentation/screens/pet_detail_screen.dart';
-import '../../../adoption/presentation/dialogs/send_adoption_request_dialog.dart'; // ✅ NUEVO
 import '../../../adoption/presentation/dialogs/send_risk_adoption_request_dialog.dart'; // ✅ Diálogo especializado para riesgo
 
 class RiskTab extends StatefulWidget {

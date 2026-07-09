@@ -5,7 +5,6 @@ import '../../../../domain/entities/pet_category.dart';
 import '../../../../core/services/image_service.dart';
 import '../../../../core/services/pet_service.dart';
 import '../../../../core/utils/logger.dart';
-import '../../../../core/utils/validation_utils.dart';
 
 class PetFormDialog extends StatefulWidget {
   final String tipo;

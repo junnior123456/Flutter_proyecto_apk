@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
-import '../../domain/entities/pet_category.dart';
 
 class CategoryService {
   static final CategoryService _instance = CategoryService._internal();

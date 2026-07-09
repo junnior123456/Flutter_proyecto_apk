@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/pet.dart';
 import '../../domain/entities/pet_category.dart';
 import 'http_service.dart';

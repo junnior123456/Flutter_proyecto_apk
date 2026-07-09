@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/services/image_service.dart';
 import '../../../../core/services/theme_service.dart';
 import '../../../../core/services/theme_notifier.dart';

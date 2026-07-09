@@ -8,7 +8,6 @@ import '../../../../core/services/pet_service.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/services/adoption_service.dart';
 import '../../../../core/widgets/pet_card.dart';
-import '../../../auth/presentation/dialogs/edit_profile_dialog.dart';
 import '../../../auth/presentation/screens/my_publications_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../../../donations/presentation/screens/donations_screen.dart';
@@ -16,7 +15,6 @@ import '../../../adoption/presentation/screens/my_requests_screen.dart';
 import '../../../adoption/presentation/screens/received_requests_screen.dart';
 import '../../../adoption/presentation/dialogs/send_adoption_request_dialog.dart';
 import '../../../adoption/presentation/dialogs/send_risk_adoption_request_dialog.dart';
-import '../../../ai/presentation/screens/dog_recommendation_screen.dart'; // 🔍 Recomendación de perros
 import '../../../ai/presentation/screens/analyze_photo_screen.dart'; // 🔍 Identificar raza por foto (IA)
 import '../../../ai/presentation/screens/pet_match_screen.dart'; // 🐕 Buscar coincidencias (IA)
 import 'publish_pet_screen.dart';
