@@ -112,7 +112,7 @@ class _MyPublicationsScreenState extends State<MyPublicationsScreen> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
@@ -139,7 +139,7 @@ class _MyPublicationsScreenState extends State<MyPublicationsScreen> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(

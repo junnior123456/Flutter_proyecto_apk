@@ -960,7 +960,7 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(color: Colors.blue[300]!),
                         ),

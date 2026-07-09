@@ -32,7 +32,7 @@ class FirstAidScreen extends StatelessWidget {
               const SizedBox(height: 16),
               _symptomButton(context),
               const SizedBox(height: 16),
-              ..._categories.map(_buildCategory),
+              ..._categories.map((c) => _buildCategory(context, c)),
               const SizedBox(height: 24),
               _emergencyFooter(),
               const SizedBox(height: 24),
@@ -133,11 +133,11 @@ class FirstAidScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCategory(_Category cat) {
+  Widget _buildCategory(BuildContext context, _Category cat) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(

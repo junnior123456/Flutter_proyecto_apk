@@ -49,12 +49,12 @@ class PublishPetScreen extends StatelessWidget {
                             color: Colors.orange,
                           ),
                           const SizedBox(height: 24),
-                          const Text(
+                          Text(
                             '¿Qué deseas publicar?',
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                             textAlign: TextAlign.center,
                           ),

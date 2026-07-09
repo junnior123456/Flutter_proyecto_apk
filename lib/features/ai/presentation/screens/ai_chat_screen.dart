@@ -127,7 +127,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
               label: Text(mode['label'] as String,
                   style: TextStyle(
                     fontSize: 12,
-                    color: isSelected ? Colors.white : Colors.black87,
+                    color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
                   )),
               selected: isSelected,
               selectedColor: mode['color'] as Color,
@@ -170,7 +170,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
               child: Text(
                 message.text,
                 style: TextStyle(
-                  color: message.isUser ? Colors.white : Colors.black87,
+                  color: message.isUser ? Colors.white : Theme.of(context).colorScheme.onSurface,
                   fontSize: 14,
                 ),
               ),
@@ -196,7 +196,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 4)],
       ),
       child: Row(

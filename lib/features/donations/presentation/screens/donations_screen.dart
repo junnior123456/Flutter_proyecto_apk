@@ -171,7 +171,7 @@ class _DonationsScreenState extends State<DonationsScreen> with SingleTickerProv
   Widget _buildYapeCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -235,7 +235,7 @@ class _DonationsScreenState extends State<DonationsScreen> with SingleTickerProv
                   width: 250,
                   height: 250,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: const Color(0xFF6B2C91), width: 3),
                   ),
@@ -455,7 +455,7 @@ class _DonationsScreenState extends State<DonationsScreen> with SingleTickerProv
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -687,7 +687,7 @@ class _DonationsScreenState extends State<DonationsScreen> with SingleTickerProv
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: Colors.white, size: 24),
+            child: Icon(icon, color: Theme.of(context).cardColor, size: 24),
           ),
           
           const SizedBox(width: 15),

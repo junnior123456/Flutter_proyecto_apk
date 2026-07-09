@@ -69,7 +69,7 @@ class _SymptomCheckerScreenState extends State<SymptomCheckerScreen> {
                       color: sel ? Colors.white : const Color(0xFF444444),
                       fontWeight: sel ? FontWeight.bold : FontWeight.normal,
                     ),
-                    backgroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).cardColor,
                     selectedColor: s.urgency.color,
                     side: BorderSide(
                       color: sel ? s.urgency.color : Colors.grey.shade300,
@@ -120,7 +120,7 @@ class _SymptomCheckerScreenState extends State<SymptomCheckerScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade200),
       ),
@@ -179,7 +179,7 @@ class _SymptomCheckerScreenState extends State<SymptomCheckerScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
         border: Border(left: BorderSide(color: s.urgency.color, width: 5)),
         boxShadow: [

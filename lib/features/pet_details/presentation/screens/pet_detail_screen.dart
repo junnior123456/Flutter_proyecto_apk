@@ -98,7 +98,7 @@ class PetDetailScreen extends StatelessWidget {
 
                   // ✅ NUEVO: Tipos de riesgo (solo si es mascota en riesgo)
                   if (pet.isRisk && pet.riskTypes.isNotEmpty) ...[
-                    _buildRiskTypesSection(),
+                    _buildRiskTypesSection(context),
                     const SizedBox(height: 16),
                   ],
                   
@@ -285,7 +285,7 @@ class PetDetailScreen extends StatelessWidget {
   }
 
   /// 🚨 Sección de tipos de riesgo
-  Widget _buildRiskTypesSection() {
+  Widget _buildRiskTypesSection(BuildContext context) {
     // Agrupar tipos por categoría
     final Map<String, List<RiskType>> groupedTypes = {};
     
@@ -381,7 +381,7 @@ class PetDetailScreen extends StatelessWidget {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(color: Colors.red[300]!),
                     ),

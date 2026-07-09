@@ -269,7 +269,7 @@ class _PetChatScreenState extends State<PetChatScreen> {
       padding: const EdgeInsets.only(right: 8),
       child: ActionChip(
         label: Text(label, style: const TextStyle(fontSize: 12.5)),
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).cardColor,
         side: BorderSide(color: _primary.withValues(alpha: 0.4)),
         onPressed: onTap,
       ),
@@ -340,7 +340,7 @@ class _PetChatScreenState extends State<PetChatScreen> {
       child: Container(
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           border: Border(top: BorderSide(color: Colors.grey.shade200)),
         ),
         child: Row(
