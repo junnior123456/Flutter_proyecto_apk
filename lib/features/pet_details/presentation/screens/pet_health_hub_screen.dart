@@ -6,6 +6,7 @@ import 'pet_weights_screen.dart';
 import 'pet_allergies_screen.dart';
 import 'pet_medications_screen.dart';
 import 'pet_medical_records_screen.dart';
+import 'pet_documents_screen.dart';
 import 'pet_profile_qr_screen.dart';
 import 'pet_ai_chat_screen.dart';
 
@@ -29,6 +30,9 @@ class PetHealthHubScreen extends StatelessWidget {
           () => PetMedicationsScreen(petId: petId, petName: petName)),
       _HubTile('Historia clínica', 'Consultas, cirugías y exámenes', Icons.description_outlined,
           () => PetMedicalRecordsScreen(petId: petId, petName: petName)),
+      _HubTile('Documentos y galería', 'Radiografías, análisis y recetas (privados)',
+          Icons.folder_shared_outlined,
+          () => PetDocumentsScreen(petId: petId, petName: petName)),
       _HubTile('Datos & QR', 'Especie, microchip y código QR', Icons.qr_code_2,
           () => PetProfileQrScreen(petId: petId, petName: petName)),
       _HubTile('Preguntar a PawBot', 'IA que lee el expediente (con tu permiso)',
