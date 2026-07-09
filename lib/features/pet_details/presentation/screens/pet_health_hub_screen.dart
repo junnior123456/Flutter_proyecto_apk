@@ -6,6 +6,7 @@ import 'pet_weights_screen.dart';
 import 'pet_allergies_screen.dart';
 import 'pet_medications_screen.dart';
 import 'pet_profile_qr_screen.dart';
+import 'pet_ai_chat_screen.dart';
 
 class PetHealthHubScreen extends StatelessWidget {
   final int petId;
@@ -27,6 +28,9 @@ class PetHealthHubScreen extends StatelessWidget {
           () => PetMedicationsScreen(petId: petId, petName: petName)),
       _HubTile('Datos & QR', 'Especie, microchip y código QR', Icons.qr_code_2,
           () => PetProfileQrScreen(petId: petId, petName: petName)),
+      _HubTile('Preguntar a PawBot', 'IA que lee el expediente (con tu permiso)',
+          Icons.smart_toy_outlined,
+          () => PetAiChatScreen(petId: petId, petName: petName)),
     ];
 
     return Scaffold(
