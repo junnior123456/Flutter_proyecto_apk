@@ -104,6 +104,7 @@ class PetDetailScreen extends StatelessWidget {
                   
                   // Información básica
                   _buildInfoSection(
+                    context,
                     icon: Icons.info_outline,
                     title: 'Información Básica',
                     children: [
@@ -123,6 +124,7 @@ class PetDetailScreen extends StatelessWidget {
                   // Descripción
                   if (pet.description.isNotEmpty) ...[
                     _buildInfoSection(
+                      context,
                       icon: Icons.description,
                       title: 'Descripción',
                       children: [
@@ -137,6 +139,7 @@ class PetDetailScreen extends StatelessWidget {
                   
                   // Salud
                   _buildInfoSection(
+                    context,
                     icon: Icons.medical_services,
                     title: 'Salud',
                     children: [
@@ -150,6 +153,7 @@ class PetDetailScreen extends StatelessWidget {
                   // Contacto
                   if (pet.contactName.isNotEmpty || pet.contactPhone.isNotEmpty) ...[
                     _buildInfoSection(
+                      context,
                       icon: Icons.contact_phone,
                       title: 'Contacto',
                       children: [
@@ -186,6 +190,7 @@ class PetDetailScreen extends StatelessWidget {
                   // Ubicación
                   if (pet.address.isNotEmpty) ...[
                     _buildInfoSection(
+                      context,
                       icon: Icons.location_on,
                       title: 'Ubicación',
                       children: [
@@ -286,6 +291,7 @@ class PetDetailScreen extends StatelessWidget {
 
   /// 🚨 Sección de tipos de riesgo
   Widget _buildRiskTypesSection(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     // Agrupar tipos por categoría
     final Map<String, List<RiskType>> groupedTypes = {};
     
@@ -300,7 +306,7 @@ class PetDetailScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: scheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey[300]!, width: 1.5),
       ),
@@ -327,7 +333,7 @@ class PetDetailScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey[900],
+                        color: scheme.onSurface,
                         letterSpacing: 0.3,
                       ),
                     ),
@@ -335,7 +341,7 @@ class PetDetailScreen extends StatelessWidget {
                       'Condiciones identificadas',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[600],
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -358,7 +364,7 @@ class PetDetailScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   margin: const EdgeInsets.only(bottom: 10, top: 8),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: scheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -366,7 +372,7 @@ class PetDetailScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: Colors.grey[700],
+                      color: scheme.onSurfaceVariant,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -401,7 +407,7 @@ class PetDetailScreen extends StatelessWidget {
                             type.label,
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[800],
+                              color: scheme.onSurface,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -445,15 +451,17 @@ class PetDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoSection({
+  Widget _buildInfoSection(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required List<Widget> children,
   }) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: scheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey[300]!),
       ),

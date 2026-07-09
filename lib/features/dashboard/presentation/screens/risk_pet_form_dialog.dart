@@ -1020,6 +1020,7 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
     required String title,
     required String subtitle,
   }) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -1028,7 +1029,7 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
           width: value ? 2 : 1,
         ),
         borderRadius: BorderRadius.circular(8),
-        color: value ? Colors.green[50] : Colors.white,
+        color: value ? Colors.green[50] : scheme.surface,
       ),
       child: CheckboxListTile(
         value: value,
@@ -1040,7 +1041,7 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: value ? Colors.green[900] : Colors.grey[800],
+            color: value ? Colors.green[900] : scheme.onSurface,
           ),
         ),
         subtitle: Padding(
@@ -1049,7 +1050,7 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
             subtitle,
             style: TextStyle(
               fontSize: 12,
-              color: value ? Colors.green[800] : Colors.grey[600],
+              color: value ? Colors.green[800] : scheme.onSurfaceVariant,
             ),
           ),
         ),

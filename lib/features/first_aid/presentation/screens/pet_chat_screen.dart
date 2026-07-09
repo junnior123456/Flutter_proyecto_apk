@@ -205,8 +205,9 @@ class _PetChatScreenState extends State<PetChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8F0),
+      backgroundColor: scheme.surface,
       appBar: AppBar(
         backgroundColor: _primary,
         foregroundColor: Colors.white,
@@ -278,6 +279,7 @@ class _PetChatScreenState extends State<PetChatScreen> {
 
   Widget _bubble(_Msg m) {
     final bot = m.isBot;
+    final scheme = Theme.of(context).colorScheme;
     return Align(
       alignment: bot ? Alignment.centerLeft : Alignment.centerRight,
       child: Container(
@@ -287,7 +289,7 @@ class _PetChatScreenState extends State<PetChatScreen> {
           maxWidth: MediaQuery.of(context).size.width * 0.78,
         ),
         decoration: BoxDecoration(
-          color: bot ? Colors.white : _primary,
+          color: bot ? scheme.surfaceContainerHighest : _primary,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -325,7 +327,7 @@ class _PetChatScreenState extends State<PetChatScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   height: 1.4,
-                  color: bot ? const Color(0xFF333333) : Colors.white,
+                  color: bot ? scheme.onSurface : Colors.white,
                 ),
               ),
           ],
@@ -335,6 +337,7 @@ class _PetChatScreenState extends State<PetChatScreen> {
   }
 
   Widget _inputBar() {
+    final scheme = Theme.of(context).colorScheme;
     return SafeArea(
       top: false,
       child: Container(
@@ -359,7 +362,7 @@ class _PetChatScreenState extends State<PetChatScreen> {
                 decoration: InputDecoration(
                   hintText: 'Escribe lo que le pasa a tu perrito...',
                   filled: true,
-                  fillColor: const Color(0xFFF4F4F4),
+                  fillColor: scheme.surfaceContainerHighest,
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   border: OutlineInputBorder(

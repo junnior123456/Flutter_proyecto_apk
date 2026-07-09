@@ -18,6 +18,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       body: Container(
         height: MediaQuery.of(context).size.height,
@@ -106,7 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               filled: true,
-                              fillColor: Colors.grey[50],
+                              fillColor: scheme.surfaceContainerHighest,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -144,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               filled: true,
-                              fillColor: Colors.grey[50],
+                              fillColor: scheme.surfaceContainerHighest,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {

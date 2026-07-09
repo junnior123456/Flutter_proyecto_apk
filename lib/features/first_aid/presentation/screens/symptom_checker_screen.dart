@@ -28,8 +28,9 @@ class _SymptomCheckerScreenState extends State<SymptomCheckerScreen> {
       if (peak == null || u.level > peak.level) peak = u;
     }
 
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8F0),
+      backgroundColor: scheme.surface,
       appBar: AppBar(
         backgroundColor: _primary,
         foregroundColor: Colors.white,
@@ -66,7 +67,7 @@ class _SymptomCheckerScreenState extends State<SymptomCheckerScreen> {
                     label: Text('${s.emoji}  ${s.name}'),
                     labelStyle: TextStyle(
                       fontSize: 13.5,
-                      color: sel ? Colors.white : const Color(0xFF444444),
+                      color: sel ? Colors.white : Theme.of(context).colorScheme.onSurface,
                       fontWeight: sel ? FontWeight.bold : FontWeight.normal,
                     ),
                     backgroundColor: Theme.of(context).cardColor,
@@ -228,7 +229,7 @@ class _SymptomCheckerScreenState extends State<SymptomCheckerScreen> {
           const Text('Qué hacer:',
               style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          ...s.advice.map((a) => _bullet(a, const Color(0xFF333333))),
+          ...s.advice.map((a) => _bullet(a, Theme.of(context).colorScheme.onSurface)),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(10),

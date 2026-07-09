@@ -161,10 +161,11 @@ class _AnalyzePhotoScreenState extends State<AnalyzePhotoScreen> {
   }
 
   Widget _buildImagePreview() {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       height: 220,
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: scheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade300),
       ),
@@ -187,6 +188,7 @@ class _AnalyzePhotoScreenState extends State<AnalyzePhotoScreen> {
 
   Widget _buildResult(Map<String, dynamic> r) {
     final confianza = (r['confianza'] is num) ? (r['confianza'] as num).toInt() : 0;
+    final scheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -219,7 +221,7 @@ class _AnalyzePhotoScreenState extends State<AnalyzePhotoScreen> {
                   child: LinearProgressIndicator(
                     value: confianza / 100,
                     minHeight: 10,
-                    backgroundColor: Colors.grey.shade200,
+                    backgroundColor: scheme.surfaceContainerHighest,
                     color: confianza >= 60 ? Colors.green : Colors.orange,
                   ),
                 ),

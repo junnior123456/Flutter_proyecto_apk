@@ -24,6 +24,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -110,7 +111,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               filled: true,
-                              fillColor: Colors.grey[50],
+                              fillColor: scheme.surfaceContainerHighest,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -135,7 +136,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               filled: true,
-                              fillColor: Colors.grey[50],
+                              fillColor: scheme.surfaceContainerHighest,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -161,7 +162,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               filled: true,
-                              fillColor: Colors.grey[50],
+                              fillColor: scheme.surfaceContainerHighest,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -189,7 +190,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               filled: true,
-                              fillColor: Colors.grey[50],
+                              fillColor: scheme.surfaceContainerHighest,
                               counterText: '', // Ocultar el contador de caracteres
                             ),
                             inputFormatters: [
@@ -234,7 +235,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               filled: true,
-                              fillColor: Colors.grey[50],
+                              fillColor: scheme.surfaceContainerHighest,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -272,7 +273,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               filled: true,
-                              fillColor: Colors.grey[50],
+                              fillColor: scheme.surfaceContainerHighest,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {

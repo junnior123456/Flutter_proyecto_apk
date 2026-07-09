@@ -13,8 +13,9 @@ class FirstAidScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8F0),
+      backgroundColor: scheme.surface,
       appBar: AppBar(
         backgroundColor: _primary,
         foregroundColor: Colors.white,
@@ -164,13 +165,15 @@ class FirstAidScreen extends StatelessWidget {
             style: TextStyle(fontSize: 12.5, color: Colors.grey[600]),
           ),
           childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-          children: cat.items.map((it) => _buildItem(it, cat.color)).toList(),
+          children:
+              cat.items.map((it) => _buildItem(context, it, cat.color)).toList(),
         ),
       ),
     );
   }
 
-  Widget _buildItem(_Item item, Color color) {
+  Widget _buildItem(BuildContext context, _Item item, Color color) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
@@ -201,10 +204,10 @@ class FirstAidScreen extends StatelessWidget {
                   Expanded(
                     child: Text(
                       s,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13.5,
                         height: 1.4,
-                        color: Color(0xFF333333),
+                        color: scheme.onSurface,
                       ),
                     ),
                   ),

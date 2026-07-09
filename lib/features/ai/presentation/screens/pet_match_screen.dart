@@ -215,10 +215,11 @@ class _PetMatchScreenState extends State<PetMatchScreen> {
   }
 
   Widget _buildImagePreview() {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       height: 200,
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: scheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade300),
       ),

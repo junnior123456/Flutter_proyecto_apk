@@ -141,6 +141,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
   /// Construye un mensaje del chat
   Widget _buildMessage(ChatMessage message) {
+    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -164,13 +165,13 @@ class _AiChatScreenState extends State<AiChatScreen> {
               decoration: BoxDecoration(
                 color: message.isUser
                     ? const Color(0xFF6C63FF)
-                    : Colors.grey.shade100,
+                    : scheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
                 message.text,
                 style: TextStyle(
-                  color: message.isUser ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  color: message.isUser ? Colors.white : scheme.onSurface,
                   fontSize: 14,
                 ),
               ),

@@ -230,7 +230,10 @@ class _DogRecommendationScreenState extends State<DogRecommendationScreen> {
                 SizedBox(width: 12),
                 Expanded(
                   child: Text('¡PawBot encontró el perro ideal para ti!',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Color(0xFF1B5E20))),
                 ),
               ],
             ),

@@ -23,7 +23,7 @@ class PublishPetScreen extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [
               Colors.orange.shade50,
-              Colors.white,
+              Theme.of(context).colorScheme.surface,
             ],
           ),
         ),
