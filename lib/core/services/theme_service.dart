@@ -7,7 +7,6 @@ class ThemeService {
   factory ThemeService() => _instance;
   ThemeService._internal();
 
-  static const String _themeKey = 'user_theme_preference';
   static const String _colorKey = 'user_color_preference';
   static const String _darkModeKey = 'user_dark_mode';
 

@@ -7,7 +7,10 @@ import '../../../../core/services/feed_service.dart';
 import '../../../../core/config/api_config.dart';
 
 class FeedScreen extends StatefulWidget {
-  const FeedScreen({super.key});
+  /// Cuando se usa como pestaña del dashboard, se embebe sin su propio
+  /// Scaffold/AppBar (el dashboard ya aporta la barra superior).
+  final bool embedded;
+  const FeedScreen({super.key, this.embedded = false});
 
   @override
   State<FeedScreen> createState() => _FeedScreenState();
@@ -122,13 +125,15 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final content = RefreshIndicator(onRefresh: _refresh, child: _body());
+    if (widget.embedded) return content;
     return Scaffold(
       appBar: AppBar(
         title: const Text('📰 Feed'),
         backgroundColor: _brand,
         foregroundColor: Colors.white,
       ),
-      body: RefreshIndicator(onRefresh: _refresh, child: _body()),
+      body: content,
     );
   }
 

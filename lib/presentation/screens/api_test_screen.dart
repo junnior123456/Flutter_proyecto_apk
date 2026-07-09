@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../core/services/http_service.dart';
-import '../../core/services/auth_service.dart';
 
 class ApiTestScreen extends StatefulWidget {
   const ApiTestScreen({super.key});
@@ -13,7 +12,6 @@ class ApiTestScreen extends StatefulWidget {
 
 class _ApiTestScreenState extends State<ApiTestScreen> {
   final HttpService _httpService = HttpService();
-  final AuthService _authService = AuthService();
   bool _isLoading = false;
   String _result = '';
   bool _isConnected = false;

@@ -1010,13 +1010,11 @@ class _ReceivedRequestsScreenState extends State<ReceivedRequestsScreen> {
                   '👇 Ahora confirma que entregaste la mascota para completar la adopción',
                   style: TextStyle(fontSize: 14),
                 ),
-                if (adopterConfirmedAt != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    'Recogida el: ${adopterConfirmedAt.day}/${adopterConfirmedAt.month}/${adopterConfirmedAt.year}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                ],
+                const SizedBox(height: 8),
+                Text(
+                  'Recogida el: ${adopterConfirmedAt.day}/${adopterConfirmedAt.month}/${adopterConfirmedAt.year}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
               ],
             ),
           ),

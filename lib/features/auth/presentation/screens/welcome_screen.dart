@@ -290,37 +290,4 @@ class WelcomeScreen extends StatelessWidget {
       },
     );
   }
-
-  // 🔐 Mostrar diálogo de autenticación requerida
-  void _showAuthRequiredDialog(BuildContext context, String title, String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushNamed(context, AppRoutes.login);
-              },
-              child: const Text('Iniciar Sesión'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushNamed(context, AppRoutes.register);
-              },
-              child: const Text('Registrarse'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

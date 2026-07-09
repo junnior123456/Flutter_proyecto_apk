@@ -444,48 +444,6 @@ class PetService {
     );
   }
 
-  /// 🔄 Reintentar operación con backoff exponencial
-  Future<T?> _retryOperation<T>(
-    Future<T> Function() operation,
-    String operationName, {
-    int maxRetries = 3,
-    Duration initialDelay = const Duration(seconds: 1),
-  }) async {
-    int attempt = 0;
-    Duration delay = initialDelay;
-
-    while (attempt < maxRetries) {
-      try {
-        Logger.debug(
-          'Attempting $operationName (attempt ${attempt + 1}/$maxRetries)',
-          tag: 'PetService',
-        );
-        return await operation();
-      } catch (e) {
-        attempt++;
-
-        if (attempt >= maxRetries) {
-          Logger.error(
-            '$operationName failed after $maxRetries attempts',
-            tag: 'PetService',
-            error: e,
-          );
-          rethrow;
-        }
-
-        Logger.warning(
-          '$operationName failed, retrying in ${delay.inSeconds}s',
-          tag: 'PetService',
-          error: e,
-        );
-        await Future.delayed(delay);
-        delay *= 2; // Backoff exponencial
-      }
-    }
-
-    return null;
-  }
-
   /// 🔍 Validar datos de mascota usando ValidationUtils
   Map<String, String> validatePetData({
     required String name,

@@ -101,10 +101,6 @@ class _NotificationsViewState extends State<_NotificationsView>
                 ? state.filteredNotifications
                 : (state as NotificationOperationSuccess).notifications;
 
-            final unreadCount = state is NotificationsLoaded
-                ? state.unreadCount
-                : (state as NotificationOperationSuccess).unreadCount;
-
             if (notifications.isEmpty) {
               return _buildEmptyView();
             }
@@ -345,9 +341,6 @@ class _NotificationsViewState extends State<_NotificationsView>
         icon = Icons.info;
         color = Colors.grey;
         break;
-      default:
-        icon = Icons.info;
-        color = Colors.grey;
     }
 
     return Container(
@@ -357,39 +350,6 @@ class _NotificationsViewState extends State<_NotificationsView>
         shape: BoxShape.circle,
       ),
       child: Icon(icon, color: color, size: 24),
-    );
-  }
-
-  Widget _buildPriorityBadge(app_notification.Notification notification) {
-    Color color;
-    String text;
-
-    if (notification.isHighPriority) {
-      color = Colors.red;
-      text = 'Alta';
-    } else if (notification.isMediumPriority) {
-      color = Colors.orange;
-      text = 'Media';
-    } else {
-      color = Colors.grey;
-      text = 'Baja';
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
     );
   }
 
@@ -642,17 +602,16 @@ class _NotificationsViewState extends State<_NotificationsView>
                 ),
               ),
               // Imagen de la mascota
-              if (pet.imageUrl != null)
-                Container(
-                  height: 300,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(pet.imageUrl!),
-                      fit: BoxFit.cover,
-                    ),
+              Container(
+                height: 300,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(pet.imageUrl),
+                    fit: BoxFit.cover,
                   ),
                 ),
+              ),
               Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
@@ -701,24 +660,22 @@ class _NotificationsViewState extends State<_NotificationsView>
                     ),
                     const SizedBox(height: 24),
                     // Descripción
-                    if (pet.description != null) ...[
-                      const Text(
-                        'Descripción',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    const Text(
+                      'Descripción',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        pet.description!,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          height: 1.5,
-                        ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      pet.description,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        height: 1.5,
                       ),
-                      const SizedBox(height: 24),
-                    ],
+                    ),
+                    const SizedBox(height: 24),
                     // Información del animal
                     const Text(
                       'Información',
@@ -728,20 +685,13 @@ class _NotificationsViewState extends State<_NotificationsView>
                       ),
                     ),
                     const SizedBox(height: 12),
-                    if (pet.breed != null)
-                      _buildInfoRow(Icons.pets, 'Raza', pet.breed!),
-                    if (pet.age != null) ...[
-                      const SizedBox(height: 8),
-                      _buildInfoRow(Icons.cake, 'Edad', pet.age!),
-                    ],
-                    if (pet.gender != null) ...[
-                      const SizedBox(height: 8),
-                      _buildInfoRow(Icons.wc, 'Género', pet.gender!),
-                    ],
-                    if (pet.size != null) ...[
-                      const SizedBox(height: 8),
-                      _buildInfoRow(Icons.straighten, 'Tamaño', pet.size!),
-                    ],
+                    _buildInfoRow(Icons.pets, 'Raza', pet.breed),
+                    const SizedBox(height: 8),
+                    _buildInfoRow(Icons.cake, 'Edad', pet.age),
+                    const SizedBox(height: 8),
+                    _buildInfoRow(Icons.wc, 'Género', pet.gender),
+                    const SizedBox(height: 8),
+                    _buildInfoRow(Icons.straighten, 'Tamaño', pet.size),
                     const SizedBox(height: 24),
                     // Información del publicador
                     const Text(
@@ -779,7 +729,7 @@ class _NotificationsViewState extends State<_NotificationsView>
                               ),
                               if (owner?.email != null)
                                 Text(
-                                  owner!.email!,
+                                  owner!.email,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey[600],
@@ -790,14 +740,10 @@ class _NotificationsViewState extends State<_NotificationsView>
                         ),
                       ],
                     ),
-                    if (pet.contactPhone != null) ...[
-                      const SizedBox(height: 12),
-                      _buildInfoRow(Icons.phone, 'Teléfono', pet.contactPhone!),
-                    ],
-                    if (pet.address != null) ...[
-                      const SizedBox(height: 8),
-                      _buildInfoRow(Icons.location_on, 'Ubicación', pet.address!),
-                    ],
+                    const SizedBox(height: 12),
+                    _buildInfoRow(Icons.phone, 'Teléfono', pet.contactPhone),
+                    const SizedBox(height: 8),
+                    _buildInfoRow(Icons.location_on, 'Ubicación', pet.address),
                     const SizedBox(height: 32),
                     // Botón de cerrar
                     SizedBox(

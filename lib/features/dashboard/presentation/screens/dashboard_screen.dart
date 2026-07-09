@@ -44,6 +44,17 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   late int _currentIndex;
   final PetService _petService = PetService();
+
+  /// Título del AppBar según la pestaña activa (mismo orden que la barra inferior).
+  String get _currentTitle {
+    final titles = widget.isAuthenticated
+        ? ['PawFinder', 'Adoptar', 'En riesgo', 'Feed', 'Mi perfil']
+        : ['PawFinder', 'Adoptar', 'En riesgo'];
+    return (_currentIndex >= 0 && _currentIndex < titles.length)
+        ? titles[_currentIndex]
+        : 'PawFinder';
+  }
+
   
   List<Pet> _adoptPets = [];
   List<Pet> _riskPets = [];
@@ -737,17 +748,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             _buildDrawerItem(
-              icon: Icons.dynamic_feed,
-              title: 'Feed',
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const FeedScreen()),
-                );
-              },
-            ),
-            _buildDrawerItem(
               icon: Icons.local_hospital,
               title: 'Veterinarias',
               onTap: () {
@@ -942,20 +942,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildDrawerSubItem(String title, VoidCallback onTap) {
-    return ListTile(
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white70,
-          fontSize: 14,
-        ),
-      ),
-      onTap: onTap,
-      dense: true,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     // Mostrar loading mientras cargan los datos
@@ -1039,12 +1025,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onRefresh: _loadPetsFromBackend,
       ),
       RiskTab(
-        riskPets: _riskPets, 
-        onAdd: _addRiskPet, 
+        riskPets: _riskPets,
+        onAdd: _addRiskPet,
         onMarkSafe: _markSafe,
         isAuthenticated: widget.isAuthenticated,
         onRefresh: _loadPetsFromBackend,
       ),
+      // El feed requiere sesión (necesita token). Va antes de Perfil para que
+      // los índices 0/1/2 (usados por welcome_screen) no cambien.
+      if (widget.isAuthenticated) const FeedScreen(embedded: true),
       if (widget.isAuthenticated)
         ProfileTab(
           adoptPets: _adoptPets,
@@ -1063,7 +1052,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'PawFinder',
+          _currentTitle,
           style: AppStyles.headingSmall.copyWith(color: Colors.white),
         ),
         backgroundColor: AppColors.primary,
@@ -1143,6 +1132,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           });
         },
         type: BottomNavigationBarType.fixed,
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
+        showUnselectedLabels: true,
         items: widget.isAuthenticated 
           ? const [
               BottomNavigationBarItem(
@@ -1156,6 +1148,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               BottomNavigationBarItem(
                 icon: Icon(Icons.warning_amber_rounded),
                 label: 'Riesgo',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.dynamic_feed),
+                label: 'Feed',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person),

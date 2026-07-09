@@ -5,7 +5,6 @@ import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'http_service.dart';
-import 'image_service.dart';
 import 'auth_service.dart';
 import '../utils/logger.dart';
 import '../config/api_config.dart';
@@ -16,7 +15,6 @@ class ProfileService {
   ProfileService._internal();
 
   final HttpService _httpService = HttpService();
-  final ImageService _imageService = ImageService();
 
   /// 📝 Actualizar perfil del usuario sin imagen
   Future<Map<String, dynamic>?> updateProfile({

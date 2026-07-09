@@ -193,27 +193,6 @@ class ImagePickerDialog extends StatelessWidget {
     onDelete?.call();
   }
 
-  /// ⏳ Mostrar diálogo de carga
-  void _showLoadingDialog(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Row(
-            children: [
-              CircularProgressIndicator(
-                color: Theme.of(context).primaryColor,
-              ),
-              const SizedBox(width: 20),
-              Expanded(child: Text(message)),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   /// 🚨 Mostrar mensaje de error
   void _showErrorSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(

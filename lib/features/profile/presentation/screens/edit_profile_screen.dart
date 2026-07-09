@@ -402,8 +402,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildProfileImage() {
-    final currentImageUrl = _originalProfile?.image;
-    
     return Center(
       child: Column(
         children: [
