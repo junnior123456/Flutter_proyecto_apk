@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../core/services/token_manager.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({Key? key}) : super(key: key);
@@ -10,6 +11,15 @@ class AdminPanelScreen extends StatefulWidget {
 }
 
 class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerProviderStateMixin {
+  /// Los endpoints /users exigen JWT (y rol ADMIN). Antes se llamaban sin token.
+  Future<Map<String, String>> _authHeaders() async {
+    final token = await TokenManager().getToken();
+    return {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+  }
+
   late TabController _tabController;
   
   // Data
@@ -67,7 +77,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
     try {
       final response = await http.get(
         Uri.parse('http://167.99.4.161/api/users'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await _authHeaders(),
       );
 
       if (response.statusCode == 200) {
@@ -85,7 +95,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
     try {
       final response = await http.get(
         Uri.parse('http://167.99.4.161/api/pets'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await _authHeaders(),
       );
 
       if (response.statusCode == 200) {
@@ -133,7 +143,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
     try {
       final response = await http.delete(
         Uri.parse('http://167.99.4.161/api/users/$userId'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await _authHeaders(),
       );
 
       if (response.statusCode == 200) {
@@ -159,7 +169,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
     try {
       final response = await http.delete(
         Uri.parse('http://167.99.4.161/api/pets/$petId'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await _authHeaders(),
       );
 
       if (response.statusCode == 200) {
@@ -617,7 +627,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
     try {
       final response = await http.post(
         Uri.parse('http://167.99.4.161/api/users'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await _authHeaders(),
         body: json.encode(userData),
       );
 
@@ -644,7 +654,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
     try {
       final response = await http.post(
         Uri.parse('http://167.99.4.161/api/pets'),
-        headers: {'Content-Type': 'application/json'},
+        headers: await _authHeaders(),
         body: json.encode(petData),
       );
 

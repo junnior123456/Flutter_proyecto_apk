@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../core/constants/backend.dart';
+import '../../core/services/auth_service.dart';
 
 class PetsAdoptionScreen extends StatefulWidget {
   const PetsAdoptionScreen({Key? key}) : super(key: key);
@@ -69,10 +70,16 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
         foregroundColor: Colors.white,
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: loadPets),
-          IconButton(
-            icon: const Icon(Icons.admin_panel_settings),
-            onPressed: () {
-              Navigator.pushNamed(context, '/admin-panel');
+          // El panel de administración sólo se ofrece a un ADMIN.
+          // (El backend además lo exige: /users devuelve 403 sin rol '1'.)
+          FutureBuilder<bool>(
+            future: AuthService().isAdmin(),
+            builder: (context, snap) {
+              if (snap.data != true) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.admin_panel_settings),
+                onPressed: () => Navigator.pushNamed(context, '/admin-panel'),
+              );
             },
           ),
         ],

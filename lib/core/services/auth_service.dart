@@ -145,6 +145,39 @@ class AuthService {
     }
   }
 
+  // ============================================================
+  //  🎭 ROLES  (el login devuelve user.roles = [{id, name, ...}])
+  //  id '1' = ADMIN, '2' = CLIENT, '3' = VET
+  // ============================================================
+
+  /// Nombres de rol del usuario actual, en mayúsculas. Lista vacía si no hay sesión.
+  Future<List<String>> getRoles() async {
+    try {
+      final userData = await getCurrentUser();
+      final roles = userData?['roles'];
+      if (roles is! List) return const [];
+      return roles
+          .map((r) => (r is Map ? r['name'] : r).toString().toUpperCase())
+          .where((r) => r.isNotEmpty)
+          .toList();
+    } catch (e) {
+      Logger.error('Error leyendo roles', tag: 'AuthService', error: e);
+      return const [];
+    }
+  }
+
+  Future<bool> isAdmin() async => (await getRoles()).contains('ADMIN');
+
+  Future<bool> isVet() async => (await getRoles()).contains('VET');
+
+  /// Rol principal para mostrar en la interfaz (ADMIN > VET > CLIENT).
+  Future<String> primaryRole() async {
+    final roles = await getRoles();
+    if (roles.contains('ADMIN')) return 'ADMIN';
+    if (roles.contains('VET')) return 'VET';
+    return 'CLIENT';
+  }
+
   // 👤 Obtener datos del usuario actual (con fallback a desarrollo)
   Future<Map<String, dynamic>?> getCurrentUser() async {
     try {
