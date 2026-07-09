@@ -49,13 +49,16 @@ class PetHealthHubScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
-              children: const [
-                Text('🐾', style: TextStyle(fontSize: 30)),
-                SizedBox(width: 12),
+              children: [
+                const Text('🐾', style: TextStyle(fontSize: 30)),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'Expediente digital de salud. Toca una sección para ver o registrar información.',
-                    style: TextStyle(fontSize: 13, color: Colors.black87),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ],

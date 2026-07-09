@@ -1168,7 +1168,13 @@ class HomeTab extends StatelessWidget {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: adoptPets.map((pet) => PetCard(
+              // PetCard ya no fija tamaño: en una lista horizontal se lo damos aquí.
+              children: adoptPets.map((pet) => Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: SizedBox(
+                  width: 160,
+                  height: 240,
+                  child: PetCard(
                 pet: pet,
                 buttonText: 'Adoptar',
                 buttonColor: Colors.blue,
@@ -1191,6 +1197,8 @@ class HomeTab extends StatelessWidget {
                   }
                 },
                 onImageTap: () => _navigateToAdoptPetDetails(context, pet, onRequestAdopt), // ✅ Clean Architecture
+                  ),
+                ),
               )).toList(),
             ),
           ),
@@ -1203,7 +1211,13 @@ class HomeTab extends StatelessWidget {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: riskPets.map((pet) => PetCard(
+              // PetCard ya no fija tamaño: en una lista horizontal se lo damos aquí.
+              children: riskPets.map((pet) => Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: SizedBox(
+                  width: 160,
+                  height: 240,
+                  child: PetCard(
                 pet: pet,
                 buttonText: 'Ayudar Adoptando', // ✅ NUEVO TEXTO
                 buttonColor: Colors.orange, // ✅ Color más cálido
@@ -1216,6 +1230,8 @@ class HomeTab extends StatelessWidget {
                   }
                 },
                 onImageTap: () => _navigateToRiskPetDetails(context, pet, onMarkSafe), // ✅ Clean Architecture
+                  ),
+                ),
               )).toList(),
             ),
           ),

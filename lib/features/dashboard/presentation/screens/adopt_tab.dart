@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
 import '../../../../core/constants/app_routes.dart';
+import '../../../../core/utils/responsive_grid.dart';
 import '../../../../core/services/pet_service.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/services/adoption_service.dart';
@@ -137,12 +138,15 @@ class _AdoptTabState extends State<AdoptTab> {
                             }
                             await _filterByCategory(_selectedCategory);
                           },
+                          // Rejilla responsiva: 2 columnas en móvil, más en tablet.
+                          // Mismos valores que risk_tab para que ambas pestañas
+                          // se vean idénticas.
                           child: GridView.count(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.8,
-                            mainAxisSpacing: 8,
-                            crossAxisSpacing: 8,
-                            padding: const EdgeInsets.all(8),
+                            crossAxisCount: responsiveColumns(context),
+                            childAspectRatio: 0.72,
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            padding: const EdgeInsets.all(12),
                             children: _filteredPets.map((pet) => PetCard(
                               pet: pet,
                               buttonText: 'Adoptar',

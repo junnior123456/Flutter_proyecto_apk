@@ -157,7 +157,10 @@ class _PetAiChatScreenState extends State<PetAiChatScreen> {
                 Text(
                   'Activa el acceso al expediente y PawBot podrá responder sobre '
                   'las vacunas, el peso, las alergias y la medicación de ${widget.petName}.',
-                  style: const TextStyle(fontSize: 12.5, color: Colors.black87),
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
               ],
             ),
@@ -177,6 +180,7 @@ class _PetAiChatScreenState extends State<PetAiChatScreen> {
   }
 
   Widget _bubble(_Msg m) {
+    final scheme = Theme.of(context).colorScheme;
     return Align(
       alignment: m.isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -184,7 +188,8 @@ class _PetAiChatScreenState extends State<PetAiChatScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: m.isUser ? _brand : Colors.grey.shade200,
+          // Burbuja del bot: color del tema, para que el modo oscuro funcione.
+          color: m.isUser ? _brand : scheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -194,7 +199,7 @@ class _PetAiChatScreenState extends State<PetAiChatScreen> {
             Text(
               m.text,
               style: TextStyle(
-                color: m.isUser ? Colors.white : Colors.black87,
+                color: m.isUser ? Colors.white : scheme.onSurface,
                 fontSize: 14.5,
               ),
             ),

@@ -74,14 +74,14 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/pawfinder_icon.png"
-  adaptive_icon_background: "#6C63FF"
+  adaptive_icon_background: "#FF9800"
   adaptive_icon_foreground: "assets/icon/pawfinder_fg.png"
   remove_alpha_ios: true
   web:
     generate: true
     image_path: "assets/icon/pawfinder_icon.png"
-    background_color: "#6C63FF"
-    theme_color: "#6C63FF"
+    background_color: "#FF9800"
+    theme_color: "#FF9800"
 
 flutter:
   uses-material-design: true

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
 import '../../../../core/constants/app_routes.dart';
+import '../../../../core/utils/responsive_grid.dart';
 import '../../../../core/services/pet_service.dart';
 import '../../../../core/services/auth_service.dart'; // ✅ NUEVO
 import '../../../../core/services/adoption_service.dart'; // ✅ NUEVO
@@ -136,9 +137,15 @@ class _RiskTabState extends State<RiskTab> {
                             }
                             await _filterByCategory(_selectedCategory);
                           },
+                          // Rejilla responsiva: 2 columnas en móvil, más en tablet.
+                          // Antes no tenía espaciado ni padding: las tarjetas se
+                          // pegaban entre sí y al borde de la pantalla.
                           child: GridView.count(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.75,
+                            crossAxisCount: responsiveColumns(context),
+                            childAspectRatio: 0.72,
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            padding: const EdgeInsets.all(12),
                             children: _filteredPets.map((pet) => PetCard(
                               pet: pet,
                               buttonText: 'Ayudar Adoptando', // ✅ NUEVO TEXTO
