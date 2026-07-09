@@ -17,6 +17,8 @@ import '../../../adoption/presentation/dialogs/send_adoption_request_dialog.dart
 import '../../../adoption/presentation/dialogs/send_risk_adoption_request_dialog.dart';
 import '../../../ai/presentation/screens/analyze_photo_screen.dart'; // 🔍 Identificar raza por foto (IA)
 import '../../../ai/presentation/screens/pet_match_screen.dart'; // 🐕 Buscar coincidencias (IA)
+import '../../../veterinarias/presentation/screens/veterinarias_directory_screen.dart';
+import '../../../veterinarias/presentation/screens/my_veterinaria_screen.dart';
 import 'publish_pet_screen.dart';
 import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
@@ -730,6 +732,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   MaterialPageRoute(
                     builder: (context) => const PetMatchScreen(),
                   ),
+                );
+              },
+            ),
+            _buildDrawerItem(
+              icon: Icons.local_hospital,
+              title: 'Veterinarias',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const VeterinariasDirectoryScreen(),
+                  ),
+                );
+              },
+            ),
+            // "Mi veterinaria" solo para cuentas con rol VET.
+            FutureBuilder<bool>(
+              future: AuthService().isVet(),
+              builder: (context, snap) {
+                if (snap.data != true) return const SizedBox.shrink();
+                return _buildDrawerItem(
+                  icon: Icons.medical_services,
+                  title: 'Mi veterinaria',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MyVeterinariaScreen(),
+                      ),
+                    );
+                  },
                 );
               },
             ),

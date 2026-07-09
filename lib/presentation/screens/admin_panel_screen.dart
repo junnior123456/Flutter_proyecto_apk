@@ -29,6 +29,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   List<dynamic> comments = [];
   List<dynamic> notifications = [];
   List<dynamic> reports = [];
+  List<dynamic> veterinarias = [];
   
   bool isLoading = true;
   String? error;
@@ -36,7 +37,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 7, vsync: this);
     loadAllData();
   }
 
@@ -60,6 +61,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
         loadComments(),
         loadNotifications(),
         loadReports(),
+        loadVeterinarias(),
       ]);
       
       setState(() {
@@ -139,6 +141,91 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
     });
   }
 
+  Future<void> loadVeterinarias() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://167.99.4.161/api/veterinarias/admin/all'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          veterinarias = data is List ? data : (data['data'] ?? []);
+        });
+      }
+    } catch (e) {
+      print('Error loading veterinarias: $e');
+    }
+  }
+
+  Future<void> updateVeterinaria(int vetId, Map<String, dynamic> body) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('http://167.99.4.161/api/veterinarias/$vetId'),
+        headers: await _authHeaders(),
+        body: json.encode(body),
+      );
+
+      if (response.statusCode == 200) {
+        await loadVeterinarias();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Veterinaria actualizada correctamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al actualizar (${response.statusCode})'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al actualizar veterinaria: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> deleteVeterinaria(int vetId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('http://167.99.4.161/api/veterinarias/$vetId'),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        await loadVeterinarias();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Veterinaria eliminada correctamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al eliminar (${response.statusCode})'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al eliminar veterinaria: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   Future<void> deleteUser(int userId) async {
     try {
       final response = await http.delete(
@@ -211,6 +298,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
             Tab(icon: Icon(Icons.comment), text: 'Comentarios'),
             Tab(icon: Icon(Icons.notifications), text: 'Notificaciones'),
             Tab(icon: Icon(Icons.report), text: 'Reportes'),
+            Tab(icon: Icon(Icons.local_hospital), text: 'Veterinarias'),
           ],
         ),
         actions: [
@@ -251,6 +339,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
                     _buildCommentsTab(),
                     _buildNotificationsTab(),
                     _buildReportsTab(),
+                    _buildVeterinariasTab(),
                   ],
                 ),
       floatingActionButton: FloatingActionButton(
@@ -449,6 +538,179 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
           SizedBox(height: 16),
           Text('Reportes'),
           Text('Próximamente...', style: TextStyle(color: Colors.grey)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVeterinariasTab() {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (veterinarias.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.local_hospital, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text('No hay veterinarias registradas'),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: loadVeterinarias,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: veterinarias.length,
+        itemBuilder: (context, index) {
+          final vet = veterinarias[index];
+          final bool isVerified = vet['isVerified'] == true;
+          final bool isActive = vet['isActive'] == true;
+
+          return Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: const Color(0xFFFF9800),
+                        child: const Icon(Icons.local_hospital, color: Colors.white),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              vet['name'] ?? 'Sin nombre',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'RUC: ${vet['ruc'] ?? 'No especificado'}',
+                              style: TextStyle(
+                                color: colorScheme.onSurfaceVariant,
+                                fontSize: 13,
+                              ),
+                            ),
+                            if (vet['address'] != null && '${vet['address']}'.isNotEmpty)
+                              Text(
+                                vet['address'],
+                                style: TextStyle(
+                                  color: colorScheme.onSurfaceVariant,
+                                  fontSize: 13,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      _statusChip(
+                        isVerified ? 'Verificada' : 'Pendiente',
+                        isVerified ? Colors.green : Colors.orange,
+                        isVerified ? Icons.verified : Icons.hourglass_empty,
+                      ),
+                      _statusChip(
+                        isActive ? 'Activa' : 'Inactiva',
+                        isActive ? Colors.green : Colors.grey,
+                        isActive ? Icons.check_circle : Icons.block,
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () => updateVeterinaria(
+                          vet['id'],
+                          {'isVerified': !isVerified},
+                        ),
+                        icon: Icon(
+                          isVerified ? Icons.gpp_bad : Icons.verified,
+                          color: isVerified ? Colors.orange : Colors.green,
+                          size: 20,
+                        ),
+                        label: Text(
+                          isVerified ? 'Desverificar' : 'Verificar',
+                          style: TextStyle(
+                            color: isVerified ? Colors.orange : Colors.green,
+                          ),
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => updateVeterinaria(
+                          vet['id'],
+                          {'isActive': !isActive},
+                        ),
+                        icon: Icon(
+                          isActive ? Icons.toggle_off : Icons.toggle_on,
+                          color: isActive ? Colors.grey : Colors.green,
+                          size: 20,
+                        ),
+                        label: Text(
+                          isActive ? 'Desactivar' : 'Activar',
+                          style: TextStyle(
+                            color: isActive ? Colors.grey : Colors.green,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _confirmDelete(
+                          'veterinaria',
+                          vet['name'] ?? 'Veterinaria',
+                          () => deleteVeterinaria(vet['id']),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _statusChip(String label, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );
