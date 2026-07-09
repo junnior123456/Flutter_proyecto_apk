@@ -46,6 +46,10 @@ class PetCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Cabecera de autor, estilo publicación de red social: foto + nombre
+          // del perfil de quien publicó (viene de `pet.user`).
+          _AuthorHeader(pet: pet),
+
           // La imagen ocupa el espacio sobrante de la celda.
           Expanded(
             child: GestureDetector(
@@ -103,6 +107,57 @@ class PetCard extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Cabecera "posteado por": avatar del autor + su nombre. Usa `pet.ownerName`
+/// (nombre del perfil, con el contacto de la publicación como respaldo).
+class _AuthorHeader extends StatelessWidget {
+  final Pet pet;
+  const _AuthorHeader({required this.pet});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final image = pet.user?.image;
+    final name = pet.ownerName;
+    if (name.trim().isEmpty) return const SizedBox.shrink();
+
+    final initial = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 12,
+            backgroundColor: scheme.primaryContainer,
+            backgroundImage: (image != null && image.isNotEmpty)
+                ? NetworkImage(image)
+                : null,
+            child: (image == null || image.isEmpty)
+                ? Text(initial,
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: scheme.onPrimaryContainer))
+                : null,
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              name,
+              style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: scheme.onSurface),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
