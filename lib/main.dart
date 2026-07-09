@@ -126,7 +126,9 @@ class _MyAppState extends State<MyApp> {
         // Localization (for future expansion)
         locale: const Locale('es', 'PE'), // Spanish (Peru)
         // Navigation Configuration
-        initialRoute: AppRoutes.welcome,
+        // Arranca en el guardián de sesión: si hay token guardado entra directo
+        // al dashboard; si no, va a la pantalla de bienvenida.
+        home: const _SessionGate(),
         onGenerateRoute: _onGenerateRoute,
 
         // Error handling for unknown routes
@@ -260,5 +262,44 @@ class _MyAppState extends State<MyApp> {
       default:
         return null;
     }
+  }
+}
+
+/// Guardián de sesión: decide la primera pantalla según haya token guardado.
+/// El JWT dura 30 días, así que el usuario no debe volver a loguearse al
+/// cerrar y reabrir la app.
+class _SessionGate extends StatefulWidget {
+  const _SessionGate();
+
+  @override
+  State<_SessionGate> createState() => _SessionGateState();
+}
+
+class _SessionGateState extends State<_SessionGate> {
+  @override
+  void initState() {
+    super.initState();
+    _decide();
+  }
+
+  Future<void> _decide() async {
+    final logged = await AuthService().isAuthenticated();
+    if (!mounted) return;
+    if (logged) {
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.dashboard,
+        arguments: {'isAuthenticated': true},
+      );
+    } else {
+      Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator()),
+    );
   }
 }

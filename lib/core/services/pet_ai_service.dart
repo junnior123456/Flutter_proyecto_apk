@@ -58,11 +58,20 @@ class PetAiService {
 
   /// Pregunta a PawBot sobre una mascota. Si no hay consentimiento, la respuesta
   /// llega igual pero genérica, con `consentRequired = true`.
-  Future<PetChatReply> petChat(int petId, String message) async {
+  /// [history] son los turnos previos, para que recuerde la conversación.
+  Future<PetChatReply> petChat(
+    int petId,
+    String message, {
+    List<Map<String, String>> history = const [],
+  }) async {
     final res = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/ai/pet-chat'),
       headers: await _headers(),
-      body: jsonEncode({'petId': petId, 'message': message}),
+      body: jsonEncode({
+        'petId': petId,
+        'message': message,
+        if (history.isNotEmpty) 'history': history,
+      }),
     );
     if (res.statusCode == 200 || res.statusCode == 201) {
       final data = jsonDecode(res.body) as Map<String, dynamic>;

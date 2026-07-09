@@ -89,12 +89,21 @@ class AiService {
 
   /// Chat general sobre perros
   /// [message] cualquier pregunta sobre perros
-  Future<String> generalChat(String message) async {
+  /// [history] turnos previos [{role: 'user'|'assistant', content: '...'}] para
+  /// que el asistente recuerde el hilo y no vuelva a saludar en cada mensaje.
+  Future<String> generalChat(
+    String message, {
+    List<Map<String, String>> history = const [],
+  }) async {
     final headers = await _getHeaders();
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/ai/chat'),
       headers: headers,
-      body: jsonEncode({'message': message, 'chatType': 'general'}),
+      body: jsonEncode({
+        'message': message,
+        'chatType': 'general',
+        if (history.isNotEmpty) 'history': history,
+      }),
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {

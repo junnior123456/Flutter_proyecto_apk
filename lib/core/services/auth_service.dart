@@ -281,48 +281,19 @@ class AuthService {
     }
   }
 
-  // 🔄 Refrescar token (simple implementación)
+  /// 🔄 Renovar la sesión.
+  ///
+  /// El backend NO expone un endpoint de refresh: el JWT dura 30 días y, cuando
+  /// caduca, la única vía es que el usuario vuelva a iniciar sesión. Por eso aquí
+  /// sólo se limpia la sesión. (Antes se re-logueaba con contraseñas escritas en
+  /// el código; se eliminaron por seguridad.)
   Future<bool> refreshToken() async {
-    try {
-      Logger.authOperation('Attempting to refresh token');
-      
-      // Obtener datos del usuario actual
-      final userData = await getCurrentUser();
-      if (userData != null && userData['email'] != null) {
-        try {
-          // Intentar login con las credenciales conocidas
-          String? password;
-          
-          // Mapeo de emails a contraseñas conocidas (solo para desarrollo)
-          if (userData['email'] == 'david@gmail.com') {
-            password = '123456';
-          } else if (userData['email'] == 'junniorchinchay@upeu.edu.pe') {
-            password = '123456';
-          } else if (userData['email'] == 'demo@pawfinder.com') {
-            password = '123456';
-          }
-          
-          if (password != null) {
-            final loginResult = await login(userData['email'], password);
-            if (loginResult != null) {
-              Logger.authOperation('Token refreshed successfully', success: true);
-              return true;
-            }
-          }
-        } catch (e) {
-          Logger.authOperation('Token refresh failed', success: false, details: e.toString());
-        }
-      }
-      
-      // Si no se puede refrescar, limpiar sesión para forzar nuevo login
-      Logger.authOperation('Cannot refresh token, clearing session', success: false);
-      await logout();
-      return false;
-    } catch (e) {
-      Logger.authOperation('Error refreshing token', success: false, details: e.toString());
-      await logout();
-      return false;
-    }
+    Logger.authOperation(
+      'El backend no tiene endpoint de refresh: se requiere iniciar sesión de nuevo',
+      success: false,
+    );
+    await logout();
+    return false;
   }
 
   // 🚪 Cerrar sesión

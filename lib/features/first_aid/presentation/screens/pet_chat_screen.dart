@@ -53,9 +53,21 @@ class _PetChatScreenState extends State<PetChatScreen> {
     super.dispose();
   }
 
+  /// Turnos previos (sin la foto ni el mensaje que se está enviando) para que
+  /// PawBot recuerde el hilo. Se mandan los últimos 10.
+  List<Map<String, String>> _history() {
+    final turns = _messages
+        .where((m) => m.text.trim().isNotEmpty)
+        .map((m) => {'role': m.isBot ? 'assistant' : 'user', 'content': m.text})
+        .toList();
+    return turns.length > 10 ? turns.sublist(turns.length - 10) : turns;
+  }
+
   Future<void> _send(String raw) async {
     final text = raw.trim();
     if (text.isEmpty || _isTyping) return;
+
+    final history = _history(); // antes de añadir el mensaje actual
     setState(() {
       _messages.add(_Msg(text, isBot: false));
       _isTyping = true;
@@ -67,7 +79,7 @@ class _PetChatScreenState extends State<PetChatScreen> {
     // motor offline por palabras clave como respaldo.
     String reply;
     try {
-      reply = await _aiService.generalChat(text);
+      reply = await _aiService.generalChat(text, history: history);
     } catch (_) {
       reply = _botReply(text);
     }
