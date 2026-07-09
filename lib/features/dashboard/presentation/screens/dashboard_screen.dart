@@ -19,6 +19,7 @@ import '../../../ai/presentation/screens/analyze_photo_screen.dart'; // 🔍 Ide
 import '../../../ai/presentation/screens/pet_match_screen.dart'; // 🐕 Buscar coincidencias (IA)
 import '../../../veterinarias/presentation/screens/veterinarias_directory_screen.dart';
 import '../../../veterinarias/presentation/screens/my_veterinaria_screen.dart';
+import '../../../feed/presentation/screens/feed_screen.dart';
 import 'publish_pet_screen.dart';
 import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
@@ -732,6 +733,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   MaterialPageRoute(
                     builder: (context) => const PetMatchScreen(),
                   ),
+                );
+              },
+            ),
+            _buildDrawerItem(
+              icon: Icons.dynamic_feed,
+              title: 'Feed',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FeedScreen()),
                 );
               },
             ),
