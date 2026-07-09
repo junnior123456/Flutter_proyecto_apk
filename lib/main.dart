@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
@@ -34,6 +35,7 @@ import 'presentation/screens/reportar_mascota_screen.dart';
 
 // Application imports
 import 'application/bloc/mascota_bloc_providers.dart';
+import 'core/services/push_service.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -286,6 +288,8 @@ class _SessionGateState extends State<_SessionGate> {
     final logged = await AuthService().isAuthenticated();
     if (!mounted) return;
     if (logged) {
+      // Sesión restaurada: refresca el token de push por si rotó o caducó.
+      unawaited(PushService().syncToken());
       Navigator.pushReplacementNamed(
         context,
         AppRoutes.dashboard,

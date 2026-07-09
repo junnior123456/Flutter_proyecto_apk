@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'http_service.dart';
 import '../config/api_config.dart';
 import '../utils/logger.dart';
+import 'push_service.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -59,7 +61,10 @@ class AuthService {
         
         // Notificar cambio de usuario autenticado
         await _notifyProfileChange();
-        
+
+        // Registrar el dispositivo para recibir push (no bloquea el login).
+        unawaited(PushService().syncToken());
+
         print('✅ Login exitoso para: ${data['user']['email']}');
         return data;
       } else {
@@ -332,6 +337,9 @@ class AuthService {
   // 🚪 Cerrar sesión
   Future<void> logout() async {
     try {
+      // Dar de baja el push ANTES de borrar el JWT: el endpoint lo necesita.
+      await PushService().unregister();
+
       final prefs = await SharedPreferences.getInstance();
       
       // Limpiar datos locales
