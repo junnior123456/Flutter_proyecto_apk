@@ -132,17 +132,110 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   }
 
   Future<void> loadNotifications() async {
-    // Simulado por ahora
-    setState(() {
-      notifications = [];
-    });
+    try {
+      final response = await http.get(
+        Uri.parse('http://167.99.4.161/api/notifications'),
+        headers: await _authHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          notifications =
+              (data['data']?['notifications'] as List?) ?? [];
+        });
+      }
+    } catch (e) {
+      print('Error loading notifications: $e');
+    }
   }
 
   Future<void> loadReports() async {
-    // Simulado por ahora
-    setState(() {
-      reports = [];
-    });
+    try {
+      final response = await http.get(
+        Uri.parse('http://167.99.4.161/api/reports/admin/all'),
+        headers: await _authHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          reports = (data['data']?['reports'] as List?) ?? [];
+        });
+      }
+    } catch (e) {
+      print('Error loading reports: $e');
+    }
+  }
+
+  Future<void> updateUser(int userId, Map<String, dynamic> body) async {
+    try {
+      final response = await http.put(
+        Uri.parse('http://167.99.4.161/api/users/$userId'),
+        headers: await _authHeaders(),
+        body: json.encode(body),
+      );
+      if (response.statusCode == 200) {
+        await loadUsers();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Usuario actualizado correctamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al actualizar (${response.statusCode})'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al actualizar usuario: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> updatePet(int petId, Map<String, dynamic> body) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('http://167.99.4.161/api/pets/$petId'),
+        headers: await _authHeaders(),
+        body: json.encode(body),
+      );
+      if (response.statusCode == 200) {
+        await loadPets();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Mascota actualizada correctamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al actualizar (${response.statusCode})'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al actualizar mascota: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> loadVeterinarias() async {
@@ -500,15 +593,6 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
                     icon: const Icon(Icons.edit, color: Colors.blue),
                     onPressed: () => _showEditUserDialog(user),
                   ),
-                  if (!isAdmin) // No permitir eliminar admins
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => _confirmDelete(
-                        'usuario',
-                        user['name'] ?? 'Usuario',
-                        () => deleteUser(user['id']),
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -623,30 +707,100 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
     );
   }
 
-  Widget _buildNotificationsTab() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+  Widget _emptyState(IconData icon, String text, Future<void> Function() onRefresh) {
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: ListView(
         children: [
-          Icon(Icons.notifications, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('Notificaciones'),
-          Text('Próximamente...', style: TextStyle(color: Colors.grey)),
+          const SizedBox(height: 120),
+          Center(
+            child: Column(
+              children: [
+                Icon(icon, size: 64, color: Colors.grey),
+                const SizedBox(height: 16),
+                Text(text, style: const TextStyle(color: Colors.grey)),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
+  Widget _buildNotificationsTab() {
+    if (notifications.isEmpty) {
+      return _emptyState(
+          Icons.notifications_off, 'No hay notificaciones', loadNotifications);
+    }
+    return RefreshIndicator(
+      onRefresh: loadNotifications,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: notifications.length,
+        itemBuilder: (context, index) {
+          final n = notifications[index];
+          final isRead = n['isRead'] == true;
+          return Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor:
+                    isRead ? Colors.grey : const Color(0xFFFF9800),
+                child: const Icon(Icons.notifications, color: Colors.white),
+              ),
+              title: Text(
+                n['title'] ?? 'Notificación',
+                style: TextStyle(
+                  fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
+                ),
+              ),
+              subtitle: Text(n['message'] ?? ''),
+              trailing: Text(
+                '${n['type'] ?? ''}',
+                style: const TextStyle(fontSize: 10, color: Colors.grey),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildReportsTab() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.report, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('Reportes'),
-          Text('Próximamente...', style: TextStyle(color: Colors.grey)),
-        ],
+    if (reports.isEmpty) {
+      return _emptyState(
+          Icons.verified, 'No hay reportes pendientes', loadReports);
+    }
+    return RefreshIndicator(
+      onRefresh: loadReports,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: reports.length,
+        itemBuilder: (context, index) {
+          final r = reports[index];
+          final status = '${r['status'] ?? 'pendiente'}';
+          return Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: Colors.red,
+                child: Icon(Icons.report, color: Colors.white),
+              ),
+              title: Text(r['reason'] ?? r['type'] ?? 'Reporte'),
+              subtitle: Text(r['description'] ?? ''),
+              trailing: Text(
+                status,
+                style: TextStyle(
+                  color: status == 'pending' || status == 'pendiente'
+                      ? Colors.orange
+                      : Colors.green,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -1161,19 +1315,119 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   }
 
   void _showEditUserDialog(Map<String, dynamic> user) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Edición de usuarios próximamente'),
-        backgroundColor: Colors.orange,
+    final name = TextEditingController(text: user['name'] ?? '');
+    final lastname = TextEditingController(text: user['lastname'] ?? '');
+    final email = TextEditingController(text: user['email'] ?? '');
+    final phone = TextEditingController(text: user['phone'] ?? '');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Editar Usuario'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: name,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+              ),
+              TextField(
+                controller: lastname,
+                decoration: const InputDecoration(labelText: 'Apellido'),
+              ),
+              TextField(
+                controller: email,
+                decoration: const InputDecoration(labelText: 'Email'),
+              ),
+              TextField(
+                controller: phone,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(labelText: 'Teléfono'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF9800),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.pop(ctx);
+              updateUser(user['id'], {
+                'name': name.text.trim(),
+                'lastname': lastname.text.trim(),
+                'email': email.text.trim(),
+                'phone': phone.text.trim(),
+              });
+            },
+            child: const Text('Guardar'),
+          ),
+        ],
       ),
     );
   }
 
   void _showEditPetDialog(Map<String, dynamic> pet) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Edición de mascotas próximamente'),
-        backgroundColor: Colors.orange,
+    final name = TextEditingController(text: pet['name'] ?? '');
+    final breed = TextEditingController(text: pet['breed'] ?? '');
+    final age = TextEditingController(text: pet['age'] ?? '');
+    final description = TextEditingController(text: pet['description'] ?? '');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Editar ${pet['name'] ?? 'Mascota'}'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: name,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+              ),
+              TextField(
+                controller: breed,
+                decoration: const InputDecoration(labelText: 'Raza'),
+              ),
+              TextField(
+                controller: age,
+                decoration: const InputDecoration(labelText: 'Edad'),
+              ),
+              TextField(
+                controller: description,
+                maxLines: 3,
+                decoration: const InputDecoration(labelText: 'Descripción'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF9800),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.pop(ctx);
+              updatePet(pet['id'], {
+                'name': name.text.trim(),
+                'breed': breed.text.trim(),
+                'age': age.text.trim(),
+                'description': description.text.trim(),
+              });
+            },
+            child: const Text('Guardar'),
+          ),
+        ],
       ),
     );
   }
