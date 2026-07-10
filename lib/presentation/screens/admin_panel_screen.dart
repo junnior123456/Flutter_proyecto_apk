@@ -252,6 +252,44 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
     }
   }
 
+  /// Cambia el rol de un usuario. roleId: '2'=CLIENTE, '3'=VETERINARIO.
+  /// El backend REEMPLAZA los roles (PATCH /api/users/:id/role, solo ADMIN).
+  Future<void> setUserRole(int userId, String roleId) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('http://167.99.4.161/api/users/$userId/role'),
+        headers: await _authHeaders(),
+        body: json.encode({'roleId': roleId}),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        await loadUsers();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(roleId == '3'
+                ? 'Usuario ascendido a veterinario'
+                : 'Usuario ahora es cliente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al cambiar rol (${response.statusCode})'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al cambiar rol: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   Future<void> deletePet(int petId) async {
     try {
       final response = await http.delete(
@@ -358,18 +396,31 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
         itemCount: users.length,
         itemBuilder: (context, index) {
           final user = users[index];
-          final isAdmin = user['roles'] != null && 
-                         (user['roles'] as List).any((role) => role['name'] == 'ADMIN');
-          
+          // Los roles llegan como lista de {id, name}. El JWT usa IDs:
+          // '1'=ADMIN, '2'=CLIENT, '3'=VET. Detectamos por nombre o por id.
+          final rolesList = (user['roles'] as List?) ?? [];
+          bool hasRole(String name, String id) => rolesList
+              .any((r) => r['name'] == name || '${r['id']}' == id);
+          final isAdmin = hasRole('ADMIN', '1');
+          final isVet = hasRole('VET', '3');
+          final roleLabel = isAdmin
+              ? 'ADMINISTRADOR'
+              : (isVet ? 'VETERINARIO' : 'CLIENTE');
+          final roleColor = isAdmin
+              ? Colors.red
+              : (isVet ? Colors.blue : Colors.green);
+          final roleIcon = isAdmin
+              ? Icons.admin_panel_settings
+              : (isVet ? Icons.local_hospital : Icons.person);
+
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: isAdmin ? Colors.red : const Color(0xFFFF9800),
-                child: Icon(
-                  isAdmin ? Icons.admin_panel_settings : Icons.person,
-                  color: Colors.white,
-                ),
+                backgroundColor: isAdmin
+                    ? Colors.red
+                    : (isVet ? Colors.blue : const Color(0xFFFF9800)),
+                child: Icon(roleIcon, color: Colors.white),
               ),
               title: Text('${user['name'] ?? ''} ${user['lastname'] ?? ''}'),
               subtitle: Column(
@@ -377,9 +428,9 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
                 children: [
                   Text(user['email'] ?? ''),
                   Text(
-                    isAdmin ? 'ADMINISTRADOR' : 'CLIENTE',
+                    roleLabel,
                     style: TextStyle(
-                      color: isAdmin ? Colors.red : Colors.green,
+                      color: roleColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -388,6 +439,19 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (!isAdmin) // Ascender/quitar VET (no aplica a admins)
+                    IconButton(
+                      tooltip: isVet
+                          ? 'Quitar veterinario'
+                          : 'Hacer veterinario',
+                      icon: Icon(
+                        isVet
+                            ? Icons.medical_services
+                            : Icons.medical_services_outlined,
+                        color: isVet ? Colors.blue : Colors.grey,
+                      ),
+                      onPressed: () => _confirmRoleChange(user, isVet),
+                    ),
                   IconButton(
                     icon: const Icon(Icons.edit, color: Colors.blue),
                     onPressed: () => _showEditUserDialog(user),
@@ -986,6 +1050,37 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cerrar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmRoleChange(Map<String, dynamic> user, bool isVet) {
+    final name = '${user['name'] ?? ''} ${user['lastname'] ?? ''}'.trim();
+    final toVet = !isVet; // si NO es vet, lo ascendemos; si lo es, lo quitamos
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(toVet ? 'Hacer veterinario' : 'Quitar veterinario'),
+        content: Text(toVet
+            ? '¿Ascender a "$name" a VETERINARIO? Podrá crear y gestionar la ficha de su veterinaria.'
+            : '¿Quitar el rol de veterinario a "$name"? Volverá a ser CLIENTE.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              setUserRole(user['id'], toVet ? '3' : '2');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: toVet ? Colors.blue : Colors.orange,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(toVet ? 'Ascender' : 'Quitar'),
           ),
         ],
       ),
