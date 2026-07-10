@@ -118,17 +118,37 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   }
 
   Future<void> loadAdoptionRequests() async {
-    // Simulado por ahora
-    setState(() {
-      adoptionRequests = [];
-    });
+    try {
+      final response = await http.get(
+        Uri.parse('http://167.99.4.161/api/adoption/admin/all'),
+        headers: await _authHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          adoptionRequests = (data['data'] as List?) ?? [];
+        });
+      }
+    } catch (e) {
+      print('Error loading adoption requests: $e');
+    }
   }
 
   Future<void> loadComments() async {
-    // Simulado por ahora
-    setState(() {
-      comments = [];
-    });
+    try {
+      final response = await http.get(
+        Uri.parse('http://167.99.4.161/api/comments/admin/all'),
+        headers: await _authHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          comments = (data['comments'] as List?) ?? [];
+        });
+      }
+    } catch (e) {
+      print('Error loading comments: $e');
+    }
   }
 
   Future<void> loadNotifications() async {
@@ -680,31 +700,137 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   }
 
   Widget _buildAdoptionsTab() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.assignment, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('Solicitudes de Adopción'),
-          Text('Próximamente...', style: TextStyle(color: Colors.grey)),
-        ],
+    if (adoptionRequests.isEmpty) {
+      return _emptyState(Icons.assignment_turned_in,
+          'No hay solicitudes de adopción', loadAdoptionRequests);
+    }
+    return RefreshIndicator(
+      onRefresh: loadAdoptionRequests,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: adoptionRequests.length,
+        itemBuilder: (context, index) {
+          final r = adoptionRequests[index];
+          final pet = r['pet'] as Map<String, dynamic>?;
+          final adopter = r['adopter'] as Map<String, dynamic>?;
+          final status = '${r['status'] ?? 'pendiente'}';
+          Color sColor;
+          switch (status) {
+            case 'accepted':
+            case 'completed':
+              sColor = Colors.green;
+              break;
+            case 'rejected':
+            case 'cancelled':
+              sColor = Colors.red;
+              break;
+            default:
+              sColor = Colors.orange;
+          }
+          return Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFFFF9800),
+                child: Icon(Icons.pets, color: Colors.white),
+              ),
+              title: Text('${pet?['name'] ?? 'Mascota'} → ${adopter?['name'] ?? 'Adoptante'}'),
+              subtitle: Text(
+                '${adopter?['email'] ?? ''}'
+                '${(r['message'] ?? '').toString().isNotEmpty ? '\n"${r['message']}"' : ''}',
+              ),
+              isThreeLine: (r['message'] ?? '').toString().isNotEmpty,
+              trailing: Text(
+                status,
+                style: TextStyle(color: sColor, fontWeight: FontWeight.bold, fontSize: 12),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildCommentsTab() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.comment, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('Comentarios'),
-          Text('Próximamente...', style: TextStyle(color: Colors.grey)),
-        ],
+    if (comments.isEmpty) {
+      return _emptyState(Icons.comment_outlined, 'No hay comentarios', loadComments);
+    }
+    return RefreshIndicator(
+      onRefresh: loadComments,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: comments.length,
+        itemBuilder: (context, index) {
+          final c = comments[index];
+          final user = c['user'] as Map<String, dynamic>?;
+          final reported = c['isReported'] == true;
+          final author = user != null
+              ? '${user['name'] ?? ''} ${user['lastname'] ?? ''}'.trim()
+              : 'Usuario';
+          return Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            color: reported ? Colors.red.withOpacity(0.06) : null,
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: reported ? Colors.red : Colors.blueGrey,
+                child: Icon(reported ? Icons.flag : Icons.comment,
+                    color: Colors.white, size: 20),
+              ),
+              title: Text(c['content'] ?? ''),
+              subtitle: Text(
+                'Por $author · Mascota #${c['petId'] ?? '?'}'
+                '${reported ? ' · REPORTADO (${c['reportCount'] ?? 0})' : ''}',
+                style: TextStyle(
+                  color: reported ? Colors.red : Colors.grey,
+                  fontSize: 12,
+                ),
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                tooltip: 'Eliminar comentario',
+                onPressed: () => _confirmDelete(
+                  'comentario',
+                  c['content'] ?? 'comentario',
+                  () => deleteComment(c['id']),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
+  }
+
+  Future<void> deleteComment(int id) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('http://167.99.4.161/api/comments/$id'),
+        headers: await _authHeaders(),
+      );
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        await loadComments();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Comentario eliminado'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al eliminar (${response.statusCode})'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
+    }
   }
 
   Widget _emptyState(IconData icon, String text, Future<void> Function() onRefresh) {
