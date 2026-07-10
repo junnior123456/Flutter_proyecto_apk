@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../core/services/token_manager.dart';
+import '../../core/services/vet_request_service.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({Key? key}) : super(key: key);
@@ -30,14 +31,16 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   List<dynamic> notifications = [];
   List<dynamic> reports = [];
   List<dynamic> veterinarias = [];
-  
+  List<dynamic> vetRequests = [];
+  final VetRequestService _vetReqService = VetRequestService();
+
   bool isLoading = true;
   String? error;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 7, vsync: this);
+    _tabController = TabController(length: 8, vsync: this);
     loadAllData();
   }
 
@@ -62,6 +65,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
         loadNotifications(),
         loadReports(),
         loadVeterinarias(),
+        loadVetRequests(),
       ]);
       
       setState(() {
@@ -157,6 +161,44 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
     } catch (e) {
       print('Error loading veterinarias: $e');
     }
+  }
+
+  Future<void> loadVetRequests() async {
+    try {
+      final data = await _vetReqService.list(status: 'pending');
+      setState(() {
+        vetRequests = data;
+      });
+    } catch (e) {
+      print('Error loading vet requests: $e');
+    }
+  }
+
+  Future<void> approveVetRequest(int id, String name) async {
+    final ok = await _vetReqService.approve(id);
+    await loadVetRequests();
+    await loadUsers();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok
+            ? '$name ahora es veterinario'
+            : 'No se pudo aprobar la solicitud'),
+        backgroundColor: ok ? Colors.green : Colors.red,
+      ),
+    );
+  }
+
+  Future<void> rejectVetRequest(int id, String name) async {
+    final ok = await _vetReqService.reject(id);
+    await loadVetRequests();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? 'Solicitud de $name rechazada' : 'No se pudo rechazar'),
+        backgroundColor: ok ? Colors.orange : Colors.red,
+      ),
+    );
   }
 
   Future<void> updateVeterinaria(int vetId, Map<String, dynamic> body) async {
@@ -337,6 +379,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
             Tab(icon: Icon(Icons.notifications), text: 'Notificaciones'),
             Tab(icon: Icon(Icons.report), text: 'Reportes'),
             Tab(icon: Icon(Icons.local_hospital), text: 'Veterinarias'),
+            Tab(icon: Icon(Icons.assignment_ind), text: 'Solicitudes'),
           ],
         ),
         actions: [
@@ -378,6 +421,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
                     _buildNotificationsTab(),
                     _buildReportsTab(),
                     _buildVeterinariasTab(),
+                    _buildVetRequestsTab(),
                   ],
                 ),
       floatingActionButton: FloatingActionButton(
@@ -742,6 +786,119 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
                           vet['name'] ?? 'Veterinaria',
                           () => deleteVeterinaria(vet['id']),
                         ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildVetRequestsTab() {
+    if (vetRequests.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: loadVetRequests,
+        child: ListView(
+          children: const [
+            SizedBox(height: 120),
+            Center(
+              child: Column(
+                children: [
+                  Icon(Icons.assignment_turned_in, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text('No hay solicitudes pendientes'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: loadVetRequests,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: vetRequests.length,
+        itemBuilder: (context, index) {
+          final r = vetRequests[index];
+          final user = r['user'] as Map<String, dynamic>?;
+          final email = user?['email'] ?? '';
+          final name = r['fullName'] ?? user?['name'] ?? 'Solicitante';
+          return Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const CircleAvatar(
+                        backgroundColor: Colors.blue,
+                        child: Icon(Icons.medical_services, color: Colors.white),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            if ('$email'.isNotEmpty)
+                              Text(
+                                email,
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 13,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  if ('${r['clinicName'] ?? ''}'.isNotEmpty)
+                    Text('🏥 ${r['clinicName']}'),
+                  if ('${r['phone'] ?? ''}'.isNotEmpty) Text('📞 ${r['phone']}'),
+                  if (r['ruc'] != null && '${r['ruc']}'.isNotEmpty)
+                    Text('RUC: ${r['ruc']}'),
+                  if ('${r['message'] ?? ''}'.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        '"${r['message']}"',
+                        style: const TextStyle(fontStyle: FontStyle.italic),
+                      ),
+                    ),
+                  const Divider(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () => rejectVetRequest(r['id'], name),
+                        icon: const Icon(Icons.close, color: Colors.red, size: 20),
+                        label: const Text('Rechazar',
+                            style: TextStyle(color: Colors.red)),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        onPressed: () => approveVetRequest(r['id'], name),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                        ),
+                        icon: const Icon(Icons.check, size: 20),
+                        label: const Text('Aprobar'),
                       ),
                     ],
                   ),

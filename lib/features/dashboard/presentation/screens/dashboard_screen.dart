@@ -7,6 +7,7 @@ import '../../../../core/services/user_profile_notifier.dart';
 import '../../../../core/services/pet_service.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/services/adoption_service.dart';
+import '../../../../core/services/vet_request_service.dart';
 import '../../../../core/widgets/pet_card.dart';
 import '../../../auth/presentation/screens/my_publications_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
@@ -1448,15 +1449,37 @@ class ProfileTab extends StatefulWidget {
 
 class _ProfileTabState extends State<ProfileTab> {
   final UserProfileNotifier _profileNotifier = UserProfileNotifier();
+  final AuthService _authService = AuthService();
+  final VetRequestService _vetReqService = VetRequestService();
   String userName = 'Usuario Demo';
   String userEmail = 'usuario@ejemplo.com';
   String? userImageUrl;
+  String userRole = 'CLIENT'; // ADMIN | VET | CLIENT
+  Map<String, dynamic>? _vetRequest; // última solicitud del cliente (si existe)
 
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
+    _loadRoleAndRequest();
     _profileNotifier.addListener(_onProfileChanged);
+  }
+
+  /// Carga el rol para la etiqueta y, si es cliente, el estado de su solicitud.
+  Future<void> _loadRoleAndRequest() async {
+    final role = await _authService.primaryRole();
+    Map<String, dynamic>? req;
+    if (role == 'CLIENT') {
+      try {
+        req = await _vetReqService.mine();
+      } catch (_) {}
+    }
+    if (mounted) {
+      setState(() {
+        userRole = role;
+        _vetRequest = req;
+      });
+    }
   }
 
   @override
@@ -1480,6 +1503,188 @@ class _ProfileTabState extends State<ProfileTab> {
   Future<void> _loadUserProfile() async {
     await _profileNotifier.loadProfile();
     _onProfileChanged();
+  }
+
+  /// Etiqueta del rol: SUPER ADMIN (dueño), VET (veterinario) o CLIENTE.
+  Widget _roleBadge() {
+    String label;
+    Color color;
+    IconData icon;
+    switch (userRole) {
+      case 'ADMIN':
+        label = 'SUPER ADMIN';
+        color = Colors.red;
+        icon = Icons.verified_user;
+        break;
+      case 'VET':
+        label = 'VET';
+        color = Colors.blue;
+        icon = Icons.local_hospital;
+        break;
+      default:
+        label = 'CLIENTE';
+        color = Colors.green;
+        icon = Icons.person;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Tarjeta de solicitud de veterinario (botón o estado), solo para clientes.
+  Widget _vetRequestTile() {
+    final status = _vetRequest?['status'] as String?;
+    if (status == 'pending') {
+      return Card(
+        color: Colors.orange.withOpacity(0.1),
+        child: const ListTile(
+          leading: Icon(Icons.hourglass_top, color: Colors.orange),
+          title: Text('Solicitud de veterinario enviada'),
+          subtitle: Text('En revisión por el administrador.'),
+        ),
+      );
+    }
+    if (status == 'rejected') {
+      final note = (_vetRequest?['reviewNote'] as String?) ?? '';
+      return Card(
+        color: Colors.red.withOpacity(0.08),
+        child: ListTile(
+          leading: const Icon(Icons.cancel, color: Colors.red),
+          title: const Text('Solicitud rechazada'),
+          subtitle: Text(note.isEmpty ? 'Puedes volver a solicitar.' : note),
+          trailing: TextButton(
+            onPressed: _showVetRequestForm,
+            child: const Text('Reintentar'),
+          ),
+        ),
+      );
+    }
+    return Card(
+      color: Colors.blue.withOpacity(0.06),
+      child: ListTile(
+        leading: const Icon(Icons.medical_services, color: Colors.blue),
+        title: const Text('¿Eres veterinario?'),
+        subtitle: const Text('Solicita tu cuenta de veterinario'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: _showVetRequestForm,
+      ),
+    );
+  }
+
+  void _showVetRequestForm() {
+    final fullName = TextEditingController(text: userName);
+    final phone = TextEditingController();
+    final clinic = TextEditingController();
+    final ruc = TextEditingController();
+    final message = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Solicitar ser veterinario'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: fullName,
+                decoration: const InputDecoration(labelText: 'Nombre completo *'),
+              ),
+              TextField(
+                controller: phone,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(labelText: 'Teléfono *'),
+              ),
+              TextField(
+                controller: clinic,
+                decoration: const InputDecoration(labelText: 'Nombre de la clínica'),
+              ),
+              TextField(
+                controller: ruc,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'RUC (opcional)'),
+              ),
+              TextField(
+                controller: message,
+                maxLines: 2,
+                decoration: const InputDecoration(labelText: 'Mensaje (opcional)'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              if (fullName.text.trim().isEmpty || phone.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Nombre y teléfono son obligatorios'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+              Navigator.pop(ctx);
+              try {
+                await _vetReqService.create({
+                  'fullName': fullName.text.trim(),
+                  'phone': phone.text.trim(),
+                  if (clinic.text.trim().isNotEmpty)
+                    'clinicName': clinic.text.trim(),
+                  if (ruc.text.trim().isNotEmpty) 'ruc': ruc.text.trim(),
+                  if (message.text.trim().isNotEmpty)
+                    'message': message.text.trim(),
+                });
+                await _loadRoleAndRequest();
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('✅ Solicitud enviada. El administrador la revisará.'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } catch (e) {
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(e.toString().replaceFirst('Exception: ', '')),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -1532,7 +1737,12 @@ class _ProfileTabState extends State<ProfileTab> {
             userEmail,
             style: const TextStyle(color: Colors.grey, fontSize: 16),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 12),
+          _roleBadge(),
+          const SizedBox(height: 20),
+          // Solicitar ser veterinario (solo para clientes)
+          if (userRole == 'CLIENT') _vetRequestTile(),
+          const SizedBox(height: 12),
           ListTile(
             leading: const Icon(Icons.edit, color: Colors.orange),
             title: const Text('Editar Perfil'),
