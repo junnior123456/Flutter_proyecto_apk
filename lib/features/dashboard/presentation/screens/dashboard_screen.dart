@@ -1038,6 +1038,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ProfileTab(
           adoptPets: _adoptPets,
           riskPets: _riskPets,
+          onRefresh: _loadPetsFromBackend,
           onRemovePet: (pet) {
             setState(() {
               if (pet.isRisk) {
@@ -1430,12 +1431,15 @@ class ProfileTab extends StatefulWidget {
   final List<Pet> adoptPets;
   final List<Pet> riskPets;
   final Function(Pet) onRemovePet;
+  /// Recarga las publicaciones desde el backend (la provee el dashboard padre).
+  final Future<void> Function()? onRefresh;
 
   const ProfileTab({
     super.key,
     required this.adoptPets,
     required this.riskPets,
     required this.onRemovePet,
+    this.onRefresh,
   });
 
   @override
@@ -1593,18 +1597,21 @@ class _ProfileTabState extends State<ProfileTab> {
               );
             },
           ),
-          // DEBUG: Botón temporal para refrescar perfil
+          // Refrescar perfil + publicaciones desde el backend
           ListTile(
             leading: const Icon(Icons.refresh, color: Colors.blue),
-            title: const Text('🔄 DEBUG: Refrescar Perfil'),
-            subtitle: const Text('Actualizar imagen desde Firebase'),
+            title: const Text('Actualizar'),
+            subtitle: const Text('Refrescar tu perfil y tus publicaciones'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () async {
-              print('🔄 DEBUG: Refrescando perfil manualmente...');
               await _profileNotifier.refreshFromBackend();
+              if (widget.onRefresh != null) {
+                await widget.onRefresh!();
+              }
+              if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('✅ Perfil refrescado desde Firebase'),
+                  content: Text('✅ Perfil y publicaciones actualizados'),
                   backgroundColor: Colors.green,
                 ),
               );
