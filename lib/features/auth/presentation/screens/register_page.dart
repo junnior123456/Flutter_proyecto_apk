@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/constants/legal_links.dart';
 import '../../../../core/services/auth_service.dart';
+
+/// Estilo de los enlaces legales del consentimiento.
+const TextStyle _enlaceLegal = TextStyle(
+  fontSize: 14,
+  color: Color(0xFFFF9800),
+  fontWeight: FontWeight.bold,
+  decoration: TextDecoration.underline,
+);
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -21,6 +31,18 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
   bool _acceptTerms = false;
+
+  Future<void> _abrirPrivacidad() async {
+    final abierto = await launchUrl(
+      Uri.parse(LegalLinks.privacidad),
+      mode: LaunchMode.externalApplication,
+    );
+    if (!abierto && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir la política de privacidad')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -321,12 +343,27 @@ class _RegisterPageState extends State<RegisterPage> {
                                       },
                                       child: const Text(
                                         'términos y condiciones',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Color(0xFFFF9800),
-                                          fontWeight: FontWeight.bold,
-                                          decoration: TextDecoration.underline,
-                                        ),
+                                        style: _enlaceLegal,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _acceptTerms = !_acceptTerms;
+                                        });
+                                      },
+                                      child: const Text(
+                                        ' y la ',
+                                        style: TextStyle(fontSize: 14),
+                                      ),
+                                    ),
+                                    // Google Play exige que la política de privacidad sea
+                                    // accesible ANTES de crear la cuenta, no después.
+                                    GestureDetector(
+                                      onTap: _abrirPrivacidad,
+                                      child: const Text(
+                                        'política de privacidad',
+                                        style: _enlaceLegal,
                                       ),
                                     ),
                                   ],

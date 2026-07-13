@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/services/ai_service.dart';
+import '../../../../core/widgets/ai_disclaimer_banner.dart';
 import 'first_aid_screen.dart';
 import 'symptom_checker_screen.dart';
 
@@ -219,6 +220,13 @@ class _PetChatScreenState extends State<PetChatScreen> {
           constraints: const BoxConstraints(maxWidth: 720),
           child: Column(
             children: [
+              // Aviso de IA + reporte (transparencia, salud y política de Play).
+              AiDisclaimerBanner(
+                ultimaRespuesta: _messages.where((m) => m.isBot).isEmpty
+                    ? null
+                    : _messages.where((m) => m.isBot).last.text,
+              ),
+
               // Accesos rápidos
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,

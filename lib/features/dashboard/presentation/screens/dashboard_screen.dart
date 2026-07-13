@@ -846,6 +846,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 );
               },
             ),
+            // Google Play exige que el usuario encuentre la política de privacidad
+            // y pueda borrar su cuenta desde dentro de la app.
+            _buildDrawerItem(
+              icon: Icons.privacy_tip_outlined,
+              title: 'Legal y privacidad',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.legal);
+              },
+            ),
             _buildDrawerItem(
               icon: Icons.info,
               title: 'Acerca de',

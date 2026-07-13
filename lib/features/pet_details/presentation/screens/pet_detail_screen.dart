@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/risk_type.dart'; // ✅ NUEVO
 import '../../../../core/widgets/cached_pet_image.dart';
+import '../../../../core/widgets/report_content_sheet.dart';
 import 'pet_health_hub_screen.dart';
 
 /// 📱 Pantalla de detalles de mascota - Clean Architecture
@@ -30,6 +31,35 @@ class PetDetailScreen extends StatelessWidget {
             expandedHeight: 300,
             pinned: true,
             backgroundColor: Colors.orange,
+            actions: [
+              // Vía por la que se ejecuta la política de derechos de autor: sin
+              // botón de denuncia, el procedimiento de retiro no existe en la
+              // práctica. También cubre el resto de contenido prohibido.
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert, color: Colors.white),
+                onSelected: (v) {
+                  if (v == 'reportar') {
+                    ReportContentSheet.mostrar(
+                      context,
+                      petId: pet.id,
+                      petName: pet.name,
+                    );
+                  }
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem(
+                    value: 'reportar',
+                    child: Row(
+                      children: [
+                        Icon(Icons.flag_outlined, size: 20, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('Reportar publicación'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 pet.name,

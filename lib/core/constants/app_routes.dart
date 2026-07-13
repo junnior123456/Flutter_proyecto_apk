@@ -34,4 +34,5 @@ class AppRoutes {
   static const String adminAccess = '/admin-access'; // 🔑 Acceso administrativo
   static const String firstAid = '/primeros-auxilios'; // 🐶 Primeros auxilios y cuidados
   static const String assistant = '/asistente'; // 🐶 Asistente/bot para perritos
+  static const String legal = '/legal'; // ⚖️ Privacidad, términos, IA y borrar cuenta
 }

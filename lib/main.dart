@@ -36,6 +36,7 @@ import 'presentation/screens/reportar_mascota_screen.dart';
 // Application imports
 import 'application/bloc/mascota_bloc_providers.dart';
 import 'core/services/push_service.dart';
+import 'features/legal/presentation/screens/legal_screen.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -259,6 +260,12 @@ class _MyAppState extends State<MyApp> {
         return MaterialPageRoute(
           settings: settings,
           builder: (context) => const PetChatScreen(),
+        );
+
+      case AppRoutes.legal:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => const LegalScreen(),
         );
 
       default:

@@ -2,6 +2,7 @@
 /// Permite al usuario chatear con la IA sobre perros en Tarapoto
 import 'package:flutter/material.dart';
 import '../../../../core/services/ai_service.dart';
+import '../../../../core/widgets/ai_disclaimer_banner.dart';
 
 class AiChatScreen extends StatefulWidget {
   const AiChatScreen({super.key});
@@ -68,6 +69,15 @@ class _AiChatScreenState extends State<AiChatScreen> {
       ),
       body: Column(
         children: [
+          // Aviso obligatorio: el usuario debe saber que habla con una IA y que
+          // no es consejo veterinario. Incluye el botón de reporte que exige la
+          // política de IA generativa de Google Play.
+          AiDisclaimerBanner(
+            ultimaRespuesta: _messages.where((m) => !m.isUser).isEmpty
+                ? null
+                : _messages.where((m) => !m.isUser).last.text,
+          ),
+
           // Chips de modo rápido
           _buildModeChips(),
 

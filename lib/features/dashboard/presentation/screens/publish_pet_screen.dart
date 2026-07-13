@@ -5,6 +5,49 @@ import 'risk_pet_form_dialog.dart';
 /// Pantalla de Selección para Publicar Mascota
 /// Permite elegir entre Adopción o Riesgo
 /// Clean Architecture - Capa de Presentación
+/// Declaración de derechos sobre el contenido, antes de publicar.
+///
+/// Traslada la responsabilidad a quien sube el material (Términos, sección 3):
+/// si la foto o el documento son de otro, responde él, no PawFinder. Sin esta
+/// declaración expresa, esa cláusula se sostiene mucho peor.
+Future<bool> _declararDerechos(BuildContext context) async {
+  final aceptado = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Row(
+        children: [
+          Icon(Icons.copyright_outlined, color: Color(0xFFFF9800)),
+          SizedBox(width: 8),
+          Expanded(child: Text('Antes de publicar')),
+        ],
+      ),
+      content: const Text(
+        'Al publicar declaras que las fotos, audios o documentos que subes son '
+        'tuyos, o que tienes permiso para usarlos.\n\n'
+        'No subas imágenes sacadas de internet ni contenido de otras personas: '
+        'si alguien reclama por ese contenido, la responsabilidad es tuya.\n\n'
+        'Si aparecen personas identificables, necesitas su consentimiento.',
+        style: TextStyle(height: 1.45),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFFF9800),
+            foregroundColor: Colors.white,
+          ),
+          onPressed: () => Navigator.pop(ctx, true),
+          child: const Text('Lo entiendo, es mío'),
+        ),
+      ],
+    ),
+  );
+  return aceptado ?? false;
+}
+
 class PublishPetScreen extends StatelessWidget {
   const PublishPetScreen({super.key});
 
@@ -83,7 +126,9 @@ class PublishPetScreen extends StatelessWidget {
                                 Colors.blue.shade600
                               ],
                             ),
-                            onTap: () {
+                            onTap: () async {
+                              if (!await _declararDerechos(context)) return;
+                              if (!context.mounted) return;
                               Navigator.pop(context);
                               showDialog(
                                 context: context,
@@ -107,7 +152,9 @@ class PublishPetScreen extends StatelessWidget {
                             gradient: LinearGradient(
                               colors: [Colors.red.shade400, Colors.red.shade600],
                             ),
-                            onTap: () {
+                            onTap: () async {
+                              if (!await _declararDerechos(context)) return;
+                              if (!context.mounted) return;
                               Navigator.pop(context);
                               showDialog(
                                 context: context,
