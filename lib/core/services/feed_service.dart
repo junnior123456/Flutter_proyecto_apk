@@ -56,9 +56,16 @@ class FeedService {
     );
     if (res.statusCode == 200) {
       final body = jsonDecode(res.body);
-      // El endpoint puede devolver {data:[...]} o una lista directa.
-      final list = body is Map ? (body['data'] ?? []) : body;
-      return (list as List).map((e) => Map<String, dynamic>.from(e)).toList();
+
+      // El backend responde {ok, data:{comments:[...], total:N}}: `data` es un
+      // OBJETO, no una lista. Antes se hacía `data as List` y reventaba, así que
+      // los comentarios se guardaban pero desaparecían al releerlos.
+      // Se aceptan las tres formas por si algún endpoint cambia.
+      final data = body is Map ? body['data'] : body;
+      final list = data is Map ? (data['comments'] ?? []) : (data ?? []);
+
+      if (list is! List) return [];
+      return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
     }
     throw Exception('No se pudieron cargar los comentarios (${res.statusCode})');
   }

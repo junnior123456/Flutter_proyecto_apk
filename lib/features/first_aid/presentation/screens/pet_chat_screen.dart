@@ -136,10 +136,14 @@ class _PetChatScreenState extends State<PetChatScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     try {
+      // 1600px con calidad 85 daba un JPEG de ~500 KB que, al pasarlo a base64,
+      // se inflaba un 33% y superaba el límite del servidor (413). El modelo de
+      // visión no aprovecha más de 1024px: bajarlo no pierde diagnóstico y sube
+      // en un tercio del tiempo (y de los datos móviles del usuario).
       final XFile? file = await _picker.pickImage(
         source: source,
-        maxWidth: 1600,
-        imageQuality: 85,
+        maxWidth: 1024,
+        imageQuality: 75,
       );
       if (file == null) return;
       final bytes = await file.readAsBytes();
