@@ -18,7 +18,7 @@ class HttpService {
 
   /// 🌐 URL fija de tu backend en Railway
   static const String _railwayBaseUrl =
-      'http://167.99.4.161';
+      'https://pawfinder.chinchay.dev';
 
   // URL que funciona (se actualiza automáticamente al detectar conexión)
   String? _workingBaseUrl;

@@ -5,11 +5,11 @@ import 'dart:io';
 class ApiConfig {
   // 🌐 URL de producción en Railway
   static const String productionUrl =
-      'http://167.99.4.161/api';
+      'https://pawfinder.chinchay.dev/api';
 
   // 🔧 URL de desarrollo local
-  static const String developmentUrl = 'http://167.99.4.161/api';
-  static const String emulatorUrl = 'http://167.99.4.161/api';
+  static const String developmentUrl = 'https://pawfinder.chinchay.dev/api';
+  static const String emulatorUrl = 'https://pawfinder.chinchay.dev/api';
 
   // 🎯 Cambiar entre producción y desarrollo
   // Durante desarrollo local en el emulador poner en `false` para usar las URLs locales
@@ -22,7 +22,7 @@ class ApiConfig {
     }
 
     if (kIsWeb) {
-      return 'http://167.99.4.161/api';
+      return 'https://pawfinder.chinchay.dev/api';
     }
     
     // Solo usar Platform en plataformas no-web
@@ -30,7 +30,7 @@ class ApiConfig {
       if (Platform.isAndroid) {
         return emulatorUrl;
       } else if (Platform.isIOS) {
-        return 'http://167.99.4.161/api';
+        return 'https://pawfinder.chinchay.dev/api';
       }
     } catch (_) {}
     
@@ -39,13 +39,13 @@ class ApiConfig {
 
   // 🔄 URLs alternativas para probar en caso de fallo
   static List<String> get alternativeUrls => [
-    'http://167.99.4.161/api', // Android Studio Emulator
-    'http://167.99.4.161/api', // IP WiFi del host
-    'http://167.99.4.161/api', // Genymotion host bridge
-    'http://167.99.4.161/api', // Genymotion alternativa
-    'http://167.99.4.161/api', // Genymotion NAT
-    'http://167.99.4.161/api', // Localhost directo
-    'http://167.99.4.161/api', // IP local
+    'https://pawfinder.chinchay.dev/api', // Android Studio Emulator
+    'https://pawfinder.chinchay.dev/api', // IP WiFi del host
+    'https://pawfinder.chinchay.dev/api', // Genymotion host bridge
+    'https://pawfinder.chinchay.dev/api', // Genymotion alternativa
+    'https://pawfinder.chinchay.dev/api', // Genymotion NAT
+    'https://pawfinder.chinchay.dev/api', // Localhost directo
+    'https://pawfinder.chinchay.dev/api', // IP local
   ];
 
   // 📱 Endpoints principales

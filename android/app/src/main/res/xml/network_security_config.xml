@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  La app habla con pawfinder.chinchay.dev por HTTPS, así que el tráfico en claro
+  queda PROHIBIDO por defecto: si alguna petición se colara por http://, Android
+  la bloquea en vez de mandarla desnuda por la red.
+
+  Sólo se permite texto plano contra localhost y la IP del emulador, para poder
+  desarrollar contra un backend local.
+-->
 <network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">167.99.4.161</domain>
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">10.0.2.2</domain>
-        <domain includeSubdomains="true">192.168.56.1</domain>
         <domain includeSubdomains="true">127.0.0.1</domain>
     </domain-config>
 </network-security-config>

@@ -8,7 +8,7 @@ import '../utils/logger.dart';
 /// Servicio de Notificaciones
 /// Capa de Servicios - Clean Architecture
 class NotificationService {
-  static const String baseUrl = 'http://167.99.4.161/api';
+  static const String baseUrl = 'https://pawfinder.chinchay.dev/api';
 
   /// 📋 Obtener todas las notificaciones del usuario
   Future<List<Notification>> getNotifications({

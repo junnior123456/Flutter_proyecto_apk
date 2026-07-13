@@ -117,9 +117,9 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
       print('🧪 Iniciando prueba de login directo');
       
       final urls = [
-        'http://167.99.4.161/api/auth/login',
-        'http://167.99.4.161/api/auth/login',
-        'http://167.99.4.161/api/auth/login',
+        'https://pawfinder.chinchay.dev/api/auth/login',
+        'https://pawfinder.chinchay.dev/api/auth/login',
+        'https://pawfinder.chinchay.dev/api/auth/login',
       ];
       
       for (String url in urls) {
