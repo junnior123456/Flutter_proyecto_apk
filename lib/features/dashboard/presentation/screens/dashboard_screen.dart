@@ -18,6 +18,7 @@ import '../../../adoption/presentation/dialogs/send_adoption_request_dialog.dart
 import '../../../adoption/presentation/dialogs/send_risk_adoption_request_dialog.dart';
 import '../../../ai/presentation/screens/analyze_photo_screen.dart'; // 🔍 Identificar raza por foto (IA)
 import '../../../ai/presentation/screens/pet_match_screen.dart'; // 🐕 Buscar coincidencias (IA)
+import '../../../pawmatch/presentation/screens/pawmatch_screen.dart'; // 🐶 Compatibilidad (árbol de decisión)
 import '../../../veterinarias/presentation/screens/veterinarias_directory_screen.dart';
 import '../../../veterinarias/presentation/screens/my_veterinaria_screen.dart';
 import '../../../feed/presentation/screens/feed_screen.dart';
@@ -744,6 +745,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const PetMatchScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildDrawerItem(
+              icon: Icons.favorite,
+              title: 'Compatibilidad PawMatch',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PawMatchScreen(),
                   ),
                 );
               },
