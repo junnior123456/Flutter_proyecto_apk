@@ -15,6 +15,12 @@ class ApiConfig {
   // Durante desarrollo local en el emulador poner en `false` para usar las URLs locales
   static const bool useProduction = true; // Set to true for production build
 
+  // 🔵 Login con Google: "ID de cliente WEB" (OAuth 2.0) de Google Cloud Console
+  // del proyecto (termina en .apps.googleusercontent.com). Sirve como
+  // serverClientId de google_sign_in para que el idToken lo pueda verificar el
+  // backend. Déjalo vacío para ocultar el botón de Google hasta configurarlo.
+  static const String googleServerClientId = '';
+
   // 🌐 URL base del backend NestJS
   static String get baseUrl {
     if (useProduction) {

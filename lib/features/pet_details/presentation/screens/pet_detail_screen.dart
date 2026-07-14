@@ -4,6 +4,9 @@ import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/risk_type.dart'; // ✅ NUEVO
 import '../../../../core/widgets/cached_pet_image.dart';
 import '../../../../core/widgets/report_content_sheet.dart';
+import '../../../../core/services/auth_service.dart';
+import '../../../../core/services/chat_service.dart';
+import '../../../chat/presentation/screens/chat_screen.dart';
 import 'pet_health_hub_screen.dart';
 
 /// 📱 Pantalla de detalles de mascota - Clean Architecture
@@ -24,6 +27,37 @@ class PetDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FutureBuilder<Map<String, dynamic>?>(
+        future: AuthService().getCurrentUser(),
+        builder: (context, snap) {
+          final myId = int.tryParse('${snap.data?['id']}');
+          // Oculto en mis propias publicaciones (no me escribo a mí mismo).
+          if (myId == null || myId == pet.userId) return const SizedBox.shrink();
+          return FloatingActionButton.extended(
+            heroTag: 'contactar_dueno',
+            onPressed: () async {
+              final conv = await ChatService().openConversation(
+                withUserId: pet.userId,
+                type: 'adoption',
+                petId: pet.id,
+              );
+              if (conv != null && context.mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatScreen(
+                      conversationId: conv['id'] as int,
+                      title: pet.ownerName,
+                    ),
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.chat),
+            label: const Text('Contactar dueño'),
+          );
+        },
+      ),
       body: CustomScrollView(
         slivers: [
           // AppBar con imagen de fondo

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/services/auth_service.dart';
+import '../../../../core/config/api_config.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -202,6 +203,28 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                             ),
                           ),
+                          // 🔵 Botón de Google (solo si está configurado)
+                          if (ApiConfig.googleServerClientId.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: OutlinedButton.icon(
+                                onPressed: _isLoading ? null : _handleGoogle,
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black87,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                icon: const Icon(Icons.g_mobiledata,
+                                    size: 30, color: Color(0xFFDB4437)),
+                                label: const Text('Continuar con Google',
+                                    style: TextStyle(fontWeight: FontWeight.bold)),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -240,6 +263,37 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  void _handleGoogle() async {
+    setState(() => _isLoading = true);
+    try {
+      final result = await _authService.loginWithGoogle();
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      if (result != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('¡Bienvenido ${result['user']?['name'] ?? ''}!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pushReplacementNamed(
+          context,
+          '/dashboard',
+          arguments: {'isAuthenticated': true},
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${e.toString().replaceFirst('Exception: ', '')}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _handleLogin() async {

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'http_service.dart';
 import '../config/api_config.dart';
@@ -119,6 +121,43 @@ class AuthService {
       print('❌ Error en registro: $e');
       rethrow;
     }
+  }
+
+  // 🔵 Login/registro con Google. Devuelve los datos del usuario, o null si se canceló.
+  Future<Map<String, dynamic>?> loginWithGoogle() async {
+    final serverClientId = ApiConfig.googleServerClientId;
+    if (serverClientId.isEmpty) {
+      throw Exception('El login con Google aún no está configurado.');
+    }
+    final googleSignIn = GoogleSignIn(
+      serverClientId: serverClientId,
+      scopes: const ['email', 'profile'],
+    );
+    // Cerrar sesión previa para que siempre muestre el selector de cuenta.
+    try {
+      await googleSignIn.signOut();
+    } catch (_) {}
+    final account = await googleSignIn.signIn();
+    if (account == null) return null; // el usuario canceló
+    final gauth = await account.authentication;
+    final idToken = gauth.idToken;
+    if (idToken == null) {
+      throw Exception('Google no devolvió un idToken (revisa el serverClientId).');
+    }
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/auth/google'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'idToken': idToken}),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      await _saveAuthData(data);
+      await _notifyProfileChange();
+      unawaited(PushService().syncToken());
+      return data;
+    }
+    final err = jsonDecode(response.body);
+    throw Exception(err['message'] ?? 'Error al iniciar sesión con Google');
   }
 
   // 💾 Guardar datos de autenticación

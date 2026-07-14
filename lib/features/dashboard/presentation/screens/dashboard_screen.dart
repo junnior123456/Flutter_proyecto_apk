@@ -19,6 +19,8 @@ import '../../../adoption/presentation/dialogs/send_risk_adoption_request_dialog
 import '../../../ai/presentation/screens/analyze_photo_screen.dart'; // 🔍 Identificar raza por foto (IA)
 import '../../../ai/presentation/screens/pet_match_screen.dart'; // 🐕 Buscar coincidencias (IA)
 import '../../../pawmatch/presentation/screens/pawmatch_screen.dart'; // 🐶 Compatibilidad (árbol de decisión)
+import '../../../chat/presentation/screens/conversations_screen.dart'; // 💬 Mensajes
+import '../../../appointments/presentation/screens/appointments_screen.dart'; // 🗓️ Citas
 import '../../../veterinarias/presentation/screens/veterinarias_directory_screen.dart';
 import '../../../veterinarias/presentation/screens/my_veterinaria_screen.dart';
 import '../../../feed/presentation/screens/feed_screen.dart';
@@ -758,6 +760,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const PawMatchScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildDrawerItem(
+              icon: Icons.forum,
+              title: 'Mensajes',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ConversationsScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildDrawerItem(
+              icon: Icons.event,
+              title: 'Citas',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AppointmentsScreen(),
                   ),
                 );
               },
