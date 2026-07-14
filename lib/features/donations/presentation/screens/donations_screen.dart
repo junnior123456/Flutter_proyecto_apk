@@ -741,23 +741,26 @@ class _DonationsScreenState extends State<DonationsScreen> with SingleTickerProv
 
       if (donation != null) {
         Logger.info('Donación creada exitosamente: ${donation.id}', tag: 'DonationsScreen');
-        
+
         // Mostrar éxito
+        if (!mounted) return;
         _showSuccess('¡Donación registrada exitosamente!');
-        
+
         // Abrir Yape
         await _openYapeApp();
-        
+
         // Mostrar diálogo de confirmación
+        if (!mounted) return;
         _showConfirmationDialog(donation.id);
       } else {
+        if (!mounted) return;
         _showError('Error al registrar la donación. Intenta nuevamente.');
       }
     } catch (e) {
       Logger.error('Error al crear donación', tag: 'DonationsScreen', error: e);
-      _showError('Error: ${e.toString()}');
+      if (mounted) _showError('Error: ${e.toString()}');
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -959,6 +962,7 @@ class _DonationsScreenState extends State<DonationsScreen> with SingleTickerProv
         transactionId,
       );
 
+      if (!mounted) return;
       if (success) {
         _showSuccess('¡Donación confirmada! Gracias por tu apoyo 💚');
         setState(() => selectedAmount = null);
@@ -967,9 +971,9 @@ class _DonationsScreenState extends State<DonationsScreen> with SingleTickerProv
       }
     } catch (e) {
       Logger.error('Error al confirmar donación', tag: 'DonationsScreen', error: e);
-      _showError('Error: ${e.toString()}');
+      if (mounted) _showError('Error: ${e.toString()}');
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
     }
   }
 

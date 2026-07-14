@@ -17,7 +17,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _authService = AuthService();
   
   bool _isLoading = false;
-  String? _resetToken; // Para modo demo
 
   @override
   void dispose() {
@@ -38,29 +37,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       if (!mounted) return;
 
       if (result != null && result['success'] == true) {
-        // Guardar token para modo demo
-        if (result['tokenDemo'] != null) {
-          setState(() {
-            _resetToken = result['tokenDemo'];
-          });
-        }
-
-        // Mostrar mensaje de éxito
+        // El token de reseteo llega por CORREO (el backend ya no lo devuelve
+        // aquí: hacerlo permitía tomar cualquier cuenta con solo el email).
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              result['message'] ?? 
-              'Se han enviado instrucciones a tu correo',
+              result['message'] ??
+              'Si el correo está registrado, recibirás instrucciones para recuperar tu contraseña.',
             ),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 5),
           ),
         );
 
-        // Si tenemos token demo, mostrar diálogo
-        if (_resetToken != null) {
-          _showDemoTokenDialog();
-        }
+        // Llevar a la pantalla de reseteo para que pegue el código del correo.
+        await Future.delayed(const Duration(seconds: 1));
+        if (!mounted) return;
+        Navigator.pushNamed(context, '/reset-password');
       }
     } catch (e) {
       if (!mounted) return;
@@ -76,68 +69,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         setState(() => _isLoading = false);
       }
     }
-  }
-
-  void _showDemoTokenDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.info_outline, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('Token de Recuperación'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'En un entorno real, recibirías este token por correo. '
-              'Para esta demo, copia el token:',
-              style: TextStyle(fontSize: 14),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[400]!),
-              ),
-              child: SelectableText(
-                _resetToken!,
-                style: const TextStyle(
-                  fontFamily: 'monospace',
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(
-                context,
-                '/reset-password',
-                arguments: _resetToken,
-              );
-            },
-            child: const Text('Ir a Resetear'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override

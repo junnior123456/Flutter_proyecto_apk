@@ -34,7 +34,16 @@ class PetService {
       final response = await _httpService.get(endpoint);
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+        // GET /pets responde paginado: { ok, data: { data: [...], total, ... } }.
+        // Antes se casteaba ese Map como List → TypeError → catch → [] (la
+        // pantalla de match por IA nunca veía candidatos). Se toleran las 3 formas.
+        final decoded = json.decode(response.body);
+        final List<dynamic> data = decoded is List
+            ? decoded
+            : ((decoded['data'] is Map
+                    ? decoded['data']['data']
+                    : decoded['data']) ??
+                []) as List<dynamic>;
         final pets = data.map((json) => _petFromJson(json)).toList();
 
         Logger.petOperation('Retrieved ${pets.length} pets successfully');

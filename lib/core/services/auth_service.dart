@@ -51,7 +51,8 @@ class AuthService {
       });
 
       print('📡 Respuesta del servidor: ${response.statusCode}');
-      print('📥 Cuerpo de respuesta: ${response.body}');
+      // NO imprimir response.body: contiene el JWT de sesión y quedaría en
+      // logcat / reportes de crash de una APK publicada.
 
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
@@ -129,7 +130,7 @@ class AuthService {
     final cleanToken = token.replaceFirst('Bearer ', '').trim();
     await prefs.setString(_tokenKey, cleanToken);
     
-    print('✅ Token guardado (limpio): ${cleanToken.substring(0, 20)}...');
+    print('✅ Token de sesión guardado');
     
     // Guardar datos del usuario
     final userData = jsonEncode(data['user']);
