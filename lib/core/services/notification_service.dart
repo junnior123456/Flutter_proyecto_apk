@@ -3,12 +3,14 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/notification.dart';
 import '../../data/models/notification_model.dart';
+import '../config/api_config.dart';
 import '../utils/logger.dart';
 
 /// Servicio de Notificaciones
 /// Capa de Servicios - Clean Architecture
 class NotificationService {
-  static const String baseUrl = 'https://pawfinder.chinchay.dev/api';
+  // URL centralizada: un solo sitio que tocar si cambia el dominio.
+  static String get baseUrl => ApiConfig.baseUrl;
 
   /// 📋 Obtener todas las notificaciones del usuario
   Future<List<Notification>> getNotifications({

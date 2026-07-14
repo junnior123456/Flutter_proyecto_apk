@@ -1,13 +1,14 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/pet.dart';
 import '../../data/models/pet_model.dart';
+import '../config/api_config.dart';
 import 'token_manager.dart';
 
 class MyPetsService {
-  static const String baseUrl = 'https://pawfinder.chinchay.dev/api';
+  // URL centralizada: un solo sitio que tocar si cambia el dominio.
+  static String get baseUrl => ApiConfig.baseUrl;
   final TokenManager _tokenManager = TokenManager();
 
   /// 📋 Obtener las mascotas del usuario autenticado
@@ -16,10 +17,10 @@ class MyPetsService {
       // Verificar si hay token guardado
       final prefs = await SharedPreferences.getInstance();
       final savedToken = prefs.getString('auth_token');
-      print('🔍 Token en SharedPreferences: ${savedToken != null ? "Existe (${savedToken.length} chars)" : "NO EXISTE"}');
-      
+      print('🔍 Token en SharedPreferences: ${savedToken != null ? "Existe" : "NO EXISTE"}');
+
       final token = await _tokenManager.getToken();
-      print('🔑 Token obtenido por TokenManager: ${token != null ? "Sí (${token.substring(0, min(20, token.length))}...)" : "No"}');
+      print('🔑 Token obtenido por TokenManager: ${token != null ? "Sí" : "No"}');
 
       if (token == null || token.isEmpty) {
         print('❌ NO HAY TOKEN - Usuario debe iniciar sesión');
@@ -38,12 +39,9 @@ class MyPetsService {
       );
 
       print('📋 GET /pets/my-pets - Status: ${response.statusCode}');
-      print('🔑 Token usado: Bearer ${cleanToken.substring(0, 20)}...');
-      print('📦 Response: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('📦 Respuesta completa: $data');
         
         if (data['ok'] == true && data['data'] != null) {
           // Verificar si data['data'] tiene la estructura correcta
@@ -89,7 +87,6 @@ class MyPetsService {
       );
 
       print('✏️ PATCH /pets/$petId - Status: ${response.statusCode}');
-      print('📦 Response: ${response.body}');
 
       if (response.statusCode == 200) {
         print('✅ Actualización exitosa en el servidor');
@@ -135,7 +132,6 @@ class MyPetsService {
       );
 
       print('🗑️ DELETE /pets/$petId - Status: ${response.statusCode}');
-      print('📦 Response: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

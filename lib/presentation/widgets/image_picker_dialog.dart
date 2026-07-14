@@ -155,13 +155,16 @@ class ImagePickerDialog extends StatelessWidget {
   Future<void> _handleCameraSelection(BuildContext context) async {
     try {
       final image = await takePhotoUseCase.execute();
-      
+
+      // El usuario pudo cerrar el diálogo mientras se tomaba la foto.
+      if (!context.mounted) return;
       // Cerrar diálogo y retornar imagen
       Navigator.pop(context, image);
     } catch (e) {
+      if (!context.mounted) return;
       // Cerrar diálogo sin imagen
       Navigator.pop(context);
-      
+
       // Mostrar error después de cerrar el diálogo
       Future.delayed(const Duration(milliseconds: 100), () {
         _showErrorSnackBar(context, 'Error con la cámara: ${e.toString()}');
@@ -173,13 +176,16 @@ class ImagePickerDialog extends StatelessWidget {
   Future<void> _handleGallerySelection(BuildContext context) async {
     try {
       final image = await pickGalleryImageUseCase.execute();
-      
+
+      // El usuario pudo cerrar el diálogo mientras elegía la imagen.
+      if (!context.mounted) return;
       // Cerrar diálogo y retornar imagen
       Navigator.pop(context, image);
     } catch (e) {
+      if (!context.mounted) return;
       // Cerrar diálogo sin imagen
       Navigator.pop(context);
-      
+
       // Mostrar error después de cerrar el diálogo
       Future.delayed(const Duration(milliseconds: 100), () {
         _showErrorSnackBar(context, 'Error con la galería: ${e.toString()}');

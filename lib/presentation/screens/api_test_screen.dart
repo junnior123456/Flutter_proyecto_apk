@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../core/config/api_config.dart';
 import '../../core/services/http_service.dart';
 
 class ApiTestScreen extends StatefulWidget {
@@ -117,9 +118,7 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
       print('🧪 Iniciando prueba de login directo');
       
       final urls = [
-        'https://pawfinder.chinchay.dev/api/auth/login',
-        'https://pawfinder.chinchay.dev/api/auth/login',
-        'https://pawfinder.chinchay.dev/api/auth/login',
+        '${ApiConfig.baseUrl}/auth/login',
       ];
       
       for (String url in urls) {
@@ -138,7 +137,6 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
           ).timeout(const Duration(seconds: 10));
           
           print('📡 Respuesta: ${response.statusCode}');
-          print('📥 Body: ${response.body}');
           
           if (response.statusCode == 201) {
             final data = jsonDecode(response.body);

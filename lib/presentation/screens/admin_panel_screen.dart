@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../core/config/api_config.dart';
 import '../../core/services/token_manager.dart';
 import '../../core/services/vet_request_service.dart';
 
@@ -82,7 +83,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> loadUsers() async {
     try {
       final response = await http.get(
-        Uri.parse('https://pawfinder.chinchay.dev/api/users'),
+        Uri.parse('${ApiConfig.baseUrl}/users'),
         headers: await _authHeaders(),
       );
 
@@ -100,7 +101,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> loadPets() async {
     try {
       final response = await http.get(
-        Uri.parse('https://pawfinder.chinchay.dev/api/pets'),
+        Uri.parse('${ApiConfig.baseUrl}/pets'),
         headers: await _authHeaders(),
       );
 
@@ -120,7 +121,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> loadAdoptionRequests() async {
     try {
       final response = await http.get(
-        Uri.parse('https://pawfinder.chinchay.dev/api/adoption/admin/all'),
+        Uri.parse('${ApiConfig.baseUrl}/adoption/admin/all'),
         headers: await _authHeaders(),
       );
       if (response.statusCode == 200) {
@@ -137,7 +138,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> loadComments() async {
     try {
       final response = await http.get(
-        Uri.parse('https://pawfinder.chinchay.dev/api/comments/admin/all'),
+        Uri.parse('${ApiConfig.baseUrl}/comments/admin/all'),
         headers: await _authHeaders(),
       );
       if (response.statusCode == 200) {
@@ -154,7 +155,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> loadNotifications() async {
     try {
       final response = await http.get(
-        Uri.parse('https://pawfinder.chinchay.dev/api/notifications'),
+        Uri.parse('${ApiConfig.baseUrl}/notifications'),
         headers: await _authHeaders(),
       );
       if (response.statusCode == 200) {
@@ -172,7 +173,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> loadReports() async {
     try {
       final response = await http.get(
-        Uri.parse('https://pawfinder.chinchay.dev/api/reports/admin/all'),
+        Uri.parse('${ApiConfig.baseUrl}/reports/admin/all'),
         headers: await _authHeaders(),
       );
       if (response.statusCode == 200) {
@@ -189,7 +190,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> updateUser(int userId, Map<String, dynamic> body) async {
     try {
       final response = await http.put(
-        Uri.parse('https://pawfinder.chinchay.dev/api/users/$userId'),
+        Uri.parse('${ApiConfig.baseUrl}/users/$userId'),
         headers: await _authHeaders(),
         body: json.encode(body),
       );
@@ -225,7 +226,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> updatePet(int petId, Map<String, dynamic> body) async {
     try {
       final response = await http.patch(
-        Uri.parse('https://pawfinder.chinchay.dev/api/pets/$petId'),
+        Uri.parse('${ApiConfig.baseUrl}/pets/$petId'),
         headers: await _authHeaders(),
         body: json.encode(body),
       );
@@ -261,7 +262,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> loadVeterinarias() async {
     try {
       final response = await http.get(
-        Uri.parse('https://pawfinder.chinchay.dev/api/veterinarias/admin/all'),
+        Uri.parse('${ApiConfig.baseUrl}/veterinarias/admin/all'),
         headers: await _authHeaders(),
       );
 
@@ -317,7 +318,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> updateVeterinaria(int vetId, Map<String, dynamic> body) async {
     try {
       final response = await http.patch(
-        Uri.parse('https://pawfinder.chinchay.dev/api/veterinarias/$vetId'),
+        Uri.parse('${ApiConfig.baseUrl}/veterinarias/$vetId'),
         headers: await _authHeaders(),
         body: json.encode(body),
       );
@@ -351,7 +352,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> deleteVeterinaria(int vetId) async {
     try {
       final response = await http.delete(
-        Uri.parse('https://pawfinder.chinchay.dev/api/veterinarias/$vetId'),
+        Uri.parse('${ApiConfig.baseUrl}/veterinarias/$vetId'),
         headers: await _authHeaders(),
       );
 
@@ -384,7 +385,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> deleteUser(int userId) async {
     try {
       final response = await http.delete(
-        Uri.parse('https://pawfinder.chinchay.dev/api/users/$userId'),
+        Uri.parse('${ApiConfig.baseUrl}/users/$userId'),
         headers: await _authHeaders(),
       );
 
@@ -412,7 +413,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> setUserRole(int userId, String roleId) async {
     try {
       final response = await http.patch(
-        Uri.parse('https://pawfinder.chinchay.dev/api/users/$userId/role'),
+        Uri.parse('${ApiConfig.baseUrl}/users/$userId/role'),
         headers: await _authHeaders(),
         body: json.encode({'roleId': roleId}),
       );
@@ -448,7 +449,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> deletePet(int petId) async {
     try {
       final response = await http.delete(
-        Uri.parse('https://pawfinder.chinchay.dev/api/pets/$petId'),
+        Uri.parse('${ApiConfig.baseUrl}/pets/$petId'),
         headers: await _authHeaders(),
       );
 
@@ -804,7 +805,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> deleteComment(int id) async {
     try {
       final response = await http.delete(
-        Uri.parse('https://pawfinder.chinchay.dev/api/comments/$id'),
+        Uri.parse('${ApiConfig.baseUrl}/comments/$id'),
         headers: await _authHeaders(),
       );
       if (response.statusCode == 200 || response.statusCode == 204) {
@@ -1389,7 +1390,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> _createUser(Map<String, dynamic> userData) async {
     try {
       final response = await http.post(
-        Uri.parse('https://pawfinder.chinchay.dev/api/users'),
+        Uri.parse('${ApiConfig.baseUrl}/users'),
         headers: await _authHeaders(),
         body: json.encode(userData),
       );
@@ -1416,7 +1417,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
   Future<void> _createPet(Map<String, dynamic> petData) async {
     try {
       final response = await http.post(
-        Uri.parse('https://pawfinder.chinchay.dev/api/pets'),
+        Uri.parse('${ApiConfig.baseUrl}/pets'),
         headers: await _authHeaders(),
         body: json.encode(petData),
       );

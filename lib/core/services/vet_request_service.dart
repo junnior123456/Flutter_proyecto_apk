@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 import 'token_manager.dart';
 
 /// Solicitudes de clientes para convertirse en veterinarios.
 /// Endpoints backend en /api/vet-requests (ver VetRequestsController).
 class VetRequestService {
-  static const String baseUrl = 'https://pawfinder.chinchay.dev/api';
+  // URL centralizada: un solo sitio que tocar si cambia el dominio.
+  static String get baseUrl => ApiConfig.baseUrl;
   final TokenManager _tokenManager = TokenManager();
 
   Future<Map<String, String>> _headers() async {
