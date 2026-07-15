@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1070427502863-sronsuhtaursd2c58av1fehrcvpnf2nv.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1070427502863-sronsuhtaursd2c58av1fehrcvpnf2nv</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>1070427502863-q032c1lbb1t9hjvsfvv771h4b1pij7hr.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyC6B2JGjs17a5DxY6Mgf76xmfXe_9Lf4bM</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1070427502863</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.chinchay.pawfinder</string>
+	<key>PROJECT_ID</key>
+	<string>pawfinder-4b099</string>
+	<key>STORAGE_BUCKET</key>
+	<string>pawfinder-4b099.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1070427502863:ios:ebdd7f544d7784102de67a</string>
+</dict>
+</plist>

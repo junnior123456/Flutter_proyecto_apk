@@ -1,33 +1,41 @@
 {
   "project_info": {
-    "project_number": "123456789012",
+    "project_number": "1070427502863",
     "project_id": "pawfinder-4b099",
     "storage_bucket": "pawfinder-4b099.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:123456789012:android:abcdef123456789",
+        "mobilesdk_app_id": "1:1070427502863:android:dbe6d9b9ff4121212de67a",
         "android_client_info": {
           "package_name": "com.example.prototipe1"
         }
       },
       "oauth_client": [
         {
-          "client_id": "123456789012-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com",
+          "client_id": "1070427502863-q032c1lbb1t9hjvsfvv771h4b1pij7hr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.prototipe1",
+            "certificate_hash": "05574b3ef2159e2d9378ba93edaab9fe96e92bd3"
+          }
+        },
+        {
+          "client_id": "1070427502863-afk1rag0bndlqnb8jk2bk6u4c80o7enl.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDummyKeyForPawFinderApp123456789"
+          "current_key": "AIzaSyCVXHDj2sd2Tv1Hv69fjWDqkRsVINyhgoE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "123456789012-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com",
+              "client_id": "1070427502863-afk1rag0bndlqnb8jk2bk6u4c80o7enl.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

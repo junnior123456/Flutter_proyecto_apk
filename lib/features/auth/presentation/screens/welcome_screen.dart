@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_routes.dart';
 import '../../../../core/constants/app_styles.dart';
+import '../../../../core/services/auth_service.dart';
+import '../../../../core/config/api_config.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -169,6 +178,40 @@ class WelcomeScreen extends StatelessWidget {
                                     ),
                                   ),
 
+                                  // 🔵 Continuar con Google (solo si está configurado)
+                                  if (ApiConfig.googleServerClientId.isNotEmpty) ...[
+                                    const SizedBox(height: 12),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 50,
+                                      child: OutlinedButton.icon(
+                                        onPressed:
+                                            _isLoading ? null : _handleGoogle,
+                                        style: OutlinedButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          foregroundColor: Colors.black87,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(25),
+                                          ),
+                                        ),
+                                        icon: _isLoading
+                                            ? const SizedBox(
+                                                width: 22,
+                                                height: 22,
+                                                child: CircularProgressIndicator(
+                                                    strokeWidth: 2),
+                                              )
+                                            : const Icon(Icons.g_mobiledata,
+                                                size: 30,
+                                                color: Color(0xFFDB4437)),
+                                        label: const Text('Continuar con Google',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                      ),
+                                    ),
+                                  ],
+
                                   const SizedBox(height: 12),
 
                                   // Enlace para continuar sin cuenta
@@ -211,6 +254,38 @@ class WelcomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // 🔵 Entrar/registrarse con Google. El backend crea la cuenta si no existe.
+  void _handleGoogle() async {
+    setState(() => _isLoading = true);
+    try {
+      final result = await AuthService().loginWithGoogle();
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      if (result != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('¡Bienvenido ${result['user']?['name'] ?? ''}!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pushReplacementNamed(
+          context,
+          AppRoutes.dashboard,
+          arguments: {'isAuthenticated': true},
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Widget _buildFeature(IconData icon, String label, VoidCallback onTap) {
