@@ -39,6 +39,12 @@
 	<string>1070427502863-sronsuhtaursd2c58av1fehrcvpnf2nv.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>PawFinder usa la camara para tomar fotos de las mascotas y de tu perfil.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>PawFinder guarda imagenes en tu galeria cuando lo eliges.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>PawFinder accede a tus fotos para publicar mascotas y actualizar tu perfil.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
