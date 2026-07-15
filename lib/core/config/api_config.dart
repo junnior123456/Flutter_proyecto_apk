@@ -19,7 +19,7 @@ class ApiConfig {
   // del proyecto (termina en .apps.googleusercontent.com). Sirve como
   // serverClientId de google_sign_in para que el idToken lo pueda verificar el
   // backend. Déjalo vacío para ocultar el botón de Google hasta configurarlo.
-  static const String googleServerClientId = '';
+  static const String googleServerClientId = '1070427502863-afk1rag0bndlqnb8jk2bk6u4c80o7enl.apps.googleusercontent.com';
 
   // 🌐 URL base del backend NestJS
   static String get baseUrl {
