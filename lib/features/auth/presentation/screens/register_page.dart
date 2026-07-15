@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/legal_links.dart';
 import '../../../../core/services/auth_service.dart';
+import '../../../../core/config/api_config.dart';
 
 /// Estilo de los enlaces legales del consentimiento.
 const TextStyle _enlaceLegal = TextStyle(
@@ -400,6 +401,30 @@ class _RegisterPageState extends State<RegisterPage> {
                                     ),
                             ),
                           ),
+                          // 🔵 Registrarse con Google (solo si está configurado)
+                          if (ApiConfig.googleServerClientId.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: OutlinedButton.icon(
+                                onPressed: (_isLoading || !_acceptTerms)
+                                    ? null
+                                    : _handleGoogle,
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black87,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                icon: const Icon(Icons.g_mobiledata,
+                                    size: 30, color: Color(0xFFDB4437)),
+                                label: const Text('Registrarme con Google',
+                                    style: TextStyle(fontWeight: FontWeight.bold)),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -438,6 +463,38 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       ),
     );
+  }
+
+  // 🔵 Registro/inicio con Google. El backend crea la cuenta si no existe.
+  void _handleGoogle() async {
+    setState(() => _isLoading = true);
+    try {
+      final result = await AuthService().loginWithGoogle();
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      if (result != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('¡Bienvenido ${result['user']?['name'] ?? ''}!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pushReplacementNamed(
+          context,
+          '/dashboard',
+          arguments: {'isAuthenticated': true},
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _handleRegister() async {
