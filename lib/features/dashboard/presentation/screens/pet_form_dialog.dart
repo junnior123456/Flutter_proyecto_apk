@@ -169,7 +169,7 @@ class _PetFormDialogState extends State<PetFormDialog> {
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.category),
                         ),
-                        items: PetCategory.values.where((cat) => cat != PetCategory.all).map((category) {
+                        items: PetCategory.selectableCategories.map((category) {
                           return DropdownMenuItem(
                             value: category,
                             child: Row(

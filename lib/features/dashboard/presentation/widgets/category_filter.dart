@@ -18,9 +18,9 @@ class CategoryFilter extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: PetCategory.values.length,
+        itemCount: PetCategory.filterCategories.length,
         itemBuilder: (context, index) {
-          final category = PetCategory.values[index];
+          final category = PetCategory.filterCategories[index];
           final isSelected = category == selectedCategory;
           
           return Container(

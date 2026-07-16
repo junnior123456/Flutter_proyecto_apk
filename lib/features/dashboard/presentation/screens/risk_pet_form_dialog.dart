@@ -411,7 +411,7 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
                           prefixIcon: Icon(Icons.category),
                           border: OutlineInputBorder(),
                         ),
-                        items: PetCategory.values.where((c) => c != PetCategory.all).map((category) {
+                        items: PetCategory.selectableCategories.map((category) {
                           return DropdownMenuItem(
                             value: category,
                             child: Row(
