@@ -27,6 +27,7 @@ import '../../../feed/presentation/screens/feed_screen.dart';
 import 'publish_pet_screen.dart';
 import '../../../../domain/entities/pet.dart';
 import '../../../../domain/entities/pet_category.dart';
+import '../../../../core/utils/network_error.dart';
 import 'adopt_tab.dart';
 import 'risk_tab.dart';
 import '../../../pet_details/presentation/screens/pet_detail_screen.dart';
@@ -1726,7 +1727,9 @@ class _ProfileTabState extends State<ProfileTab> {
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(e.toString().replaceFirst('Exception: ', '')),
+                    content: Text(describeNetworkError(e)),
+          // El mensaje explica la causa y qué hacer: 4s no alcanzan para leerlo.
+          duration: const Duration(seconds: 8),
                     backgroundColor: Colors.red,
                   ),
                 );

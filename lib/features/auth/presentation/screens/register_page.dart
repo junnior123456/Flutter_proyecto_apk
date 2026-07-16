@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/legal_links.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/config/api_config.dart';
+import '../../../../core/utils/network_error.dart';
 
 /// Estilo de los enlaces legales del consentimiento.
 const TextStyle _enlaceLegal = TextStyle(
@@ -490,7 +491,9 @@ class _RegisterPageState extends State<RegisterPage> {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          content: Text(describeNetworkError(e)),
+          // El mensaje explica la causa y qué hacer: 4s no alcanzan para leerlo.
+          duration: const Duration(seconds: 8),
           backgroundColor: Colors.red,
         ),
       );
@@ -565,7 +568,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: ${e.toString().replaceFirst('Exception: ', '')}'),
+              content: Text(describeNetworkError(e)),
+          // El mensaje explica la causa y qué hacer: 4s no alcanzan para leerlo.
+          duration: const Duration(seconds: 8),
               backgroundColor: Colors.red,
             ),
           );

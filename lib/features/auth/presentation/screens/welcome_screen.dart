@@ -4,6 +4,7 @@ import '../../../../core/constants/app_routes.dart';
 import '../../../../core/constants/app_styles.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/config/api_config.dart';
+import '../../../../core/utils/network_error.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -281,7 +282,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          content: Text(describeNetworkError(e)),
+          // El mensaje explica la causa y qué hacer: 4s no alcanzan para leerlo.
+          duration: const Duration(seconds: 8),
           backgroundColor: Colors.red,
         ),
       );
