@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/utils/logger.dart';
 
 class UserRepository {
   static const _usersKey = 'app_users_v1';
@@ -20,9 +21,9 @@ class UserRepository {
       final encoded = jsonEncode(users);
       await prefs.setString(_usersKey, encoded);
       
-      print('User saved successfully: ${user['email']}');
+      Logger.debug('User saved successfully: ${user['email']}');
     } catch (e) {
-      print('Error saving user: $e');
+      Logger.debug('Error saving user: $e');
       throw Exception('Failed to save user');
     }
   }
@@ -48,7 +49,7 @@ class UserRepository {
       
       return users.any((u) => (u['email']?.trim().toLowerCase() ?? '') == email);
     } catch (e) {
-      print('Error checking email existence: $e');
+      Logger.debug('Error checking email existence: $e');
       return false;
     }
   }
@@ -66,7 +67,7 @@ class UserRepository {
         (u['password'] ?? '') == password
       );
     } catch (e) {
-      print('Error validating credentials: $e');
+      Logger.debug('Error validating credentials: $e');
       return false;
     }
   }

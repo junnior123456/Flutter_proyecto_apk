@@ -38,6 +38,20 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+
+            // Blindaje del binario. R8 elimina el codigo Java/Kotlin que no se
+            // usa y renombra lo que queda, de modo que abrir la APK ya no
+            // muestra nombres de clases y metodos legibles. `shrinkResources`
+            // descarta ademas los recursos que ningun codigo referencia.
+            //
+            // Ojo: R8 NO toca el codigo Dart, que va compilado a codigo nativo;
+            // ese se ofusca aparte con --obfuscate al compilar.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

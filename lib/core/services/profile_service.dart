@@ -148,7 +148,7 @@ class ProfileService {
             Logger.userOperation('Profile obtained from backend', userId: userId.toString(), data: {'name': backendData['name']});
             
             // DEBUG: Log de la URL de imagen
-            print('🖼️ DEBUG ProfileService: Image URL from backend: ${backendData['image']}');
+            Logger.debug('🖼️ DEBUG ProfileService: Image URL from backend: ${backendData['image']}');
             
             // Actualizar datos locales con los del backend
             await saveUserDataLocally(backendData);
@@ -216,14 +216,14 @@ class ProfileService {
       }
 
       Logger.userOperation('FORCE Refreshing profile from backend', userId: userId.toString());
-      print('🔄 FORCE REFRESH: Obteniendo perfil actualizado del backend...');
+      Logger.debug('🔄 FORCE REFRESH: Obteniendo perfil actualizado del backend...');
       
       _httpService.setAuthToken(token.replaceFirst('Bearer ', ''));
       final response = await _httpService.get('/users/$userId');
 
       if (response.statusCode == 200) {
         final backendData = json.decode(response.body);
-        print('🖼️ FORCE REFRESH: Nueva imagen URL: ${backendData['image']}');
+        Logger.debug('🖼️ FORCE REFRESH: Nueva imagen URL: ${backendData['image']}');
         await saveUserDataLocally(backendData);
         Logger.userOperation('Profile FORCE refreshed from backend', userId: userId.toString(), data: backendData);
         return backendData;
@@ -294,7 +294,7 @@ class ProfileService {
 
       final token = await _getToken();
       if (token == null) {
-        print('⚠️ No hay token, manteniendo datos locales');
+        Logger.debug('⚠️ No hay token, manteniendo datos locales');
         return localData;
       }
 

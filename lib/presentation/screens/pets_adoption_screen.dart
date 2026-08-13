@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../core/constants/backend.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/utils/logger.dart';
 
 class PetsAdoptionScreen extends StatefulWidget {
   const PetsAdoptionScreen({Key? key}) : super(key: key);
@@ -199,7 +200,7 @@ class _PetsAdoptionScreenState extends State<PetsAdoptionScreen> {
                 fit: BoxFit.cover,
                 headers: const {'User-Agent': 'PawFinder/1.0'},
                 errorBuilder: (context, error, stackTrace) {
-                  print('Error loading image: $displayImageUrl - $error');
+                  Logger.debug('Error loading image: $displayImageUrl - $error');
                   return Container(
                     height: 200,
                     color: Colors.grey[300],

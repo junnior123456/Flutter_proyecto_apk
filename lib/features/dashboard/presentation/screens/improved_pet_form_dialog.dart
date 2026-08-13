@@ -129,7 +129,7 @@ class _ImprovedPetFormDialogState extends State<ImprovedPetFormDialog> {
     
     // Prevenir doble envío
     if (_isSubmitting) {
-      print('⚠️ Ya se está enviando el formulario, ignorando clic adicional');
+      Logger.debug('⚠️ Ya se está enviando el formulario, ignorando clic adicional');
       return;
     }
 

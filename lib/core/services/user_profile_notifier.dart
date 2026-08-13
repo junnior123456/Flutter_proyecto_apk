@@ -36,7 +36,7 @@ class UserProfileNotifier extends ChangeNotifier {
       
       if (backendData != null) {
         // DEBUG: Log de datos del backend
-        print('🔍 DEBUG UserProfileNotifier: Backend data image field: ${backendData['image']}');
+        Logger.debug('🔍 DEBUG UserProfileNotifier: Backend data image field: ${backendData['image']}');
         
         // Convertir datos del backend al modelo UserProfile
         _currentProfile = UserProfile(
@@ -48,7 +48,7 @@ class UserProfileNotifier extends ChangeNotifier {
         );
         
         // DEBUG: Log del perfil creado
-        print('🔍 DEBUG UserProfileNotifier: Created profile image: ${_currentProfile!.image}');
+        Logger.debug('🔍 DEBUG UserProfileNotifier: Created profile image: ${_currentProfile!.image}');
         
         // Sincronizar con preferencias locales
         await _saveProfileLocally(_currentProfile!);

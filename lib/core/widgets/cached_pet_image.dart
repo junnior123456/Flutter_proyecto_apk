@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:io';
+import '../utils/logger.dart';
 
 /// Widget reutilizable para mostrar imágenes de mascotas con caché
 /// Sigue Clean Architecture: Core/Widgets (capa de presentación compartida)
@@ -75,7 +76,7 @@ class CachedPetImage extends StatelessWidget {
         height: height,
         fit: fit,
         errorBuilder: (context, error, stackTrace) {
-          debugPrint('❌ Error cargando imagen local: $filePath - Error: $error');
+          Logger.debug('❌ Error cargando imagen local: $filePath - Error: $error');
           return errorWidget ?? _buildErrorPlaceholder();
         },
       ),
@@ -93,9 +94,9 @@ class CachedPetImage extends StatelessWidget {
         fit: fit,
         placeholder: (context, url) => placeholder ?? _buildLoadingPlaceholder(),
         errorWidget: (context, url, error) {
-          debugPrint('❌ Error cargando imagen remota: $url');
-          debugPrint('   Tipo de error: ${error.runtimeType}');
-          debugPrint('   Detalles: $error');
+          Logger.debug('❌ Error cargando imagen remota: $url');
+          Logger.debug('   Tipo de error: ${error.runtimeType}');
+          Logger.debug('   Detalles: $error');
           return errorWidget ?? _buildErrorPlaceholder(showRetry: true, url: url);
         },
         // Configuración de caché optimizada

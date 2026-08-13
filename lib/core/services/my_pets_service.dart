@@ -5,6 +5,7 @@ import '../../domain/entities/pet.dart';
 import '../../data/models/pet_model.dart';
 import '../config/api_config.dart';
 import 'token_manager.dart';
+import '../utils/logger.dart';
 
 class MyPetsService {
   // URL centralizada: un solo sitio que tocar si cambia el dominio.
@@ -17,13 +18,13 @@ class MyPetsService {
       // Verificar si hay token guardado
       final prefs = await SharedPreferences.getInstance();
       final savedToken = prefs.getString('auth_token');
-      print('🔍 Token en SharedPreferences: ${savedToken != null ? "Existe" : "NO EXISTE"}');
+      Logger.debug('🔍 Token en SharedPreferences: ${savedToken != null ? "Existe" : "NO EXISTE"}');
 
       final token = await _tokenManager.getToken();
-      print('🔑 Token obtenido por TokenManager: ${token != null ? "Sí" : "No"}');
+      Logger.debug('🔑 Token obtenido por TokenManager: ${token != null ? "Sí" : "No"}');
 
       if (token == null || token.isEmpty) {
-        print('❌ NO HAY TOKEN - Usuario debe iniciar sesión');
+        Logger.debug('❌ NO HAY TOKEN - Usuario debe iniciar sesión');
         throw Exception('No hay token de autenticación. Por favor inicia sesión nuevamente.');
       }
 
@@ -38,7 +39,7 @@ class MyPetsService {
         },
       );
 
-      print('📋 GET /pets/my-pets - Status: ${response.statusCode}');
+      Logger.debug('📋 GET /pets/my-pets - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -47,10 +48,10 @@ class MyPetsService {
           // Verificar si data['data'] tiene la estructura correcta
           if (data['data']['data'] != null && data['data']['data'] is List) {
             final petsData = data['data']['data'] as List;
-            print('✅ Mascotas encontradas: ${petsData.length}');
+            Logger.debug('✅ Mascotas encontradas: ${petsData.length}');
             return petsData.map((json) => PetModel.fromJson(json as Map<String, dynamic>)).toList();
           } else {
-            print('⚠️ No hay mascotas o estructura incorrecta');
+            Logger.debug('⚠️ No hay mascotas o estructura incorrecta');
             return []; // Retornar lista vacía si no hay mascotas
           }
         }
@@ -58,15 +59,15 @@ class MyPetsService {
 
       throw Exception('Error al obtener mis mascotas: ${response.statusCode}');
     } catch (e) {
-      print('❌ Error en getMyPets: $e');
+      Logger.debug('❌ Error en getMyPets: $e');
       rethrow;
     }
   }
 
   /// ✏️ Actualizar una mascota
   Future<PetModel> updatePet(int petId, Map<String, dynamic> updateData) async {
-    print('🔄 [UPDATE] Iniciando actualización de mascota $petId');
-    print('📋 [UPDATE] Datos: $updateData');
+    Logger.debug('🔄 [UPDATE] Iniciando actualización de mascota $petId');
+    Logger.debug('📋 [UPDATE] Datos: $updateData');
     try {
       final token = await _tokenManager.getToken();
 
@@ -86,10 +87,10 @@ class MyPetsService {
         body: json.encode(updateData),
       );
 
-      print('✏️ PATCH /pets/$petId - Status: ${response.statusCode}');
+      Logger.debug('✏️ PATCH /pets/$petId - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
-        print('✅ Actualización exitosa en el servidor');
+        Logger.debug('✅ Actualización exitosa en el servidor');
         // Por ahora, simplemente devolver un PetModel básico para confirmar que funciona
         // Luego recargaremos la lista completa
         return PetModel(
@@ -106,7 +107,7 @@ class MyPetsService {
 
       throw Exception('Error al actualizar mascota: ${response.statusCode} - ${response.body}');
     } catch (e) {
-      print('❌ Error en updatePet: $e');
+      Logger.debug('❌ Error en updatePet: $e');
       rethrow;
     }
   }
@@ -131,7 +132,7 @@ class MyPetsService {
         },
       );
 
-      print('🗑️ DELETE /pets/$petId - Status: ${response.statusCode}');
+      Logger.debug('🗑️ DELETE /pets/$petId - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -143,7 +144,7 @@ class MyPetsService {
 
       throw Exception('Error al eliminar mascota: ${response.statusCode} - ${response.body}');
     } catch (e) {
-      print('❌ Error en deletePet: $e');
+      Logger.debug('❌ Error en deletePet: $e');
       rethrow;
     }
   }

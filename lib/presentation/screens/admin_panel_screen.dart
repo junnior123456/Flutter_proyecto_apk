@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../../core/config/api_config.dart';
 import '../../core/services/token_manager.dart';
 import '../../core/services/vet_request_service.dart';
+import '../../core/utils/logger.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({Key? key}) : super(key: key);
@@ -94,7 +95,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
         });
       }
     } catch (e) {
-      print('Error loading users: $e');
+      Logger.debug('Error loading users: $e');
     }
   }
 
@@ -114,7 +115,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
         }
       }
     } catch (e) {
-      print('Error loading pets: $e');
+      Logger.debug('Error loading pets: $e');
     }
   }
 
@@ -131,7 +132,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
         });
       }
     } catch (e) {
-      print('Error loading adoption requests: $e');
+      Logger.debug('Error loading adoption requests: $e');
     }
   }
 
@@ -148,7 +149,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
         });
       }
     } catch (e) {
-      print('Error loading comments: $e');
+      Logger.debug('Error loading comments: $e');
     }
   }
 
@@ -166,7 +167,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
         });
       }
     } catch (e) {
-      print('Error loading notifications: $e');
+      Logger.debug('Error loading notifications: $e');
     }
   }
 
@@ -183,7 +184,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
         });
       }
     } catch (e) {
-      print('Error loading reports: $e');
+      Logger.debug('Error loading reports: $e');
     }
   }
 
@@ -273,7 +274,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
         });
       }
     } catch (e) {
-      print('Error loading veterinarias: $e');
+      Logger.debug('Error loading veterinarias: $e');
     }
   }
 
@@ -284,7 +285,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> with SingleTickerPr
         vetRequests = data;
       });
     } catch (e) {
-      print('Error loading vet requests: $e');
+      Logger.debug('Error loading vet requests: $e');
     }
   }
 

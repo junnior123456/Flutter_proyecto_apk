@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../core/config/api_config.dart';
 import '../../core/services/http_service.dart';
+import '../../core/utils/logger.dart';
 
 class ApiTestScreen extends StatefulWidget {
   const ApiTestScreen({super.key});
@@ -115,7 +116,7 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
 
     try {
       // Prueba directa sin usar AuthService
-      print('🧪 Iniciando prueba de login directo');
+      Logger.debug('🧪 Iniciando prueba de login directo');
       
       final urls = [
         '${ApiConfig.baseUrl}/auth/login',
@@ -123,7 +124,7 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
       
       for (String url in urls) {
         try {
-          print('🔍 Probando login en: $url');
+          Logger.debug('🔍 Probando login en: $url');
           final response = await http.post(
             Uri.parse(url),
             headers: {
@@ -136,7 +137,7 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
             }),
           ).timeout(const Duration(seconds: 10));
           
-          print('📡 Respuesta: ${response.statusCode}');
+          Logger.debug('📡 Respuesta: ${response.statusCode}');
           
           if (response.statusCode == 201) {
             final data = jsonDecode(response.body);
@@ -146,7 +147,7 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
             return;
           }
         } catch (e) {
-          print('❌ Error con $url: $e');
+          Logger.debug('❌ Error con $url: $e');
         }
       }
       

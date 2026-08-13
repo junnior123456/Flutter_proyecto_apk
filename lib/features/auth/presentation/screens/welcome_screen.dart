@@ -5,6 +5,7 @@ import '../../../../core/constants/app_styles.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/config/api_config.dart';
 import '../../../../core/utils/network_error.dart';
+import '../../../../core/utils/logger.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -328,7 +329,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   // 🔍 Manejar búsqueda (acceso público)
   void _handleSearch(BuildContext context) {
-    print('🔍 DEBUG: _handleSearch llamado');
+    Logger.debug('🔍 DEBUG: _handleSearch llamado');
     Navigator.pushNamed(
       context,
       AppRoutes.dashboard,
@@ -341,8 +342,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   // 📝 Manejar reporte (acceso público para ver, autenticación para reportar)
   void _handleReport(BuildContext context) {
-    print('🔍 DEBUG: _handleReport llamado');
-    print('🔍 DEBUG: Navegando a dashboard con tab 2 (riesgo)');
+    Logger.debug('🔍 DEBUG: _handleReport llamado');
+    Logger.debug('🔍 DEBUG: Navegando a dashboard con tab 2 (riesgo)');
 
     Navigator.pushNamed(
       context,
@@ -353,12 +354,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       },
     );
 
-    print('🔍 DEBUG: Navegación iniciada');
+    Logger.debug('🔍 DEBUG: Navegación iniciada');
   }
 
   // ❤️ Manejar adopción (acceso público para ver, autenticación para adoptar)
   void _handleAdopt(BuildContext context) {
-    print('🔍 DEBUG: _handleAdopt llamado');
+    Logger.debug('🔍 DEBUG: _handleAdopt llamado');
     Navigator.pushNamed(
       context,
       AppRoutes.dashboard,

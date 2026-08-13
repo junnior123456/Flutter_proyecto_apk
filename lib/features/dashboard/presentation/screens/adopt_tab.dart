@@ -11,6 +11,7 @@ import '../widgets/category_filter.dart';
 import 'improved_pet_form_dialog.dart';
 import '../../../adoption/presentation/dialogs/send_adoption_request_dialog.dart';
 import '../../../pet_details/presentation/screens/pet_detail_screen.dart'; // ✅ Clean Architecture
+import '../../../../core/utils/logger.dart';
 
 class AdoptTab extends StatefulWidget {
   final List<Pet> adoptPets;
@@ -72,9 +73,9 @@ class _AdoptTabState extends State<AdoptTab> {
         _isLoadingFiltered = false;
       });
       
-      print('✅ Filtrado por ${category.displayName}: ${pets.length} mascotas');
+      Logger.debug('✅ Filtrado por ${category.displayName}: ${pets.length} mascotas');
     } catch (e) {
-      print('❌ Error filtrando por categoría: $e');
+      Logger.debug('❌ Error filtrando por categoría: $e');
       setState(() {
         _filteredBackendPets = [];
         _isLoadingFiltered = false;

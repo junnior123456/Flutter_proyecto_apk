@@ -33,18 +33,18 @@ class AuthService {
   // 🔐 Login con el backend
   Future<Map<String, dynamic>?> login(String email, String password) async {
     try {
-      print('🔐 === INICIANDO LOGIN ===');
-      print('📧 Email: $email');
-      print('🌐 URL base configurada: ${ApiConfig.baseUrl}');
-      print('🔄 URLs alternativas: ${ApiConfig.alternativeUrls}');
+      Logger.debug('🔐 === INICIANDO LOGIN ===');
+      Logger.debug('📧 Email: $email');
+      Logger.debug('🌐 URL base configurada: ${ApiConfig.baseUrl}');
+      Logger.debug('🔄 URLs alternativas: ${ApiConfig.alternativeUrls}');
       
       // Verificar conectividad (no bloquear si falla)
-      print('🔍 Verificando conectividad antes del login...');
+      Logger.debug('🔍 Verificando conectividad antes del login...');
       try {
         final isConnected = await _httpService.checkConnection();
-        print('📡 Estado de conectividad: $isConnected');
+        Logger.debug('📡 Estado de conectividad: $isConnected');
       } catch (e) {
-        print('⚠️ Error en verificación de conectividad, continuando con login: $e');
+        Logger.debug('⚠️ Error en verificación de conectividad, continuando con login: $e');
       }
       
       final response = await _httpService.post('/auth/login', body: {
@@ -52,7 +52,7 @@ class AuthService {
         'password': password,
       });
 
-      print('📡 Respuesta del servidor: ${response.statusCode}');
+      Logger.debug('📡 Respuesta del servidor: ${response.statusCode}');
       // NO imprimir response.body: contiene el JWT de sesión y quedaría en
       // logcat / reportes de crash de una APK publicada.
 
@@ -68,16 +68,16 @@ class AuthService {
         // Registrar el dispositivo para recibir push (no bloquea el login).
         unawaited(PushService().syncToken());
 
-        print('✅ Login exitoso para: ${data['user']['email']}');
+        Logger.debug('✅ Login exitoso para: ${data['user']['email']}');
         return data;
       } else {
         final error = jsonDecode(response.body);
-        print('❌ Error de login: ${error['message']}');
+        Logger.debug('❌ Error de login: ${error['message']}');
         throw Exception(error['message'] ?? 'Error de autenticación');
       }
     } catch (e) {
-      print('❌ Error completo en login: $e');
-      print('❌ Tipo de error: ${e.runtimeType}');
+      Logger.debug('❌ Error completo en login: $e');
+      Logger.debug('❌ Tipo de error: ${e.runtimeType}');
       rethrow;
     }
   }
@@ -91,7 +91,7 @@ class AuthService {
     String? phone,
   }) async {
     try {
-      print('📝 Intentando registro con: $email');
+      Logger.debug('📝 Intentando registro con: $email');
       
       final response = await _httpService.post('/auth/register', body: {
         'name': name,
@@ -110,15 +110,15 @@ class AuthService {
         // Notificar cambio de usuario autenticado
         await _notifyProfileChange();
         
-        print('✅ Registro exitoso para: ${data['user']['email']}');
+        Logger.debug('✅ Registro exitoso para: ${data['user']['email']}');
         return data;
       } else {
         final error = jsonDecode(response.body);
-        print('❌ Error de registro: ${error['message']}');
+        Logger.debug('❌ Error de registro: ${error['message']}');
         throw Exception(error['message'] ?? 'Error de registro');
       }
     } catch (e) {
-      print('❌ Error en registro: $e');
+      Logger.debug('❌ Error en registro: $e');
       rethrow;
     }
   }
@@ -169,7 +169,7 @@ class AuthService {
     final cleanToken = token.replaceFirst('Bearer ', '').trim();
     await prefs.setString(_tokenKey, cleanToken);
     
-    print('✅ Token de sesión guardado');
+    Logger.debug('✅ Token de sesión guardado');
     
     // Guardar datos del usuario
     final userData = jsonEncode(data['user']);
@@ -392,9 +392,9 @@ class AuthService {
       // Limpiar perfil
       await _clearProfile();
       
-      print('✅ Sesión cerrada correctamente');
+      Logger.debug('✅ Sesión cerrada correctamente');
     } catch (e) {
-      print('❌ Error cerrando sesión: $e');
+      Logger.debug('❌ Error cerrando sesión: $e');
     }
   }
 
@@ -436,7 +436,7 @@ class AuthService {
   Future<void> _notifyProfileChange() async {
     // Por ahora, simplemente imprimir. El UserProfileNotifier se sincronizará
     // cuando se cargue la siguiente pantalla
-    print('🔄 Usuario autenticado, perfil debe sincronizarse');
+    Logger.debug('🔄 Usuario autenticado, perfil debe sincronizarse');
   }
 
   // 🗑️ Limpiar perfil
@@ -444,9 +444,9 @@ class AuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('user_profile');
-      print('🗑️ Perfil limpiado');
+      Logger.debug('🗑️ Perfil limpiado');
     } catch (e) {
-      print('⚠️ No se pudo limpiar perfil: $e');
+      Logger.debug('⚠️ No se pudo limpiar perfil: $e');
     }
   }
 

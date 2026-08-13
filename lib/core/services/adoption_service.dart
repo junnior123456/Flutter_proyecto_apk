@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import 'token_manager.dart';
+import '../utils/logger.dart';
 
 class AdoptionService {
   final TokenManager _tokenManager = TokenManager();
@@ -61,7 +62,7 @@ class AdoptionService {
         throw Exception(data['message'] ?? 'Error al enviar solicitud');
       }
     } catch (e) {
-      print('❌ Error en sendAdoptionRequest: $e');
+      Logger.debug('❌ Error en sendAdoptionRequest: $e');
       rethrow;
     }
   }
@@ -89,7 +90,7 @@ class AdoptionService {
         throw Exception(data['message'] ?? 'Error al obtener solicitudes');
       }
     } catch (e) {
-      print('❌ Error en getMyRequests: $e');
+      Logger.debug('❌ Error en getMyRequests: $e');
       rethrow;
     }
   }
@@ -117,7 +118,7 @@ class AdoptionService {
         throw Exception(data['message'] ?? 'Error al obtener solicitudes recibidas');
       }
     } catch (e) {
-      print('❌ Error en getReceivedRequests: $e');
+      Logger.debug('❌ Error en getReceivedRequests: $e');
       rethrow;
     }
   }
@@ -153,7 +154,7 @@ class AdoptionService {
         throw Exception(data['message'] ?? 'Error al aceptar solicitud');
       }
     } catch (e) {
-      print('❌ Error en acceptRequest: $e');
+      Logger.debug('❌ Error en acceptRequest: $e');
       rethrow;
     }
   }
@@ -189,7 +190,7 @@ class AdoptionService {
         throw Exception(data['message'] ?? 'Error al rechazar solicitud');
       }
     } catch (e) {
-      print('❌ Error en rejectRequest: $e');
+      Logger.debug('❌ Error en rejectRequest: $e');
       rethrow;
     }
   }
@@ -203,7 +204,7 @@ class AdoptionService {
         request['status'] == 'pending'
       );
     } catch (e) {
-      print('❌ Error en hasExistingRequest: $e');
+      Logger.debug('❌ Error en hasExistingRequest: $e');
       return false;
     }
   }
@@ -229,7 +230,7 @@ class AdoptionService {
         throw Exception(data['message'] ?? 'Error al cancelar solicitud');
       }
     } catch (e) {
-      print('❌ Error en cancelRequest: $e');
+      Logger.debug('❌ Error en cancelRequest: $e');
       rethrow;
     }
   }
@@ -258,7 +259,7 @@ class AdoptionService {
         throw Exception(data['message'] ?? 'Error al confirmar entrega');
       }
     } catch (e) {
-      print('❌ Error en donorConfirmDelivery: $e');
+      Logger.debug('❌ Error en donorConfirmDelivery: $e');
       rethrow;
     }
   }
@@ -287,7 +288,7 @@ class AdoptionService {
         throw Exception(data['message'] ?? 'Error al confirmar recepción');
       }
     } catch (e) {
-      print('❌ Error en adopterConfirmReception: $e');
+      Logger.debug('❌ Error en adopterConfirmReception: $e');
       rethrow;
     }
   }

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../utils/logger.dart';
 
 class GoogleAuthService {
   static final GoogleAuthService _instance = GoogleAuthService._internal();
@@ -14,17 +15,17 @@ class GoogleAuthService {
   /// 🔐 Iniciar sesión con Google
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      print('🔐 Iniciando autenticación con Google...');
+      Logger.debug('🔐 Iniciando autenticación con Google...');
 
       // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
       if (googleUser == null) {
-        print('❌ Usuario canceló la autenticación');
+        Logger.debug('❌ Usuario canceló la autenticación');
         return null;
       }
 
-      print('✅ Usuario seleccionado: ${googleUser.email}');
+      Logger.debug('✅ Usuario seleccionado: ${googleUser.email}');
 
       // Obtain the auth details from the request
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -38,10 +39,10 @@ class GoogleAuthService {
       // Sign in to Firebase with the Google credential
       final UserCredential userCredential = await _auth.signInWithCredential(credential);
       
-      print('✅ Autenticación exitosa: ${userCredential.user?.email}');
+      Logger.debug('✅ Autenticación exitosa: ${userCredential.user?.email}');
       return userCredential;
     } catch (e) {
-      print('❌ Error en autenticación con Google: $e');
+      Logger.debug('❌ Error en autenticación con Google: $e');
       return null;
     }
   }
@@ -62,10 +63,10 @@ class GoogleAuthService {
       if (user == null) return false;
 
       await user.sendEmailVerification();
-      print('✅ Email de verificación enviado a: ${user.email}');
+      Logger.debug('✅ Email de verificación enviado a: ${user.email}');
       return true;
     } catch (e) {
-      print('❌ Error enviando email de verificación: $e');
+      Logger.debug('❌ Error enviando email de verificación: $e');
       return false;
     }
   }
@@ -79,15 +80,15 @@ class GoogleAuthService {
       // Verificar si ya está verificado
       await user.reload();
       if (user.emailVerified) {
-        print('✅ El email ya está verificado');
+        Logger.debug('✅ El email ya está verificado');
         return true;
       }
 
       await user.sendEmailVerification();
-      print('✅ Email de verificación reenviado');
+      Logger.debug('✅ Email de verificación reenviado');
       return true;
     } catch (e) {
-      print('❌ Error reenviando email de verificación: $e');
+      Logger.debug('❌ Error reenviando email de verificación: $e');
       return false;
     }
   }
@@ -96,10 +97,10 @@ class GoogleAuthService {
   Future<bool> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
-      print('✅ Email de restablecimiento enviado a: $email');
+      Logger.debug('✅ Email de restablecimiento enviado a: $email');
       return true;
     } catch (e) {
-      print('❌ Error enviando email de restablecimiento: $e');
+      Logger.debug('❌ Error enviando email de restablecimiento: $e');
       return false;
     }
   }
@@ -116,10 +117,10 @@ class GoogleAuthService {
       );
 
       await user.reauthenticateWithCredential(credential);
-      print('✅ Usuario reautenticado correctamente');
+      Logger.debug('✅ Usuario reautenticado correctamente');
       return true;
     } catch (e) {
-      print('❌ Error en reautenticación: $e');
+      Logger.debug('❌ Error en reautenticación: $e');
       return false;
     }
   }
@@ -136,10 +137,10 @@ class GoogleAuthService {
       if (user == null) return false;
 
       await user.updatePassword(newPassword);
-      print('✅ Contraseña actualizada correctamente');
+      Logger.debug('✅ Contraseña actualizada correctamente');
       return true;
     } catch (e) {
-      print('❌ Error cambiando contraseña: $e');
+      Logger.debug('❌ Error cambiando contraseña: $e');
       return false;
     }
   }
@@ -149,9 +150,9 @@ class GoogleAuthService {
     try {
       await _googleSignIn.signOut();
       await _auth.signOut();
-      print('✅ Sesión cerrada correctamente');
+      Logger.debug('✅ Sesión cerrada correctamente');
     } catch (e) {
-      print('❌ Error cerrando sesión: $e');
+      Logger.debug('❌ Error cerrando sesión: $e');
     }
   }
 

@@ -10,6 +10,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import 'token_manager.dart';
+import '../utils/logger.dart';
 
 class PushService {
   static final PushService _instance = PushService._internal();
@@ -36,13 +37,13 @@ class PushService {
       // Android 13+ e iOS exigen permiso explícito.
       final settings = await messaging.requestPermission();
       if (settings.authorizationStatus == AuthorizationStatus.denied) {
-        print('🔕 El usuario denegó las notificaciones');
+        Logger.debug('🔕 El usuario denegó las notificaciones');
         return;
       }
 
       final fcmToken = await messaging.getToken();
       if (fcmToken == null) {
-        print('⚠️ FCM no devolvió token');
+        Logger.debug('⚠️ FCM no devolvió token');
         return;
       }
       await _register(fcmToken);
@@ -54,7 +55,7 @@ class PushService {
       }
     } catch (e) {
       // Que no llegue el push nunca debe impedir usar la app.
-      print('⚠️ No se pudo registrar el token de push: $e');
+      Logger.debug('⚠️ No se pudo registrar el token de push: $e');
     }
   }
 
@@ -66,12 +67,12 @@ class PushService {
         body: jsonEncode({'token': fcmToken}),
       );
       if (res.statusCode == 200 || res.statusCode == 201) {
-        print('✅ Token de push registrado');
+        Logger.debug('✅ Token de push registrado');
       } else {
-        print('⚠️ El backend rechazó el token de push (${res.statusCode})');
+        Logger.debug('⚠️ El backend rechazó el token de push (${res.statusCode})');
       }
     } catch (e) {
-      print('⚠️ Error registrando el token de push: $e');
+      Logger.debug('⚠️ Error registrando el token de push: $e');
     }
   }
 
@@ -83,9 +84,9 @@ class PushService {
         headers: await _headers(),
       );
       await FirebaseMessaging.instance.deleteToken();
-      print('✅ Token de push dado de baja');
+      Logger.debug('✅ Token de push dado de baja');
     } catch (e) {
-      print('⚠️ Error dando de baja el token de push: $e');
+      Logger.debug('⚠️ Error dando de baja el token de push: $e');
     }
   }
 }

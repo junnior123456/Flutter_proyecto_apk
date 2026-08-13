@@ -141,13 +141,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final hasChanges = nameChanged || emailChanged || phoneChanged || imageChanged || colorChanged || darkModeChanged;
     
     // Debug log
-    print('🔍 _hasChanges: $hasChanges');
-    print('  - nameChanged: $nameChanged');
-    print('  - emailChanged: $emailChanged');
-    print('  - phoneChanged: $phoneChanged');
-    print('  - imageChanged: $imageChanged (selectedImage: ${_selectedImage != null})');
-    print('  - colorChanged: $colorChanged');
-    print('  - darkModeChanged: $darkModeChanged');
+    Logger.debug('🔍 _hasChanges: $hasChanges');
+    Logger.debug('  - nameChanged: $nameChanged');
+    Logger.debug('  - emailChanged: $emailChanged');
+    Logger.debug('  - phoneChanged: $phoneChanged');
+    Logger.debug('  - imageChanged: $imageChanged (selectedImage: ${_selectedImage != null})');
+    Logger.debug('  - colorChanged: $colorChanged');
+    Logger.debug('  - darkModeChanged: $darkModeChanged');
     
     return hasChanges;
   }
@@ -159,7 +159,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       setState(() {
         _hasUnsavedChanges = hasChanges;
       });
-      print('🔄 Estado de cambios actualizado: $_hasUnsavedChanges');
+      Logger.debug('🔄 Estado de cambios actualizado: $_hasUnsavedChanges');
     }
   }
 
@@ -168,16 +168,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final selectedImage = await _imageService.showImageSourceDialog(context);
 
       if (selectedImage != null) {
-        print('📸 Nueva imagen seleccionada: ${selectedImage.path}');
+        Logger.debug('📸 Nueva imagen seleccionada: ${selectedImage.path}');
         setState(() {
           _selectedImage = selectedImage;
           _hasUnsavedChanges = true; // Marcar directamente que hay cambios
         });
-        print('🔄 Estado actualizado - _selectedImage: ${_selectedImage != null}');
-        print('🔄 _hasUnsavedChanges: $_hasUnsavedChanges');
+        Logger.debug('🔄 Estado actualizado - _selectedImage: ${_selectedImage != null}');
+        Logger.debug('🔄 _hasUnsavedChanges: $_hasUnsavedChanges');
       }
     } catch (e) {
-      print('❌ Error seleccionando imagen: $e');
+      Logger.debug('❌ Error seleccionando imagen: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

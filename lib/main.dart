@@ -37,6 +37,7 @@ import 'presentation/screens/reportar_mascota_screen.dart';
 import 'application/bloc/mascota_bloc_providers.dart';
 import 'core/services/push_service.dart';
 import 'features/legal/presentation/screens/legal_screen.dart';
+import 'core/utils/logger.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -49,7 +50,7 @@ void main() async {
     );
   } catch (e) {
     // Firebase ya está inicializado, continuar
-    print('Firebase ya inicializado: $e');
+    Logger.debug('Firebase ya inicializado: $e');
   }
 
   // Initialize AuthService

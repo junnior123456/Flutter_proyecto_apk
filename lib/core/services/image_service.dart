@@ -34,7 +34,7 @@ class ImageService {
       }
       return null;
     } catch (e) {
-      print('❌ Error tomando foto: $e');
+      Logger.debug('❌ Error tomando foto: $e');
       return null;
     }
   }
@@ -54,7 +54,7 @@ class ImageService {
       }
       return null;
     } catch (e) {
-      print('❌ Error seleccionando imagen: $e');
+      Logger.debug('❌ Error seleccionando imagen: $e');
       return null;
     }
   }
@@ -87,7 +87,7 @@ class ImageService {
         return processedFile;
       }
     } catch (e) {
-      print('❌ Error procesando imagen: $e');
+      Logger.debug('❌ Error procesando imagen: $e');
       return imageFile; // Retornar original si falla el procesamiento
     }
   }
@@ -157,10 +157,10 @@ class ImageService {
     try {
       final ref = _storage.refFromURL(imageUrl);
       await ref.delete();
-      print('✅ Imagen eliminada de Firebase');
+      Logger.debug('✅ Imagen eliminada de Firebase');
       return true;
     } catch (e) {
-      print('❌ Error eliminando imagen: $e');
+      Logger.debug('❌ Error eliminando imagen: $e');
       return false;
     }
   }

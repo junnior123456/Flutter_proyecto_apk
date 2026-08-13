@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
+import '../utils/logger.dart';
 
 class CategoryService {
   static final CategoryService _instance = CategoryService._internal();
@@ -22,7 +23,7 @@ class CategoryService {
         throw Exception('Error al obtener categorías: ${response.statusCode}');
       }
     } catch (e) {
-      print('❌ Error obteniendo categorías: $e');
+      Logger.debug('❌ Error obteniendo categorías: $e');
       // Retornar categorías por defecto si falla la conexión
       return _getDefaultCategories();
     }
@@ -45,7 +46,7 @@ class CategoryService {
         );
       }
     } catch (e) {
-      print('❌ Error obteniendo estadísticas: $e');
+      Logger.debug('❌ Error obteniendo estadísticas: $e');
       return _getDefaultCategories();
     }
   }
@@ -64,7 +65,7 @@ class CategoryService {
         throw Exception('Error al obtener categoría: ${response.statusCode}');
       }
     } catch (e) {
-      print('❌ Error obteniendo categoría: $e');
+      Logger.debug('❌ Error obteniendo categoría: $e');
       return null;
     }
   }
@@ -109,11 +110,11 @@ class CategoryService {
   Future<void> syncCategories() async {
     try {
       final backendCategories = await getCategories();
-      print(
+      Logger.debug(
         '✅ Categorías sincronizadas: ${backendCategories.length} encontradas',
       );
     } catch (e) {
-      print('⚠️ No se pudieron sincronizar las categorías: $e');
+      Logger.debug('⚠️ No se pudieron sincronizar las categorías: $e');
     }
   }
 }

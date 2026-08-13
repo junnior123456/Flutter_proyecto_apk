@@ -31,6 +31,7 @@ import '../../../../core/utils/network_error.dart';
 import 'adopt_tab.dart';
 import 'risk_tab.dart';
 import '../../../pet_details/presentation/screens/pet_detail_screen.dart';
+import '../../../../core/utils/logger.dart';
 
 class DashboardScreen extends StatefulWidget {
   final bool isAuthenticated;
@@ -92,29 +93,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
         });
       }
     } catch (e) {
-      print('❌ Error cargando perfil: $e');
+      Logger.debug('❌ Error cargando perfil: $e');
     }
   }
 
   /// 🔄 Cargar mascotas desde el backend
   Future<void> _loadPetsFromBackend() async {
-    print('🔄 Iniciando carga de mascotas desde backend...');
+    Logger.debug('🔄 Iniciando carga de mascotas desde backend...');
     setState(() {
       _isLoading = true;
     });
 
     try {
       // Cargar mascotas para adopción y en riesgo en paralelo
-      print('📡 Solicitando mascotas para adopción...');
+      Logger.debug('📡 Solicitando mascotas para adopción...');
       final adoptPetsFuture = _petService.getPetsForAdoption();
-      print('📡 Solicitando mascotas en riesgo...');
+      Logger.debug('📡 Solicitando mascotas en riesgo...');
       final riskPetsFuture = _petService.getPetsInRisk();
       
-      print('⏳ Esperando respuestas...');
+      Logger.debug('⏳ Esperando respuestas...');
       final adoptPets = await adoptPetsFuture;
-      print('✅ Mascotas para adopción recibidas: ${adoptPets.length}');
+      Logger.debug('✅ Mascotas para adopción recibidas: ${adoptPets.length}');
       final riskPets = await riskPetsFuture;
-      print('✅ Mascotas en riesgo recibidas: ${riskPets.length}');
+      Logger.debug('✅ Mascotas en riesgo recibidas: ${riskPets.length}');
 
       setState(() {
         _adoptPets = adoptPets;
@@ -122,11 +123,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _isLoading = false;
       });
 
-      print('✅ Mascotas cargadas desde backend:');
-      print('   - Adopción: ${_adoptPets.length}');
-      print('   - Riesgo: ${_riskPets.length}');
+      Logger.debug('✅ Mascotas cargadas desde backend:');
+      Logger.debug('   - Adopción: ${_adoptPets.length}');
+      Logger.debug('   - Riesgo: ${_riskPets.length}');
     } catch (e) {
-      print('❌ Error cargando mascotas del backend: $e');
+      Logger.debug('❌ Error cargando mascotas del backend: $e');
       
       // Si es error de token, redirigir a login
       final errorMessage = e.toString();
@@ -295,7 +296,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         throw Exception('Error creando mascota');
       }
     } catch (e) {
-      print('❌ Error agregando mascota para adopción: $e');
+      Logger.debug('❌ Error agregando mascota para adopción: $e');
       
       String errorMessage;
       Color backgroundColor;
@@ -367,7 +368,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         throw Exception('Error creando mascota');
       }
     } catch (e) {
-      print('❌ Error agregando mascota en riesgo: $e');
+      Logger.debug('❌ Error agregando mascota en riesgo: $e');
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1544,7 +1545,7 @@ class _ProfileTabState extends State<ProfileTab> {
   void _onProfileChanged() {
     final profile = _profileNotifier.currentProfile;
     if (profile != null && mounted) {
-      print('🖼️ DEBUG: Profile image URL: ${profile.image}');
+      Logger.debug('🖼️ DEBUG: Profile image URL: ${profile.image}');
       setState(() {
         userName = profile.name;
         userEmail = profile.email;
@@ -1756,8 +1757,8 @@ class _ProfileTabState extends State<ProfileTab> {
                       backgroundColor: Colors.orange,
                       backgroundImage: NetworkImage(userImageUrl!),
                       onBackgroundImageError: (exception, stackTrace) {
-                        print('❌ Error cargando imagen: $exception');
-                        print('🔗 URL problemática: $userImageUrl');
+                        Logger.debug('❌ Error cargando imagen: $exception');
+                        Logger.debug('🔗 URL problemática: $userImageUrl');
                       },
                     )
                   : CircleAvatar(
@@ -1810,7 +1811,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 final updated = result['updated'] as bool? ?? false;
                 if (updated) {
                   // Forzar refresh del perfil
-                  print('✅ Perfil actualizado, refrescando desde backend...');
+                  Logger.debug('✅ Perfil actualizado, refrescando desde backend...');
                   await _profileNotifier.refreshFromBackend();
                 }
               }

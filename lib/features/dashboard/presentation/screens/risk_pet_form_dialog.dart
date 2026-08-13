@@ -142,7 +142,7 @@ class _RiskPetFormDialogState extends State<RiskPetFormDialog> {
 
     // Prevenir doble envío
     if (_isSubmitting) {
-      print('⚠️ Ya se está enviando el reporte, ignorando clic adicional');
+      Logger.debug('⚠️ Ya se está enviando el reporte, ignorando clic adicional');
       return;
     }
 

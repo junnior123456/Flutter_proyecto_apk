@@ -1,3 +1,6 @@
+// Este es el UNICO punto del proyecto autorizado a llamar a debugPrint:
+// todo lo demas pasa por `Logger`, que se anula en release.
+// ignore_for_file: avoid_print
 import 'package:flutter/foundation.dart';
 
 /// 📊 Niveles de log
@@ -23,8 +26,13 @@ class Logger {
   static const String _reset = '\x1B[0m';
 
   /// 📝 Log genérico
-  static void _log(LogLevel level, String message, {String? tag, Object? error, StackTrace? stackTrace}) {
-    if (!kDebugMode && level == LogLevel.debug) return;
+  static void _log(LogLevel level, Object? message, {String? tag, Object? error, StackTrace? stackTrace}) {
+    // En compilaciones de publicacion no se escribe NADA: `kDebugMode` es una
+    // constante, asi que el compilador elimina el resto del metodo y la APK
+    // deja de filtrar trazas internas (URLs, respuestas del backend, correos).
+    // Antes esta guarda solo tapaba el nivel `debug` y info/warning/error si
+    // llegaban a producirse en el dispositivo del usuario.
+    if (!kDebugMode) return;
 
     final timestamp = DateTime.now().toIso8601String();
     final levelStr = level.name.toUpperCase().padRight(7);
@@ -53,22 +61,22 @@ class Logger {
   }
 
   /// 🐛 Debug log
-  static void debug(String message, {String? tag}) {
+  static void debug(Object? message, {String? tag}) {
     _log(LogLevel.debug, message, tag: tag);
   }
 
   /// ℹ️ Info log
-  static void info(String message, {String? tag}) {
+  static void info(Object? message, {String? tag}) {
     _log(LogLevel.info, message, tag: tag);
   }
 
   /// ⚠️ Warning log
-  static void warning(String message, {String? tag, Object? error}) {
+  static void warning(Object? message, {String? tag, Object? error}) {
     _log(LogLevel.warning, message, tag: tag, error: error);
   }
 
   /// ❌ Error log
-  static void error(String message, {String? tag, Object? error, StackTrace? stackTrace}) {
+  static void error(Object? message, {String? tag, Object? error, StackTrace? stackTrace}) {
     _log(LogLevel.error, message, tag: tag, error: error, stackTrace: stackTrace);
   }
 
