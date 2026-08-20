@@ -8,6 +8,7 @@ import '../../../../core/services/auth_service.dart';
 import '../../../../core/services/chat_service.dart';
 import '../../../chat/presentation/screens/chat_screen.dart';
 import 'pet_health_hub_screen.dart';
+import '../../../feed/presentation/widgets/image_viewer.dart';
 
 /// 📱 Pantalla de detalles de mascota - Clean Architecture
 class PetDetailScreen extends StatelessWidget {
@@ -110,11 +111,23 @@ class PetDetailScreen extends StatelessWidget {
                 ),
               ),
               background: pet.imageUrl.isNotEmpty
-                  ? CachedPetImage(
-                      imageUrl: pet.imageUrl,
-                      width: double.infinity,
-                      height: 300,
-                      fit: BoxFit.cover,
+                  ? GestureDetector(
+                      // Tocar la foto la abre a pantalla completa, como en
+                      // Instagram o Facebook.
+                      onTap: () => abrirImagenCompleta(
+                        context,
+                        imageUrl: pet.imageUrl,
+                        heroTag: 'detalle-foto-${pet.id}',
+                      ),
+                      child: Hero(
+                        tag: 'detalle-foto-${pet.id}',
+                        child: CachedPetImage(
+                          imageUrl: pet.imageUrl,
+                          width: double.infinity,
+                          height: 300,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     )
                   : Container(
                       color: Colors.grey[300],
@@ -252,13 +265,32 @@ class PetDetailScreen extends StatelessWidget {
                   ],
                   
                   // Ubicación
-                  if (pet.address.isNotEmpty) ...[
+                  if (pet.address.isNotEmpty || pet.hasLocation) ...[
                     _buildInfoSection(
                       context,
                       icon: Icons.location_on,
                       title: 'Ubicación',
                       children: [
-                        _buildInfoRow('Dirección', pet.address),
+                        if (pet.address.isNotEmpty)
+                          _buildInfoRow('Dirección', pet.address),
+                        // Punto exacto marcado por quien publicó: es lo que de
+                        // verdad sirve para ir a buscar al animal.
+                        if (pet.hasLocation)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: OutlinedButton.icon(
+                              onPressed: () => launchUrl(
+                                Uri.parse(
+                                    'https://www.google.com/maps/search/?api=1&query=${pet.latitude},${pet.longitude}'),
+                                mode: LaunchMode.externalApplication,
+                              ),
+                              icon: const Icon(Icons.map),
+                              label: const Text('Ver en el mapa'),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 44),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                     const SizedBox(height: 16),

@@ -6,6 +6,9 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../core/services/feed_service.dart';
 import '../../../../core/config/api_config.dart';
 import '../widgets/post_video.dart';
+import '../widgets/image_viewer.dart';
+import '../widgets/double_tap_like.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FeedScreen extends StatefulWidget {
   /// Cuando se usa como pestaña del dashboard, se embebe sin su propio
@@ -225,6 +228,14 @@ class _PostCard extends StatelessWidget {
           orElse: () => null,
         );
     final liked = post['isLiked'] == true;
+    // Dónde se encuentra el animal. La dirección escrita y el punto GPS son
+    // independientes: puede haber una, el otro, los dos o ninguno.
+    final direccion = post['address']?.toString() ?? '';
+    // Ojo: el backend manda las coordenadas como TEXTO ("-6.48690000"), porque
+    // la columna es decimal y el driver de Postgres las serializa así para no
+    // perder precisión. Con `as num?` salían null y no se veía la ubicación.
+    final lat = double.tryParse('${post['latitude'] ?? ''}');
+    final lng = double.tryParse('${post['longitude'] ?? ''}');
     final isRisk = post['isRisk'] == true;
 
     return Card(
@@ -296,9 +307,19 @@ class _PostCard extends StatelessWidget {
               durationSec: video['durationSec'] as int?,
             )
           else if (img.isNotEmpty)
-            AspectRatio(
-              aspectRatio: 1,
-              child: Image.network(
+            DobleToqueMeGusta(
+              yaLeGusta: liked,
+              onMeGusta: onLike,
+              onToqueSimple: () => abrirImagenCompleta(
+                context,
+                imageUrl: img,
+                heroTag: 'foto-${post['id']}',
+              ),
+              child: Hero(
+                tag: 'foto-${post['id']}',
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Image.network(
                 img,
                 fit: BoxFit.cover,
                 loadingBuilder: (_, child, p) => p == null
@@ -311,8 +332,49 @@ class _PostCard extends StatelessWidget {
                   height: 200,
                   child: Icon(Icons.pets, size: 48, color: scheme.onSurfaceVariant),
                 ),
+                  ),
+                ),
               ),
             ),
+          // Dónde encontrarlo
+          if (direccion.isNotEmpty || lat != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+              child: Row(
+                children: [
+                  Icon(Icons.location_on, size: 16, color: _brand),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      direccion.isNotEmpty
+                          ? direccion
+                          : 'Ubicación marcada por quien publicó',
+                      style: TextStyle(
+                          fontSize: 12, color: scheme.onSurfaceVariant),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (lat != null && lng != null)
+                    TextButton.icon(
+                      onPressed: () => launchUrl(
+                        Uri.parse(
+                            'https://www.google.com/maps/search/?api=1&query=$lat,$lng'),
+                        mode: LaunchMode.externalApplication,
+                      ),
+                      icon: const Icon(Icons.map, size: 16),
+                      label: const Text('Ver mapa',
+                          style: TextStyle(fontSize: 12)),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        minimumSize: const Size(0, 32),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
           // Nombre + raza + edad
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),

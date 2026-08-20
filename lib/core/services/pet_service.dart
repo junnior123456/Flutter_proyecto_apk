@@ -150,6 +150,9 @@ class PetService {
     String? contactPhone,
     String? contactEmail,
     String? address,
+    // Dónde está el animal, para que la gente sepa dónde buscarlo.
+    double? latitude,
+    double? longitude,
     List<String>? riskTypes, // ✅ NUEVO: Tipos de riesgo como strings
   }) async {
     try {
@@ -231,6 +234,8 @@ class PetService {
         contactPhone: contactPhone,
         contactEmail: contactEmail,
         address: address,
+        latitude: latitude,
+        longitude: longitude,
         riskTypes: riskTypes, // ✅ NUEVO
       );
 
@@ -301,6 +306,11 @@ class PetService {
         contactPhone: json['contactPhone']?.toString() ?? '',
         contactEmail: json['contactEmail']?.toString() ?? '',
         address: json['address']?.toString() ?? '',
+        // Sin esto, hasLocation siempre daba false y el mapa no salía nunca,
+        // aunque el backend mandara las coordenadas.
+        // Llegan como texto: la columna es decimal en Postgres.
+        latitude: double.tryParse('${json['latitude'] ?? ''}'),
+        longitude: double.tryParse('${json['longitude'] ?? ''}'),
         category: PetCategory.fromId(json['categoryId'] ?? 1),
       );
     } catch (e) {
@@ -495,6 +505,8 @@ class PetService {
     String? contactPhone,
     String? contactEmail,
     String? address,
+    double? latitude,
+    double? longitude,
     List<String>? riskTypes, // ✅ NUEVO
   }) {
     return {
@@ -518,6 +530,10 @@ class PetService {
         'contactEmail': ValidationUtils.normalizeEmail(contactEmail),
       if (address != null && address.isNotEmpty)
         'address': ValidationUtils.cleanText(address),
+      // El backend valida el rango (-90..90 y -180..180) y las guarda en
+      // columnas que ya existían pero nadie rellenaba.
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
       if (riskTypes != null && riskTypes.isNotEmpty) 'riskTypes': riskTypes, // ✅ NUEVO
     };
   }

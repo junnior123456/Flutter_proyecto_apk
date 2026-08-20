@@ -6,6 +6,7 @@ import '../../../../core/services/pet_service.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/services/video_service.dart';
+import '../../../../core/services/location_service.dart';
 
 /// Formulario mejorado para publicar mascotas en adopción
 /// Sigue Clean Architecture: Features/Dashboard/Presentation
@@ -26,6 +27,7 @@ class _ImprovedPetFormDialogState extends State<ImprovedPetFormDialog> {
   final _imageService = ImageService();
   final _petService = PetService();
   final _videoService = VideoService();
+  final _location = LocationService();
   final _authService = AuthService();
   
   // Controladores
@@ -57,6 +59,11 @@ class _ImprovedPetFormDialogState extends State<ImprovedPetFormDialog> {
   // mascota, porque el endpoint necesita el id que devuelve el backend).
   File? _selectedVideo;
   int? _videoSegundos;
+  // Dónde se encontró al animal. Es opcional: si el usuario no da permiso de
+  // ubicación, la publicación sale igual, solo que sin el punto en el mapa.
+  double? _latitud;
+  double? _longitud;
+  bool _ubicandose = false;
   bool _isSubmitting = false;
   int _currentStep = 0;
 
@@ -123,6 +130,35 @@ class _ImprovedPetFormDialogState extends State<ImprovedPetFormDialog> {
   }
 
   /// 🗑️ Eliminar imagen
+  Future<void> _usarMiUbicacion() async {
+    setState(() => _ubicandose = true);
+    final (posicion, error) = await _location.posicionActual();
+    if (!mounted) return;
+    setState(() => _ubicandose = false);
+
+    if (posicion == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('⚠️ ${error ?? 'No se pudo obtener la ubicación'}'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _latitud = posicion.latitude;
+      _longitud = posicion.longitude;
+    });
+  }
+
+  void _quitarUbicacion() {
+    setState(() {
+      _latitud = null;
+      _longitud = null;
+    });
+  }
+
   Future<void> _addVideo() async {
     final video = await _videoService.pickVideo();
     if (video == null) return;
@@ -211,6 +247,8 @@ class _ImprovedPetFormDialogState extends State<ImprovedPetFormDialog> {
         contactPhone: _contactPhoneController.text.trim(),
         contactEmail: _contactEmailController.text.trim(),
         address: _addressController.text.trim(),
+        latitude: _latitud,
+        longitude: _longitud,
       );
 
       if (createdPet != null && mounted) {
@@ -623,6 +661,44 @@ class _ImprovedPetFormDialogState extends State<ImprovedPetFormDialog> {
             onPressed: _addVideo,
             icon: const Icon(Icons.videocam),
             label: const Text('Agregar vídeo corto (máx. 30 s)'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
+          ),
+
+        const SizedBox(height: 12),
+
+        // Ubicación donde se encuentra el animal
+        if (_latitud != null && _longitud != null)
+          Card(
+            color: Colors.green.shade50,
+            child: ListTile(
+              leading: const Icon(Icons.location_on, color: Colors.green),
+              title: const Text('Ubicación guardada'),
+              subtitle: Text(
+                '${_latitud!.toStringAsFixed(5)}, ${_longitud!.toStringAsFixed(5)}',
+                style: const TextStyle(fontSize: 12),
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: _quitarUbicacion,
+                tooltip: 'Quitar ubicación',
+              ),
+            ),
+          )
+        else
+          OutlinedButton.icon(
+            onPressed: _ubicandose ? null : _usarMiUbicacion,
+            icon: _ubicandose
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.my_location),
+            label: Text(_ubicandose
+                ? 'Obteniendo ubicación...'
+                : 'Marcar dónde se encuentra'),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size(double.infinity, 48),
             ),
