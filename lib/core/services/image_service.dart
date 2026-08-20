@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import '../utils/logger.dart';
 import '../config/api_config.dart';
+import 'token_manager.dart';
 
 class ImageService {
   static final ImageService _instance = ImageService._internal();
@@ -121,8 +122,14 @@ class ImageService {
       );
       
       // Agregar headers
+      // 🔒 El token es OBLIGATORIO: /upload/image dejó de ser público en la
+      // auditoría del 20-ago-2026 (cualquiera podía subir ficheros al
+      // servidor). Sin esta cabecera, publicar una mascota con foto o cambiar
+      // el avatar devolvía 401.
+      final token = await TokenManager().getToken();
       request.headers.addAll({
         'Accept': 'application/json',
+        if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
       });
       
       Logger.debug('Sending request to: $uri', tag: 'IMAGE');
