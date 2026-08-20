@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "1070427502863-26ogi4g7lvo3pqn8udid77pvq8v22vpc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.prototipe1",
+            "certificate_hash": "f028b3eb9bfc8a3a14dae1871ce59655f338c93a"
+          }
+        },
+        {
+          "client_id": "1070427502863-a6ud58t95f9hkkj1fjo9on54eea063c9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.prototipe1",
+            "certificate_hash": "24a1f998ca6072e6457e12c7180dfbc7f3eef897"
+          }
+        },
+        {
           "client_id": "1070427502863-q032c1lbb1t9hjvsfvv771h4b1pij7hr.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -37,6 +53,13 @@
             {
               "client_id": "1070427502863-afk1rag0bndlqnb8jk2bk6u4c80o7enl.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "1070427502863-sronsuhtaursd2c58av1fehrcvpnf2nv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.chinchay.pawfinder"
+              }
             }
           ]
         }
