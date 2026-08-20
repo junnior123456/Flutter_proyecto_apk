@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/services/veterinaria_service.dart';
 import '../../../../core/services/location_service.dart';
-import '../../../appointments/presentation/screens/book_appointment_screen.dart';
+import 'clinica_screen.dart';
 
 class VeterinariasDirectoryScreen extends StatefulWidget {
   const VeterinariasDirectoryScreen({super.key});
@@ -231,17 +231,14 @@ class _VeterinariasDirectoryScreenState
                   _action(Icons.map, 'Mapa', Colors.red,
                       () => _map((lat as num).toDouble(), (lng as num).toDouble(),
                           v['name']?.toString() ?? '')),
-                _action(Icons.event_available, 'Reservar cita',
+                // Entra a la clínica: catálogo + pedir cita entre los turnos
+                // que de verdad están libres.
+                _action(Icons.storefront, 'Ver clínica',
                     const Color(0xFF6A1B9A), () {
-                  final id = int.tryParse('${v['id']}');
-                  if (id == null) return;
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => BookAppointmentScreen(
-                        veterinariaId: id,
-                        veterinariaName: v['name']?.toString() ?? 'Veterinaria',
-                      ),
+                      builder: (_) => ClinicaScreen(veterinaria: v),
                     ),
                   );
                 }),

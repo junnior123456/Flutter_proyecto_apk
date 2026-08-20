@@ -3,6 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 import '../../../../core/services/veterinaria_service.dart';
+import 'mi_clinica_screen.dart';
 
 class MyVeterinariaScreen extends StatefulWidget {
   const MyVeterinariaScreen({super.key});
@@ -29,6 +30,9 @@ class _MyVeterinariaScreenState extends State<MyVeterinariaScreen> {
   bool _saving = false;
   int? _id; // null = todavía no tiene ficha
   bool _isVerified = false;
+  // Ficha completa tal cual llega del backend: la necesita el panel de la
+  // clínica (catálogo, horario y agenda), que trabaja con el mapa entero.
+  Map<String, dynamic>? _veterinaria;
 
   @override
   void initState() {
@@ -57,6 +61,7 @@ class _MyVeterinariaScreenState extends State<MyVeterinariaScreen> {
   }
 
   void _fill(Map<String, dynamic> v) {
+    _veterinaria = v;
     _id = v['id'] as int?;
     _isVerified = v['isVerified'] == true;
     _name.text = v['name']?.toString() ?? '';
@@ -114,6 +119,29 @@ class _MyVeterinariaScreenState extends State<MyVeterinariaScreen> {
         title: const Text('🏥 Mi veterinaria'),
         backgroundColor: _brand,
         foregroundColor: Colors.white,
+        actions: [
+          // Catálogo, horario de atención y conexión con su propio sistema.
+          IconButton(
+            icon: const Icon(Icons.storefront),
+            tooltip: 'Catálogo, horario y agenda',
+            onPressed: () {
+              if (_veterinaria == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Primero guarda los datos de tu veterinaria'),
+                  ),
+                );
+                return;
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MiClinicaScreen(veterinaria: _veterinaria!),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

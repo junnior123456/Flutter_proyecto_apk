@@ -37,6 +37,39 @@ class AppointmentService {
     return null;
   }
 
+  /// Reserva y devuelve NULL si fue bien, o el mensaje de error del servidor.
+  ///
+  /// book() se queda con un null pelado cuando falla, y aquí el motivo importa:
+  /// el backend responde "Ese horario ya no está disponible" cuando alguien se
+  /// adelantó, y el usuario tiene que poder leerlo.
+  Future<String?> reservar({
+    required int veterinariaId,
+    required DateTime cuando,
+    required String motivo,
+    int? petId,
+  }) async {
+    try {
+      final res = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/appointments'),
+        headers: await _headers(),
+        body: json.encode({
+          'veterinariaId': veterinariaId,
+          'scheduledAt': cuando.toUtc().toIso8601String(),
+          'reason': motivo,
+          if (petId != null) 'petId': petId,
+        }),
+      );
+      if (res.statusCode == 200 || res.statusCode == 201) return null;
+
+      final cuerpo = json.decode(res.body);
+      final mensaje = cuerpo is Map ? cuerpo['message'] : null;
+      if (mensaje is List && mensaje.isNotEmpty) return mensaje.first.toString();
+      return mensaje?.toString() ?? 'No se pudo reservar (${res.statusCode})';
+    } catch (_) {
+      return 'No se pudo reservar. Revisa tu conexión.';
+    }
+  }
+
   Future<List<Map<String, dynamic>>> mine() => _list('/appointments/mine');
   Future<List<Map<String, dynamic>>> forVet() => _list('/appointments/vet');
 
