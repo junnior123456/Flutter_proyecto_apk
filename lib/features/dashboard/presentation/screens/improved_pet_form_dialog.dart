@@ -5,6 +5,7 @@ import '../../../../core/services/image_service.dart';
 import '../../../../core/services/pet_service.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/services/video_service.dart';
 
 /// Formulario mejorado para publicar mascotas en adopción
 /// Sigue Clean Architecture: Features/Dashboard/Presentation
@@ -24,6 +25,7 @@ class _ImprovedPetFormDialogState extends State<ImprovedPetFormDialog> {
   final _formKey = GlobalKey<FormState>();
   final _imageService = ImageService();
   final _petService = PetService();
+  final _videoService = VideoService();
   final _authService = AuthService();
   
   // Controladores
@@ -51,6 +53,10 @@ class _ImprovedPetFormDialogState extends State<ImprovedPetFormDialog> {
   
   // Imágenes (máximo 5, mínimo 2)
   List<File> _selectedImages = [];
+  // Vídeo corto opcional de la publicación (se sube DESPUÉS de crear la
+  // mascota, porque el endpoint necesita el id que devuelve el backend).
+  File? _selectedVideo;
+  int? _videoSegundos;
   bool _isSubmitting = false;
   int _currentStep = 0;
 
@@ -117,6 +123,34 @@ class _ImprovedPetFormDialogState extends State<ImprovedPetFormDialog> {
   }
 
   /// 🗑️ Eliminar imagen
+  Future<void> _addVideo() async {
+    final video = await _videoService.pickVideo();
+    if (video == null) return;
+
+    final rechazo = await _videoService.motivoRechazo(video);
+    if (!mounted) return;
+    if (rechazo != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('⚠️ $rechazo'), backgroundColor: Colors.orange),
+      );
+      return;
+    }
+
+    final segundos = await _videoService.duracionSegundos(video);
+    if (!mounted) return;
+    setState(() {
+      _selectedVideo = video;
+      _videoSegundos = segundos;
+    });
+  }
+
+  void _removeVideo() {
+    setState(() {
+      _selectedVideo = null;
+      _videoSegundos = null;
+    });
+  }
+
   void _removeImage(int index) {
     setState(() {
       _selectedImages.removeAt(index);
@@ -180,6 +214,27 @@ class _ImprovedPetFormDialogState extends State<ImprovedPetFormDialog> {
       );
 
       if (createdPet != null && mounted) {
+        // El vídeo va después de crear la mascota: el endpoint necesita su id.
+        if (_selectedVideo != null) {
+          final error = await _videoService.subirVideoDeMascota(
+            petId: createdPet.id,
+            video: _selectedVideo!,
+            durationSec: _videoSegundos,
+          );
+          if (error != null && mounted) {
+            // La mascota SÍ se publicó: solo falló el vídeo, y hay que decirlo
+            // claro para que no crea que se perdió todo.
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('⚠️ Se publicó, pero el vídeo no subió: $error'),
+                backgroundColor: Colors.orange,
+                duration: const Duration(seconds: 5),
+              ),
+            );
+          }
+        }
+        if (!mounted) return;
+
         // Ocultar indicador de progreso
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         
@@ -542,6 +597,37 @@ class _ImprovedPetFormDialogState extends State<ImprovedPetFormDialog> {
             ),
           ),
         
+        const SizedBox(height: 12),
+
+        // Vídeo corto opcional
+        if (_selectedVideo != null)
+          Card(
+            color: Colors.deepPurple.shade50,
+            child: ListTile(
+              leading: const Icon(Icons.videocam, color: Colors.deepPurple),
+              title: const Text('Vídeo listo para subir'),
+              subtitle: Text(
+                _videoSegundos != null
+                    ? 'Duración: $_videoSegundos s'
+                    : 'Vídeo seleccionado',
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: _removeVideo,
+                tooltip: 'Quitar vídeo',
+              ),
+            ),
+          )
+        else
+          OutlinedButton.icon(
+            onPressed: _addVideo,
+            icon: const Icon(Icons.videocam),
+            label: const Text('Agregar vídeo corto (máx. 30 s)'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
+          ),
+
         // Mensaje informativo
         if (_selectedImages.isEmpty)
           Padding(

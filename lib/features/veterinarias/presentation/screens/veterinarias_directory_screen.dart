@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/services/veterinaria_service.dart';
+import '../../../../core/services/location_service.dart';
 import '../../../appointments/presentation/screens/book_appointment_screen.dart';
 
 class VeterinariasDirectoryScreen extends StatefulWidget {
@@ -18,6 +19,13 @@ class _VeterinariasDirectoryScreenState
     extends State<VeterinariasDirectoryScreen> {
   static const Color _brand = Color(0xFFFF9800);
   final VeterinariaService _service = VeterinariaService();
+  final LocationService _location = LocationService();
+
+  /// Dos modos: el directorio completo (por defecto) y las de cerca, que
+  /// necesitan permiso de ubicación. Se guarda el radio para poder ampliarlo
+  /// sin volver a pedir la posición.
+  bool _soloCercanas = false;
+  double _radioKm = 10;
 
   bool _loading = true;
   String? _error;
@@ -32,13 +40,47 @@ class _VeterinariasDirectoryScreenState
   Future<void> _load() async {
     setState(() { _loading = true; _error = null; });
     try {
-      final data = await _service.listPublic();
+      final data = _soloCercanas
+          ? await _cargarCercanas()
+          : await _service.listPublic();
       if (!mounted) return;
+      if (data == null) return; // el error ya se mostró
       setState(() { _items = data; _loading = false; });
     } catch (_) {
       if (!mounted) return;
       setState(() { _error = 'No se pudo cargar el directorio.'; _loading = false; });
     }
+  }
+
+  /// Pide la ubicación y trae las veterinarias del radio actual.
+  /// Devuelve null si no se pudo (y deja el error puesto).
+  Future<List<Map<String, dynamic>>?> _cargarCercanas() async {
+    final (posicion, errorUbicacion) = await _location.posicionActual();
+    if (!mounted) return null;
+    if (posicion == null) {
+      setState(() {
+        _error = errorUbicacion;
+        _loading = false;
+        // Volver al directorio: sin ubicación el modo cercanas no da nada.
+        _soloCercanas = false;
+      });
+      return null;
+    }
+    return _service.getNearby(
+      lat: posicion.latitude,
+      lng: posicion.longitude,
+      radiusKm: _radioKm,
+    );
+  }
+
+  void _alternarCercanas() {
+    setState(() => _soloCercanas = !_soloCercanas);
+    _load();
+  }
+
+  void _ampliarRadio() {
+    setState(() => _radioKm = _radioKm >= 50 ? 50 : _radioKm * 2);
+    _load();
   }
 
   Future<void> _launch(Uri uri) async {
@@ -66,9 +108,18 @@ class _VeterinariasDirectoryScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('🏥 Veterinarias'),
+        title: Text(_soloCercanas ? '📍 Cerca de mí' : '🏥 Veterinarias'),
         backgroundColor: _brand,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            tooltip: _soloCercanas
+                ? 'Ver todo el directorio'
+                : 'Ver las más cercanas a mí',
+            icon: Icon(_soloCercanas ? Icons.list : Icons.my_location),
+            onPressed: _alternarCercanas,
+          ),
+        ],
       ),
       body: RefreshIndicator(onRefresh: _load, child: _body()),
     );
@@ -91,9 +142,24 @@ class _VeterinariasDirectoryScreenState
         Icon(Icons.local_hospital_outlined, size: 56, color: scheme.onSurfaceVariant),
         const SizedBox(height: 12),
         Center(
-          child: Text('Aún no hay veterinarias registradas.',
-              style: TextStyle(color: scheme.onSurfaceVariant)),
+          child: Text(
+            _soloCercanas
+                ? 'No hay veterinarias a menos de ${_radioKm.toInt()} km.'
+                : 'Aún no hay veterinarias registradas.',
+            style: TextStyle(color: scheme.onSurfaceVariant),
+            textAlign: TextAlign.center,
+          ),
         ),
+        if (_soloCercanas && _radioKm < 50) ...[
+          const SizedBox(height: 12),
+          Center(
+            child: OutlinedButton.icon(
+              onPressed: _ampliarRadio,
+              icon: const Icon(Icons.zoom_out_map),
+              label: Text('Buscar hasta ${(_radioKm * 2).toInt()} km'),
+            ),
+          ),
+        ],
       ]);
     }
     return ListView.separated(
@@ -130,6 +196,21 @@ class _VeterinariasDirectoryScreenState
                 child: Text(v['name']?.toString() ?? '',
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               ),
+              // Solo llega en el modo "cerca de mí".
+              if (v['distanceKm'] != null)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _brand.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${v['distanceKm']} km',
+                    style: const TextStyle(
+                        color: _brand, fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
+                ),
             ]),
             if (addr.isNotEmpty) ...[
               const SizedBox(height: 8),

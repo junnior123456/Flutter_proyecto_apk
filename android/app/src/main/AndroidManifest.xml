@@ -4,6 +4,11 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Android 13+: sin este permiso el sistema nunca muestra notificaciones -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Ubicación: solo para buscar veterinarias cerca del usuario.
+         COARSE basta para ordenar por cercanía; FINE mejora la precisión
+         cuando el usuario la concede. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:label="PawFinder"

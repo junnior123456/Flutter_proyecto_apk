@@ -37,6 +37,17 @@ class VeterinariaService {
 
   String get _base => '${ApiConfig.baseUrl}/veterinarias';
 
+  /// Veterinarias cercanas a un punto, de la más cercana a la más lejana.
+  /// Cada ficha llega con un campo extra `distanceKm`.
+  /// Es pública: no hace falta estar logueado para buscar una veterinaria.
+  Future<List<Map<String, dynamic>>> getNearby({
+    required double lat,
+    required double lng,
+    double radiusKm = 10,
+  }) {
+    return _getList('$_base/nearby?lat=$lat&lng=$lng&radiusKm=$radiusKm');
+  }
+
   Future<List<Map<String, dynamic>>> _getList(String url, {bool auth = false}) async {
     final res = await http.get(Uri.parse(url), headers: await _headers(auth: auth));
     if (res.statusCode == 200) {

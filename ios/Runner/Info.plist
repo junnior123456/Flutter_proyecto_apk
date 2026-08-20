@@ -41,6 +41,8 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>PawFinder usa tu ubicación para mostrarte las veterinarias más cercanas.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>PawFinder usa la camara para tomar fotos de las mascotas y de tu perfil.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

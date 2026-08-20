@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/services/feed_service.dart';
 import '../../../../core/config/api_config.dart';
+import '../widgets/post_video.dart';
 
 class FeedScreen extends StatefulWidget {
   /// Cuando se usa como pestaña del dashboard, se embebe sin su propio
@@ -216,6 +217,13 @@ class _PostCard extends StatelessWidget {
         : (post['contactName']?.toString() ?? 'Usuario');
     final authorImg = user?['image']?.toString();
     final img = post['imageUrl']?.toString() ?? '';
+    // Una publicación puede traer un vídeo corto en su lista de medios.
+    // Si lo tiene, manda el vídeo y la foto de portada pasa a segundo plano.
+    final medios = (post['images'] as List?) ?? const [];
+    final video = medios.cast<Map<String, dynamic>?>().firstWhere(
+          (m) => m != null && m['mediaType'] == 'video',
+          orElse: () => null,
+        );
     final liked = post['isLiked'] == true;
     final isRisk = post['isRisk'] == true;
 
@@ -280,8 +288,14 @@ class _PostCard extends StatelessWidget {
               child: Text(post['description'].toString(),
                   style: TextStyle(fontSize: 13, color: scheme.onSurface)),
             ),
-          // Imagen grande
-          if (img.isNotEmpty)
+          // Vídeo corto (tiene prioridad) o imagen grande
+          if (video != null)
+            PostVideo(
+              videoUrl: video['imageUrl']?.toString() ?? '',
+              thumbnailUrl: video['thumbnailUrl']?.toString(),
+              durationSec: video['durationSec'] as int?,
+            )
+          else if (img.isNotEmpty)
             AspectRatio(
               aspectRatio: 1,
               child: Image.network(
