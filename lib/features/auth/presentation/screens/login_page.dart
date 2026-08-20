@@ -28,10 +28,7 @@ class _LoginPageState extends State<LoginPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFFF9800),
-              Color(0xFFFF5722),
-            ],
+            colors: [Color(0xFFFF9800), Color(0xFFFF5722)],
           ),
         ),
         child: SafeArea(
@@ -43,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 60),
-                  
+
                   // Logo y título
                   Column(
                     children: [
@@ -78,16 +75,13 @@ class _LoginPageState extends State<LoginPage> {
                       const SizedBox(height: 10),
                       const Text(
                         'Bienvenido de vuelta',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white70,
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.white70),
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 50),
-                  
+
                   // Formulario
                   Card(
                     elevation: 10,
@@ -121,9 +115,9 @@ class _LoginPageState extends State<LoginPage> {
                               return null;
                             },
                           ),
-                          
+
                           const SizedBox(height: 20),
-                          
+
                           // Contraseña
                           TextFormField(
                             controller: _passwordController,
@@ -159,9 +153,9 @@ class _LoginPageState extends State<LoginPage> {
                               return null;
                             },
                           ),
-                          
+
                           const SizedBox(height: 15),
-                          
+
                           // Olvidé mi contraseña
                           Align(
                             alignment: Alignment.centerRight,
@@ -169,15 +163,13 @@ class _LoginPageState extends State<LoginPage> {
                               onPressed: _forgotPassword,
                               child: const Text(
                                 '¿Olvidaste tu contraseña?',
-                                style: TextStyle(
-                                  color: Color(0xFFFF9800),
-                                ),
+                                style: TextStyle(color: Color(0xFFFF9800)),
                               ),
                             ),
                           ),
-                          
+
                           const SizedBox(height: 30),
-                          
+
                           // Botón de login
                           SizedBox(
                             width: double.infinity,
@@ -219,10 +211,15 @@ class _LoginPageState extends State<LoginPage> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                icon: const Icon(Icons.g_mobiledata,
-                                    size: 30, color: Color(0xFFDB4437)),
-                                label: const Text('Continuar con Google',
-                                    style: TextStyle(fontWeight: FontWeight.bold)),
+                                icon: const Icon(
+                                  Icons.g_mobiledata,
+                                  size: 30,
+                                  color: Color(0xFFDB4437),
+                                ),
+                                label: const Text(
+                                  'Continuar con Google',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ),
                           ],
@@ -230,9 +227,9 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 30),
-                  
+
                   // Enlace para registrarse
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -279,10 +276,13 @@ class _LoginPageState extends State<LoginPage> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pushReplacementNamed(
+        Navigator.pushNamedAndRemoveUntil(
           context,
           '/dashboard',
           arguments: {'isAuthenticated': true},
+          // Vacía la pila: sin esto la bienvenida se queda
+          // debajo y el botón atrás parece cerrar la sesión.
+          (route) => false,
         );
       }
     } catch (e) {
@@ -326,16 +326,21 @@ class _LoginPageState extends State<LoginPage> {
               ),
             );
 
-            Navigator.pushReplacementNamed(
-              context, 
+            Navigator.pushNamedAndRemoveUntil(
+              context,
               '/dashboard',
               arguments: {'isAuthenticated': true},
+              // Vacía la pila: sin esto la bienvenida se queda
+              // debajo y el botón atrás parece cerrar la sesión.
+              (route) => false,
             );
           } else {
             // Error de conexión
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('No se pudo conectar con el servidor. Verifica tu conexión.'),
+                content: Text(
+                  'No se pudo conectar con el servidor. Verifica tu conexión.',
+                ),
                 backgroundColor: Colors.red,
               ),
             );
@@ -350,8 +355,8 @@ class _LoginPageState extends State<LoginPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(describeNetworkError(e)),
-          // El mensaje explica la causa y qué hacer: 4s no alcanzan para leerlo.
-          duration: const Duration(seconds: 8),
+              // El mensaje explica la causa y qué hacer: 4s no alcanzan para leerlo.
+              duration: const Duration(seconds: 8),
               backgroundColor: Colors.red,
             ),
           );

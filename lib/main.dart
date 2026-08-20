@@ -40,6 +40,7 @@ import 'features/legal/presentation/screens/legal_screen.dart';
 import 'core/utils/logger.dart';
 import 'features/vet_home/presentation/screens/vet_home_screen.dart';
 import 'features/admin_home/presentation/screens/admin_home_screen.dart';
+import 'core/widgets/salida_con_doble_atras.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -201,10 +202,8 @@ class _MyAppState extends State<MyApp> {
           // Un veterinario NO ve el muro de un usuario normal: entra a su
           // panel de clínica. Se decide aquí, en el único sitio por el que
           // pasan todas las entradas (login, registro, Google y el arranque).
-          builder: (context) => _PorRol(
-            isAuthenticated: isAuthenticated,
-            initialTab: initialTab,
-          ),
+          builder: (context) =>
+              _PorRol(isAuthenticated: isAuthenticated, initialTab: initialTab),
         );
 
       case AppRoutes.pets:
@@ -303,10 +302,13 @@ class _SessionGateState extends State<_SessionGate> {
     if (logged) {
       // Sesión restaurada: refresca el token de push por si rotó o caducó.
       unawaited(PushService().syncToken());
-      Navigator.pushReplacementNamed(
+      Navigator.pushNamedAndRemoveUntil(
         context,
         AppRoutes.dashboard,
         arguments: {'isAuthenticated': true},
+        // Vacía la pila: sin esto la bienvenida se queda
+        // debajo y el botón atrás parece cerrar la sesión.
+        (route) => false,
       );
     } else {
       Navigator.pushReplacementNamed(context, AppRoutes.welcome);
@@ -315,12 +317,9 @@ class _SessionGateState extends State<_SessionGate> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
-    );
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }
-
 
 /// Manda a cada quien a su app: el administrador a su panel de control, el
 /// veterinario al de su clínica y el resto al muro de siempre.
@@ -343,15 +342,20 @@ class _PorRol extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
+        // El guardián envuelve a los tres: estando dentro, el atrás no debe
+        // devolverte a la bienvenida. Se sale con el botón Salir, o pulsando
+        // atrás dos veces (y eso cierra la app SIN cerrar la sesión).
         switch (snap.data) {
           case 'ADMIN':
-            return const AdminHomeScreen();
+            return const SalidaConDobleAtras(child: AdminHomeScreen());
           case 'VET':
-            return const VetHomeScreen();
+            return const SalidaConDobleAtras(child: VetHomeScreen());
           default:
-            return DashboardScreen(
-              isAuthenticated: isAuthenticated,
-              initialTab: initialTab,
+            return SalidaConDobleAtras(
+              child: DashboardScreen(
+                isAuthenticated: isAuthenticated,
+                initialTab: initialTab,
+              ),
             );
         }
       },

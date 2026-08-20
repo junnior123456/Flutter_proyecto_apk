@@ -58,7 +58,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.2),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.2,
+                                        ),
                                         blurRadius: 10,
                                         offset: const Offset(0, 5),
                                       ),
@@ -88,7 +90,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
                             // Descripción y características
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 32),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 32,
+                              ),
                               child: Column(
                                 children: [
                                   const Text(
@@ -102,7 +106,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                   ),
                                   const SizedBox(height: 32),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
                                     children: [
                                       _buildFeature(
                                         Icons.search,
@@ -129,7 +134,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
                             // Botones
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                              ),
                               child: Column(
                                 children: [
                                   // Botón Iniciar Sesión
@@ -138,19 +145,25 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                     height: 50,
                                     child: ElevatedButton(
                                       onPressed: () {
-                                        Navigator.pushNamed(context, AppRoutes.login);
+                                        Navigator.pushNamed(
+                                          context,
+                                          AppRoutes.login,
+                                        );
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.white,
                                         foregroundColor: AppColors.primary,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(25),
+                                          borderRadius: BorderRadius.circular(
+                                            25,
+                                          ),
                                         ),
                                       ),
                                       child: Text(
                                         'Iniciar Sesión',
-                                        style: AppStyles.buttonLarge
-                                            .copyWith(color: AppColors.primary),
+                                        style: AppStyles.buttonLarge.copyWith(
+                                          color: AppColors.primary,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -163,14 +176,21 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                     height: 50,
                                     child: OutlinedButton(
                                       onPressed: () {
-                                        Navigator.pushNamed(context, AppRoutes.register);
+                                        Navigator.pushNamed(
+                                          context,
+                                          AppRoutes.register,
+                                        );
                                       },
                                       style: OutlinedButton.styleFrom(
                                         foregroundColor: Colors.white,
                                         side: const BorderSide(
-                                            color: Colors.white, width: 2),
+                                          color: Colors.white,
+                                          width: 2,
+                                        ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(25),
+                                          borderRadius: BorderRadius.circular(
+                                            25,
+                                          ),
                                         ),
                                       ),
                                       child: const Text(
@@ -181,35 +201,46 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                   ),
 
                                   // 🔵 Continuar con Google (solo si está configurado)
-                                  if (ApiConfig.googleServerClientId.isNotEmpty) ...[
+                                  if (ApiConfig
+                                      .googleServerClientId
+                                      .isNotEmpty) ...[
                                     const SizedBox(height: 12),
                                     SizedBox(
                                       width: double.infinity,
                                       height: 50,
                                       child: OutlinedButton.icon(
-                                        onPressed:
-                                            _isLoading ? null : _handleGoogle,
+                                        onPressed: _isLoading
+                                            ? null
+                                            : _handleGoogle,
                                         style: OutlinedButton.styleFrom(
                                           backgroundColor: Colors.white,
                                           foregroundColor: Colors.black87,
                                           shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(25),
+                                            borderRadius: BorderRadius.circular(
+                                              25,
+                                            ),
                                           ),
                                         ),
                                         icon: _isLoading
                                             ? const SizedBox(
                                                 width: 22,
                                                 height: 22,
-                                                child: CircularProgressIndicator(
-                                                    strokeWidth: 2),
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                    ),
                                               )
-                                            : const Icon(Icons.g_mobiledata,
+                                            : const Icon(
+                                                Icons.g_mobiledata,
                                                 size: 30,
-                                                color: Color(0xFFDB4437)),
-                                        label: const Text('Continuar con Google',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold)),
+                                                color: Color(0xFFDB4437),
+                                              ),
+                                        label: const Text(
+                                          'Continuar con Google',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -234,7 +265,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                   // Botón de acceso al panel de admin
                                   TextButton(
                                     onPressed: () {
-                                      Navigator.pushNamed(context, AppRoutes.adminAccess);
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.adminAccess,
+                                      );
                                     },
                                     child: const Text(
                                       '👑 Panel de Administración',
@@ -272,10 +306,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pushReplacementNamed(
+        Navigator.pushNamedAndRemoveUntil(
           context,
           AppRoutes.dashboard,
           arguments: {'isAuthenticated': true},
+          // Vacía la pila: sin esto la bienvenida se queda
+          // debajo y el botón atrás parece cerrar la sesión.
+          (route) => false,
         );
       }
     } catch (e) {
@@ -307,11 +344,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 width: 1,
               ),
             ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 30,
-            ),
+            child: Icon(icon, color: Colors.white, size: 30),
           ),
           const SizedBox(height: 8),
           Text(

@@ -41,7 +41,9 @@ class _RegisterPageState extends State<RegisterPage> {
     );
     if (!abierto && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo abrir la política de privacidad')),
+        const SnackBar(
+          content: Text('No se pudo abrir la política de privacidad'),
+        ),
       );
     }
   }
@@ -55,10 +57,7 @@ class _RegisterPageState extends State<RegisterPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFFF9800),
-              Color(0xFFFF5722),
-            ],
+            colors: [Color(0xFFFF9800), Color(0xFFFF5722)],
           ),
         ),
         child: SafeArea(
@@ -70,7 +69,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 40),
-                  
+
                   // Logo y título
                   Column(
                     children: [
@@ -105,16 +104,13 @@ class _RegisterPageState extends State<RegisterPage> {
                       const SizedBox(height: 10),
                       const Text(
                         'Únete a nuestra comunidad',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white70,
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.white70),
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 30),
-                  
+
                   // Formulario
                   Card(
                     elevation: 10,
@@ -147,9 +143,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               return null;
                             },
                           ),
-                          
+
                           const SizedBox(height: 20),
-                          
+
                           // Apellido
                           TextFormField(
                             controller: _lastnameController,
@@ -172,9 +168,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               return null;
                             },
                           ),
-                          
+
                           const SizedBox(height: 20),
-                          
+
                           // Email
                           TextFormField(
                             controller: _emailController,
@@ -198,9 +194,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               return null;
                             },
                           ),
-                          
+
                           const SizedBox(height: 20),
-                          
+
                           // Teléfono
                           TextFormField(
                             controller: _phoneController,
@@ -215,10 +211,12 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                               filled: true,
                               fillColor: scheme.surfaceContainerHighest,
-                              counterText: '', // Ocultar el contador de caracteres
+                              counterText:
+                                  '', // Ocultar el contador de caracteres
                             ),
                             inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly, // Solo números
+                              FilteringTextInputFormatter
+                                  .digitsOnly, // Solo números
                             ],
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -233,9 +231,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               return null;
                             },
                           ),
-                          
+
                           const SizedBox(height: 20),
-                          
+
                           // Contraseña
                           TextFormField(
                             controller: _passwordController,
@@ -271,9 +269,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               return null;
                             },
                           ),
-                          
+
                           const SizedBox(height: 20),
-                          
+
                           // Confirmar contraseña
                           TextFormField(
                             controller: _confirmPasswordController,
@@ -289,7 +287,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
                                 onPressed: () {
                                   setState(() {
-                                    _obscureConfirmPassword = !_obscureConfirmPassword;
+                                    _obscureConfirmPassword =
+                                        !_obscureConfirmPassword;
                                   });
                                 },
                               ),
@@ -309,9 +308,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               return null;
                             },
                           ),
-                          
+
                           const SizedBox(height: 20),
-                          
+
                           // Términos y condiciones
                           Row(
                             children: [
@@ -373,15 +372,17 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                             ],
                           ),
-                          
+
                           const SizedBox(height: 30),
-                          
+
                           // Botón de registro
                           SizedBox(
                             width: double.infinity,
                             height: 50,
                             child: ElevatedButton(
-                              onPressed: (_isLoading || !_acceptTerms) ? null : _handleRegister,
+                              onPressed: (_isLoading || !_acceptTerms)
+                                  ? null
+                                  : _handleRegister,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFFFF9800),
                                 foregroundColor: Colors.white,
@@ -419,10 +420,15 @@ class _RegisterPageState extends State<RegisterPage> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                icon: const Icon(Icons.g_mobiledata,
-                                    size: 30, color: Color(0xFFDB4437)),
-                                label: const Text('Registrarme con Google',
-                                    style: TextStyle(fontWeight: FontWeight.bold)),
+                                icon: const Icon(
+                                  Icons.g_mobiledata,
+                                  size: 30,
+                                  color: Color(0xFFDB4437),
+                                ),
+                                label: const Text(
+                                  'Registrarme con Google',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ),
                           ],
@@ -430,9 +436,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 30),
-                  
+
                   // Enlace para login
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -480,10 +486,13 @@ class _RegisterPageState extends State<RegisterPage> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pushReplacementNamed(
+        Navigator.pushNamedAndRemoveUntil(
           context,
           '/dashboard',
           arguments: {'isAuthenticated': true},
+          // Vacía la pila: sin esto la bienvenida se queda
+          // debajo y el botón atrás parece cerrar la sesión.
+          (route) => false,
         );
       }
     } catch (e) {
@@ -508,7 +517,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
       try {
         final authService = AuthService();
-        
+
         // 🔍 1. Validar si el correo ya existe
         final emailExists = await authService.checkEmailExists(
           _emailController.text.trim(),
@@ -548,15 +557,20 @@ class _RegisterPageState extends State<RegisterPage> {
             // Mostrar mensaje de éxito y navegar al dashboard
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('¡Bienvenido ${result['user']['name']}! Cuenta creada exitosamente.'),
+                content: Text(
+                  '¡Bienvenido ${result['user']['name']}! Cuenta creada exitosamente.',
+                ),
                 backgroundColor: Colors.green,
               ),
             );
 
-            Navigator.pushReplacementNamed(
-              context, 
+            Navigator.pushNamedAndRemoveUntil(
+              context,
               '/dashboard',
               arguments: {'isAuthenticated': true},
+              // Vacía la pila: sin esto la bienvenida se queda
+              // debajo y el botón atrás parece cerrar la sesión.
+              (route) => false,
             );
           }
         }
@@ -569,8 +583,8 @@ class _RegisterPageState extends State<RegisterPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(describeNetworkError(e)),
-          // El mensaje explica la causa y qué hacer: 4s no alcanzan para leerlo.
-          duration: const Duration(seconds: 8),
+              // El mensaje explica la causa y qué hacer: 4s no alcanzan para leerlo.
+              duration: const Duration(seconds: 8),
               backgroundColor: Colors.red,
             ),
           );
