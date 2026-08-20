@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/services/vet_store_service.dart';
 import '../../../../core/services/appointment_service.dart';
+import '../../../feed/presentation/widgets/post_video.dart';
+import '../../../feed/presentation/widgets/image_viewer.dart';
 
 class ClinicaScreen extends StatefulWidget {
   const ClinicaScreen({super.key, required this.veterinaria});
@@ -191,9 +193,37 @@ class _ClinicaScreenState extends State<ClinicaScreen>
     final precio = double.tryParse('${p['price'] ?? 0}') ?? 0;
     final stock = p['stock'];
 
+    final foto = p['imageUrl']?.toString() ?? '';
+    final video = p['videoUrl']?.toString() ?? '';
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
-      child: ListTile(
+      child: Column(
+        children: [
+          // Publicidad del veterinario: el vídeo manda sobre la foto, igual
+          // que en el muro.
+          if (video.isNotEmpty)
+            PostVideo(videoUrl: video, thumbnailUrl: foto.isEmpty ? null : foto)
+          else if (foto.isNotEmpty)
+            GestureDetector(
+              onTap: () => abrirImagenCompleta(
+                context,
+                imageUrl: foto,
+                heroTag: 'producto-${p['id']}',
+              ),
+              child: Hero(
+                tag: 'producto-${p['id']}',
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Image.network(
+                    foto,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+            ),
+          ListTile(
         leading: CircleAvatar(
           backgroundColor: (esServicio ? Colors.teal : _brand)
               .withValues(alpha: 0.15),
@@ -226,8 +256,10 @@ class _ClinicaScreenState extends State<ClinicaScreen>
           'S/ ${precio.toStringAsFixed(2)}',
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
         ),
-        isThreeLine: true,
-        onTap: _contactar,
+            isThreeLine: true,
+            onTap: _contactar,
+          ),
+        ],
       ),
     );
   }

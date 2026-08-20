@@ -38,6 +38,7 @@ import 'application/bloc/mascota_bloc_providers.dart';
 import 'core/services/push_service.dart';
 import 'features/legal/presentation/screens/legal_screen.dart';
 import 'core/utils/logger.dart';
+import 'features/vet_home/presentation/screens/vet_home_screen.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -196,7 +197,10 @@ class _MyAppState extends State<MyApp> {
         final initialTab = args?['initialTab'] as int? ?? 0;
         return MaterialPageRoute(
           settings: settings,
-          builder: (context) => DashboardScreen(
+          // Un veterinario NO ve el muro de un usuario normal: entra a su
+          // panel de clínica. Se decide aquí, en el único sitio por el que
+          // pasan todas las entradas (login, registro, Google y el arranque).
+          builder: (context) => _PorRol(
             isAuthenticated: isAuthenticated,
             initialTab: initialTab,
           ),
@@ -312,6 +316,37 @@ class _SessionGateState extends State<_SessionGate> {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(child: CircularProgressIndicator()),
+    );
+  }
+}
+
+
+/// Manda a cada quien a su app: el veterinario a su panel de clínica, el resto
+/// al muro de siempre. El rol se lee del usuario guardado en el login.
+class _PorRol extends StatelessWidget {
+  const _PorRol({required this.isAuthenticated, required this.initialTab});
+
+  final bool isAuthenticated;
+  final int initialTab;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: AuthService().isVet(),
+      builder: (context, snap) {
+        // Mientras se resuelve, una espera corta evita el parpadeo de entrar
+        // al muro y saltar al panel un instante después.
+        if (snap.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snap.data == true) return const VetHomeScreen();
+        return DashboardScreen(
+          isAuthenticated: isAuthenticated,
+          initialTab: initialTab,
+        );
+      },
     );
   }
 }

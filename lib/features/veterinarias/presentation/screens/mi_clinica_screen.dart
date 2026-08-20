@@ -4,6 +4,8 @@ library;
 
 import 'package:flutter/material.dart';
 import '../../../../core/services/vet_store_service.dart';
+import '../../../../core/services/image_service.dart';
+import '../../../../core/services/video_service.dart';
 
 class MiClinicaScreen extends StatefulWidget {
   const MiClinicaScreen({super.key, required this.veterinaria});
@@ -22,6 +24,8 @@ class _MiClinicaScreenState extends State<MiClinicaScreen>
   ];
 
   final VetStoreService _store = VetStoreService();
+  final ImageService _imagenes = ImageService();
+  final VideoService _videos = VideoService();
   late final TabController _tabs = TabController(length: 3, vsync: this);
 
   List<Map<String, dynamic>> _catalogo = [];
@@ -85,6 +89,10 @@ class _MiClinicaScreenState extends State<MiClinicaScreen>
     final stock = TextEditingController(
         text: producto?['stock'] == null ? '' : '${producto!['stock']}');
     String tipo = producto?['kind']?.toString() ?? 'producto';
+    // Foto y vídeo de publicidad: se suben al elegirlos y se guarda la URL.
+    String? fotoUrl = producto?['imageUrl']?.toString();
+    String? videoUrl = producto?['videoUrl']?.toString();
+    var subiendo = false;
 
     final guardar = await showDialog<bool>(
       context: context,
@@ -133,6 +141,78 @@ class _MiClinicaScreenState extends State<MiClinicaScreen>
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: 'Stock'),
                   ),
+                const SizedBox(height: 12),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Publicidad',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+                if (subiendo)
+                  const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: LinearProgressIndicator(),
+                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: subiendo
+                            ? null
+                            : () async {
+                                final foto = await _imagenes.pickFromGallery();
+                                if (foto == null) return;
+                                setLocal(() => subiendo = true);
+                                final url = await _store.subirFoto(foto);
+                                setLocal(() {
+                                  subiendo = false;
+                                  if (url != null) fotoUrl = url;
+                                });
+                              },
+                        icon: Icon(fotoUrl != null
+                            ? Icons.check_circle
+                            : Icons.add_photo_alternate),
+                        label: Text(fotoUrl != null ? 'Foto lista' : 'Foto'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: subiendo
+                            ? null
+                            : () async {
+                                final video = await _videos.pickVideo();
+                                if (video == null) return;
+                                final rechazo =
+                                    await _videos.motivoRechazo(video);
+                                if (rechazo != null) {
+                                  _avisar(rechazo, error: true);
+                                  return;
+                                }
+                                setLocal(() => subiendo = true);
+                                final url = await _store.subirVideo(video);
+                                setLocal(() {
+                                  subiendo = false;
+                                  if (url != null) videoUrl = url;
+                                });
+                              },
+                        icon: Icon(videoUrl != null
+                            ? Icons.check_circle
+                            : Icons.videocam),
+                        label: Text(videoUrl != null ? 'Vídeo listo' : 'Vídeo'),
+                      ),
+                    ),
+                  ],
+                ),
+                if (fotoUrl != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(fotoUrl!, height: 90,
+                          fit: BoxFit.cover, errorBuilder: (_, __, ___) =>
+                              const SizedBox.shrink()),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -163,6 +243,8 @@ class _MiClinicaScreenState extends State<MiClinicaScreen>
       'kind': tipo,
       'category': categoria.text.trim(),
       'stock': tipo == 'producto' ? int.tryParse(stock.text) : null,
+      'imageUrl': fotoUrl,
+      'videoUrl': videoUrl,
     };
 
     try {

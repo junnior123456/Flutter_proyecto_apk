@@ -2,6 +2,7 @@
 library;
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import 'token_manager.dart';
@@ -83,6 +84,33 @@ class VetStoreService {
     );
     if (res.statusCode != 200) {
       throw Exception('No se pudo borrar el producto (${res.statusCode})');
+    }
+  }
+
+  /// Sube una foto del producto y devuelve su URL pública.
+  Future<String?> subirFoto(File foto) => _subir(foto, 'image', 'image');
+
+  /// Sube un vídeo corto de publicidad y devuelve su URL pública.
+  Future<String?> subirVideo(File video) => _subir(video, 'video', 'video');
+
+  /// Los dos endpoints de subida son gemelos: solo cambia el campo y la ruta.
+  Future<String?> _subir(File archivo, String campo, String ruta) async {
+    try {
+      final token = await _tokenManager.getToken();
+      final peticion = http.MultipartRequest(
+        'POST',
+        Uri.parse('${ApiConfig.baseUrl}/upload/$ruta'),
+      );
+      peticion.headers['Authorization'] = 'Bearer $token';
+      peticion.files
+          .add(await http.MultipartFile.fromPath(campo, archivo.path));
+
+      final res = await http.Response.fromStream(await peticion.send());
+      if (res.statusCode != 200 && res.statusCode != 201) return null;
+      final cuerpo = jsonDecode(res.body);
+      return (cuerpo['imageUrl'] ?? cuerpo['videoUrl'])?.toString();
+    } catch (_) {
+      return null;
     }
   }
 
